@@ -4131,7 +4131,10 @@ var Vmgr = {
   TIMEOUT_MS: 8000,          /* §26: timeout explícito de red */
   RETRY_FAIL_MS: 86400000,   /* §27: tras un fallo, 24 h sin reintentar */
   _busy: false,
-  _fetchImpl: (typeof fetch === 'function') ? fetch : null, /* costura para arneses (no es producto) */
+  /* Referencia a fetch LIGADA a window: llamarla como this._fetchImpl(...)
+     lanzaría «Illegal invocation» en Chromium. Con bind(window) el check
+     real funciona; los arneses pueden sustituirla por dobles de prueba. */
+  _fetchImpl: (typeof window !== 'undefined' && typeof window.fetch === 'function') ? window.fetch.bind(window) : null,
   el: function(id){ return document.getElementById(id); },
   installedVersion: function(){
     try{ return (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.buildMeta && APP_CONFIG.buildMeta.version) || null; }
