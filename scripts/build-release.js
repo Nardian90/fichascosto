@@ -25,8 +25,8 @@ const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'FC.html');
 const OUT = path.join(ROOT, 'release', 'FC.release.html');
 const DOCS = path.join(ROOT, 'docs', 'release');
-const VERSION = '12.4.0';
-const PHASE = 'FASE 23 · DISTRIBUCIÓN OFICIAL (repo + manifest + VersionManager)';
+const VERSION = '12.5.0';
+const PHASE = 'FASE 24.1 · FcCloud — identidad en la nube (Supabase existente, solo lectura)';
 
 function loadToolchain() {
   const tries = [
@@ -111,6 +111,17 @@ const md5 = s => crypto.createHash('md5').update(s).digest('hex');
   ok('Landing accesible desde el Login (auLanding)', (out.match(/auLanding/g) || []).length >= 2);
   ok('SIN SECRETOS (patrones github_pat_/ghp_/gho_/sk-ant-/clave privada)',
      !/github_pat_|ghp_[A-Za-z0-9]|gho_[A-Za-z0-9]|sk-ant-|-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(out));
+  /* ---- FASE 24.1: capa FcCloud (identidad, solo lectura) ---- */
+  ok('FASE 24.1: FcCloud presente (auth + sesión + perfil + plan + checkQuota)',
+     /(var|,)\s*FcCloud\s*=\s*(\(function|function)/.test(out));
+  ok('FASE 24.1: publishable key pública exactamente 1 vez (formato sb_publishable_)',
+     (out.match(/sb_publishable_[A-Za-z0-9_-]{20,}/g) || []).length === 1);
+  ok('FASE 24.1: sin claves de servicio ni secretas (service_role/sb_secret_)',
+     !/service_role|sb_secret_|sb_secret-/.test(out));
+  ok('FASE 24.1: solo lectura — sin escrituras REST desde el cliente',
+     !/rest\/v1\/[a-z_]+[^"]*",\s*\{\s*method:\s*['"]POST/.test(out) && !/\.insert\(|\.upsert\(|\.delete\(\)/.test(out));
+  ok('FASE 24.1: punto de integración de cuotas declarado (checkQuota no activo)',
+     out.includes('checkQuota') && out.includes('fc_create') && out.includes('cuotas-no-activas'));
 
   const failed = chk.filter(c => !c.ok);
   chk.forEach(c => console.log((c.ok ? 'PASS' : 'FAIL') + ' · ' + c.n + (c.info ? '  [' + c.info + ']' : '')));
@@ -143,7 +154,7 @@ const md5 = s => crypto.createHash('md5').update(s).digest('hex');
     generator: 'scripts/build-release.js · html-minifier-terser + terser (mangle interno, sin ofuscación extrema)',
     releaseMd5, sourceMd5, releaseEngineHash,
     engineNote: 'engineHash = md5 del slice __ENGINE_START__/__ENGINE_END__ de la FUENTE. En el release el motor está minificado (mangle interno): su md5 difiere por diseño; la identidad funcional DEV≈RELEASE se demuestra por batería de equivalencia.',
-    noSecrets: 'El release contiene únicamente la clave pública de verificación de licencias; sin claves privadas, tokens ni credenciales.',
+    noSecrets: 'El release contiene únicamente la clave pública de verificación de licencias y la publishable key de Supabase (credencial PÚBLICA de cliente por diseño); sin claves de servicio, sin secretos, sin tokens privados.',
     distribution: 'El archivo para clientes es exclusivamente FC.release.html; FC.html queda para desarrollo y auditoría.'
   };
   fs.writeFileSync(path.join(ROOT, 'release', 'release-manifest.json'), JSON.stringify(manifest, null, 2) + '\n', 'utf8');

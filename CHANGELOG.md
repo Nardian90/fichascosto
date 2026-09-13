@@ -2,6 +2,28 @@
 
 Formato: Keep a Changelog simplificado. Cada versión corresponde a un tag `vX.Y.Z` y a un GitHub Release con `FC.release.html` + `release/release-manifest.json`.
 
+## v12.5.0 — 2026-09-13 · FASE 24.1 · FcCloud — identidad en la nube (solo lectura)
+
+### Added
+- **FcCloud**, nueva capa de identidad en la nube, OPCIONAL y AISLADA del núcleo: integra FC con la MISMA instancia de Supabase que usa COSTPRO Next.js (proyecto `wthkddeleylijmonclxg`) en la capa de identidad exclusivamente.
+  - Login email+password (`/auth/v1/token?grant_type=password`, mismo servicio que el LoginForm del Next.js), logout, restauración de sesión al arrancar con refresco silencioso, y expiración/revocación detectada con degradación honesta.
+  - Lectura de `profiles` (nombre, rol, plan `profiles.plan`) y de la organización (`tenants`: plan, estado de prueba y fecha) respetando las políticas RLS existentes — si RLS no devuelve filas, la tarjeta muestra «no disponible» y nada más.
+  - UI con los COSTPRO DESIGN TOKENS: sección «Cuenta COSTPRO en la nube (opcional)» en la puerta de sesión, tarjeta de estado en «Mi cuenta» (conectada / expirada / sin conexión / error, siempre con salida), ítem «Cuenta en la nube» en el menú de usuario con insignia de plan.
+  - Estados de la cuenta: `desconectado · conectando · online · expirada · offline (identidad cacheada) · error`; evento DOM `fccloud:change` y `FcCloud.onChange()` para capas futuras.
+- **Punto de integración de cuotas para 24.2**: `FcCloud.checkQuota(accion)` expone la firma estable del sistema de cuotas YA EXISTENTE del proyecto (`user_usage` + `increment_user_usage`, acciones `fc_create/fc_export/fc_import`, límite free 3/día) — NO activo en 24.1.
+- Transporte REST directo de GoTrue/PostgREST con timeout (8 s): cero dependencias externas, cero `<script src>` nuevos, cero cargas al arrancar (todo es perezoso).
+
+### Security
+- En el cliente SOLO viajan la URL del proyecto y la publishable key (credencial PÚBLICA de cliente por diseño, la misma que distribuye el cliente del Next.js). Sin claves de servicio, secretos ni tokens privados — verificado por el pipeline.
+- Solo lectura: ninguna escritura REST en el código (verificación nueva del pipeline); RLS existente respetado tal cual; tripwire E2E que falla ante cualquier intento de escritura.
+- La sesión se guarda en una clave propia `FC_CLOUD_SESSION_V1`, sin tocar ninguna clave `FC_*` existente.
+
+### Offline (inalterado por diseño)
+- Sin Internet: la app arranca igual, la nube queda en «desconectado/sin conexión» y el núcleo (cálculo, guardado local, Preview, PDF) funciona 100% offline. La nube NUNCA bloquea la puerta local ni el trabajo.
+
+### Accounting
+- `computeFicha()`: **SIN MODIFICACIONES** — engineHash `c5f4dca8042385c36e49c76992269b25` INVARIANTE. Supabase sin ningún cambio (esquema, RLS, Auth, policies). COSTPRO Next.js sin ningún cambio.
+
 ## v12.4.0 — 2026-09-13 · FASE 23 · DISTRIBUCIÓN OFICIAL
 
 ### Added

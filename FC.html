@@ -1182,6 +1182,21 @@ body[data-view="cuenta"] main{max-width:980px;margin:0 auto;padding:18px 16px ca
 .gate-switch button{flex:1;border:none;background:none;font:inherit;font-weight:700;font-size:13px;color:var(--muted);padding:9px 8px;border-radius:8px;cursor:pointer;min-height:40px}
 .gate-switch button[aria-pressed="true"]{background:var(--surface-elevated);color:var(--ink);box-shadow:var(--shadow)}
 .gate-hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin:9px 0 0}
+/* --- FASE 24.1 · FcCloud: identidad en la nube (opcional, solo tokens COSTPRO) --- */
+.gate-cloud{margin-top:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-2);padding:10px 12px}
+.gcc-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.gcc-tgl{background:none;border:0;padding:6px 0;font:inherit;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:7px;text-align:left}
+.gcc-tgl em{font-style:normal;font-weight:500;color:var(--muted)}
+.gcc-tgl:focus-visible{outline:2.5px solid var(--focus);outline-offset:2px}
+.gcc-state{font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--faint);flex:none}
+.gcc-state.ok{color:var(--ok)}
+.gcc-state.warn{color:var(--err)}
+.gcc-note{margin:8px 0 10px;font-size:12.5px;line-height:1.55;color:var(--muted)}
+.gcc-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--faint);margin-right:6px}
+.gcc-dot.ok{background:var(--ok)}
+.gcc-dot.warn{background:var(--err)}
+.gcc-chip{margin-left:8px;font-size:10px;font-weight:800;letter-spacing:.6px;padding:2px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line)}
+.gcc-beta{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--faint);border:1px solid var(--chipline);background:var(--chipbg);border-radius:999px;padding:2px 8px;margin-left:8px;vertical-align:middle}
 .gate-welcome{font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.5}
 /* --- Admin: bloque modelo comercial --- */
 .adm-comm{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line2)}
@@ -1564,6 +1579,23 @@ body.landing-open .skip{visibility:hidden}
     </div>
     <p class="gate-hint">«Ver presentación» muestra la página de inicio de COSTPRO: qué es, cómo funciona y sus ejemplos reales, sin necesidad de iniciar sesión.</p>
     <p class="gate-hint">El invitado puede probar todas las funciones. Los datos se guardan localmente en este navegador, sin cuenta asociada, y los PDF incluyen la identificación de COSTPRO.</p>
+    <div class="gate-cloud" id="auCloud">
+      <div class="gcc-head">
+        <button type="button" class="gcc-tgl" data-btn="cloudToggle" aria-expanded="false" aria-controls="auCloudBox">Cuenta COSTPRO en la nube <em>(opcional)</em></button>
+        <span class="gcc-state" id="auCloudState">Opcional</span>
+      </div>
+      <div id="auCloudBox" hidden>
+        <p class="gcc-note">Conecta la misma cuenta que usas en el panel COSTPRO para ver tu perfil y tu plan. Es opcional: no sustituye el acceso local y COSTPRO funciona sin Internet.</p>
+        <div class="field"><label for="auCloudEmail">Correo electrónico</label>
+          <div class="inwrap"><span class="in-ic" data-icon="user" data-sz="16"></span>
+            <input id="auCloudEmail" name="nube_correo" type="email" autocomplete="email" autocapitalize="none" spellcheck="false"></div></div>
+        <div class="field"><label for="auCloudPass">Contraseña</label>
+          <div class="inwrap"><span class="in-ic" data-icon="lock" data-sz="16"></span>
+            <input id="auCloudPass" name="nube_clave" type="password" autocomplete="current-password"></div></div>
+        <p id="auCloudMsg" class="gate-err" role="alert" hidden></p>
+        <button type="button" class="btn gcc-go" id="auCloudGo" data-btn="cloudSignIn">Conectar cuenta</button>
+      </div>
+    </div>
     <p class="gate-foot">Aplicación local · el acceso y los datos permanecen en este equipo
       <span class="gate-support">¿Necesitas ayuda? <a id="gateWa" target="_blank" rel="noopener noreferrer" href="#">Contactar soporte</a></span>
       <span class="gate-support">Desarrollado por <b>ADRIAN POMPA SANTANA</b></span></p>
@@ -1838,6 +1870,7 @@ body.landing-open .skip{visibility:hidden}
           <div class="menu" id="userMenu" hidden role="menu" aria-label="Sesión">
             <button class="menu-item" role="menuitem" data-btn="cuenta" aria-label="Abrir Mi cuenta"><span class="ic" data-icon="user"></span>Mi cuenta</button>
             <button class="menu-item" role="menuitem" data-btn="cuentaPlan" aria-label="Ver plan y licencia"><span class="ic" data-icon="badge"></span>Plan y licencia</button>
+            <button class="menu-item" role="menuitem" data-btn="cloudCuenta" aria-label="Cuenta en la nube"><span class="ic" data-icon="cloud"></span>Cuenta en la nube<span class="gcc-chip" id="umCloudChip" hidden></span></button>
             <button class="menu-item" role="menuitem" data-btn="cuentaCafe" aria-label="Apoyar COSTPRO"><span class="ic" data-icon="coffee"></span>Apoya COSTPRO</button>
             <hr class="menu-sep">
             <button class="menu-item" role="menuitem" data-btn="logout" aria-label="Cerrar sesión"><span class="ic" data-icon="logout"></span>Cerrar sesión</button>
@@ -3668,7 +3701,8 @@ var ICON_PATHS = {
   whatsapp:'<path fill="currentColor" stroke="none" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>',
   /* FASE 22A: iconos añadidos para la Landing (aditivos, mismo lenguaje visual de stroke) */
   wifioff:'<line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M16.85 18.58a9 9 0 0 0-9.7 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>',
-  home:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'
+  home:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  cloud:'<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>'
 };
 function icon(name, sz){
   var p = ICON_PATHS[name] || ICON_PATHS.info;
@@ -4089,6 +4123,25 @@ var APP_CONFIG = {
   versionCheckIntervalDays: 7,
   offlineGrace: { softDays: 7, hardDays: 30 },
   minimumSupportedVersion: '12.4.0',
+  /* FASE 24.1 · FcCloud — capa de identidad en la nube (OPCIONAL, aislada).
+     Usa la MISMA instancia de Supabase que COSTPRO Next.js (proyecto
+     wthkddeleylijmonclxg): auth email+password, sesión, perfil y plan,
+     SOLO LECTURA. La publishable key es una credencial PÚBLICA de cliente
+     por diseño (el equivalente moderno de la anon key del Next.js): la
+     seguridad real vive en Auth + RLS del servidor. Aquí JAMÁS van claves
+     de servicio, secretos ni tokens privados. FcCloud no es un segundo
+     sistema de usuarios/planes/licencias: reutiliza auth.users,
+     profiles.plan y el sistema de cuotas EXISTENTE del proyecto. Sin red,
+     el núcleo (computeFicha, IndexedDB, PDF) sigue 100% local. */
+  cloud: {
+    supabaseUrl: 'https://wthkddeleylijmonclxg.supabase.co',
+    publishableKey: 'sb_publishable__wm5ULYU2FT_Cwq663dP5g_Ycg8AlXr',
+    timeoutMs: 8000,
+    /* Acciones del sistema de cuotas YA EXISTENTE en el proyecto
+       (tabla user_usage + RPC increment_user_usage; límite free 3/día).
+       Punto de integración de la FASE 24.2 — NO activo en 24.1. */
+    quotaActions: ['fc_create', 'fc_export', 'fc_import']
+  },
   /* DonationProvider + método REAL de aporte (transferencia).
      Los datos del aporte viven SOLO aquí: la UI los consume, jamás los
      repite en otras funciones ni cadenas. No hay pasarela de pago ni
@@ -4106,6 +4159,320 @@ var APP_CONFIG = {
     }
   }
 };
+
+/* =====================================================================
+   FASE 24.1 · FcCloud — CAPA DE IDENTIDAD EN LA NUBE (OPCIONAL, AISLADA)
+   ---------------------------------------------------------------------
+   Integra FC con la MISMA instancia de Supabase que usa COSTPRO Next.js,
+   SOLO en la capa de identidad: auth email+password, sesión, perfil y
+   plan (profiles.plan). SOLO LECTURA — cero escrituras en esta fase.
+   REGLAS del pliego:
+   · Supabase existente NO se modifica (esquema, RLS, Auth, policies: ni
+     se crean ni se alteran). Se respetan las policies tal cual: si RLS
+     no devuelve filas, se muestra «no disponible» y nada más.
+   · NO es un segundo sistema de usuarios/planes/licencias: reutiliza
+     auth.users, profiles.plan (enum plan_t) y el sistema de cuotas YA
+     EXISTENTE del proyecto (user_usage + increment_user_usage).
+   · Aislado del núcleo: si Supabase está caído o no hay Internet,
+     FcCloud degrada (estado offline/expirada) y el núcleo (computeFicha,
+     IndexedDB, Preview, PDF) continúa exactamente igual — fail-open.
+   · Credenciales cliente: SOLO la URL + publishable key (públicas por
+     diseño). Jamás claves de servicio, secretos ni tokens privados.
+   Transporte: REST de GoTrue/PostgREST (los mismos endpoints que usa
+   supabase-js en el Next.js) vía fetch con timeout — sin dependencias
+   externas ni cargas de red nuevas al arrancar (todo es perezoso).
+   PUNTO DE INTEGRACIÓN FUTURO (24.2, sin tocar el núcleo):
+   FcCloud.checkQuota(accion) ya expone la firma estable para conectar
+   las cuotas existentes (fc_create/fc_export/fc_import) y el evento
+   'fccloud:change' permite que capas futuras reaccionen al estado.
+   ===================================================================== */
+var FcCloud = (function(){
+  var CFG = APP_CONFIG.cloud;
+  var LS_KEY = 'FC_CLOUD_SESSION_V1';
+  var listeners = [];
+  var state = { status:'desconectado' };  /* desconectado|conectando|online|expirada|offline|error */
+  var busy = false;
+
+  function clone(o){ try{ return JSON.parse(JSON.stringify(o)); }catch(e){ return {}; } }
+  function emit(){
+    try{ document.dispatchEvent(new CustomEvent('fccloud:change', { detail: clone(state) })); }catch(e){}
+    for(var i = 0; i < listeners.length; i++){ try{ listeners[i](clone(state)); }catch(e){} }
+    syncUI();
+  }
+  /* Suscripción de capas futuras (24.2+). Devuelve la función de baja. */
+  function onChange(fn){ if(typeof fn === 'function') listeners.push(fn); return function(){ listeners = listeners.filter(function(f){ return f !== fn; }); }; }
+  function lsLoad(){ try{ var s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if(s && s.v === 1 && s.access_token && s.user && s.user.id) return s; }catch(e){} return null; }
+  function lsSave(s){ try{ localStorage.setItem(LS_KEY, JSON.stringify(s)); }catch(e){} }
+  function lsClear(){ try{ localStorage.removeItem(LS_KEY); }catch(e){} }
+
+  /* fetch con timeout propio: sin AbortController el timeout no aplica, la
+     promesa se resuelve o falla por la red igualmente (degradación segura). */
+  function fetchT(url, opts){
+    opts = opts || {};
+    var timer = null;
+    if(typeof AbortController !== 'undefined'){
+      var ctl = new AbortController();
+      opts.signal = ctl.signal;
+      timer = setTimeout(function(){ try{ ctl.abort(); }catch(e){} }, CFG.timeoutMs || 8000);
+    }
+    opts.headers = Object.assign({ 'apikey': CFG.publishableKey, 'Content-Type': 'application/json' }, opts.headers || {});
+    opts.cache = 'no-store';
+    function fin(r){ if(timer) clearTimeout(timer); return r; }
+    return fetch(url, opts).then(fin, function(e){ if(timer) clearTimeout(timer); throw e; });
+  }
+  /* Solo lee «exp» del JWT para decidir refresco. La validación REAL del
+     token la hace el servidor en cada petición (igual que supabase-js). */
+  function jwtExp(tok){
+    try{ var p = String(tok).split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+      while(p.length % 4) p += '=';
+      return (JSON.parse(atob(p)).exp || 0) * 1000;
+    }catch(e){ return 0; }
+  }
+  function classifyError(e){
+    var m = String((e && e.message) || e || '');
+    if(m.indexOf('abort') >= 0 || m.indexOf('AbortError') >= 0 || m.indexOf('Failed to fetch') >= 0 || m.indexOf('NetworkError') >= 0 || m.indexOf('fetch') >= 0 || m.indexOf('network') >= 0) return 'red';
+    return 'servicio';
+  }
+
+  /* Perfil del propio usuario (RLS existente: cada usuario ve SOLO su fila).
+     Enriquecimiento opcional con la organización (tenants): si RLS no la
+     expone, se degrada en silencio — no es un error de la app. */
+  function readProfile(sess){
+    var uid = sess.user.id;
+    var url = CFG.supabaseUrl + '/rest/v1/profiles?id=eq.' + encodeURIComponent(uid) + '&select=id,email,full_name,role,plan,tenant_id,is_active';
+    return fetchT(url, { headers: { 'Authorization': 'Bearer ' + sess.access_token } }).then(function(r){
+      if(!r.ok) throw new Error('perfil_http_' + r.status);
+      return r.json();
+    }).then(function(rows){
+      var p = (rows && rows.length) ? rows[0] : null;
+      if(!p) return { profile: null, tenant: null };
+      if(!p.tenant_id) return { profile: p, tenant: null };
+      return fetchT(CFG.supabaseUrl + '/rest/v1/tenants?id=eq.' + encodeURIComponent(p.tenant_id) + '&select=id,name,plan,subscription_status,trial_ends_at', { headers: { 'Authorization': 'Bearer ' + sess.access_token } })
+        .then(function(r2){ return r2.ok ? r2.json() : []; })
+        .then(function(ts){ return { profile: p, tenant: (ts && ts.length) ? ts[0] : null }; })
+        .catch(function(){ return { profile: p, tenant: null }; });
+    });
+  }
+  function setState(s){ state = s; emit(); }
+
+  function refreshSession(sess){
+    return fetchT(CFG.supabaseUrl + '/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: JSON.stringify({ refresh_token: sess.refresh_token }) })
+      .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+      .then(function(res){
+        if(!res.ok || !res.j || !res.j.access_token) throw new Error('refresh_denegado');
+        var ns = { v: 1, access_token: res.j.access_token, refresh_token: res.j.refresh_token || sess.refresh_token,
+                   expires_at: Date.now() + ((res.j.expires_in || 3600) * 1000),
+                   user: { id: (res.j.user && res.j.user.id) || sess.user.id, email: (res.j.user && res.j.user.email) || sess.user.email },
+                   obtainedAt: new Date().toISOString() };
+        lsSave(ns);
+        return ns;
+      });
+  }
+  function loadProfileOf(sess){
+    return readProfile(sess).then(function(r){
+      setState({ status:'online', user: sess.user,
+                 profile: r && r.profile ? r.profile : null,
+                 tenant: r && r.tenant ? r.tenant : null,
+                 plan: (r && r.profile && r.profile.plan) ? r.profile.plan : null,
+                 expiresAt: sess.expires_at || jwtExp(sess.access_token) });
+    });
+  }
+
+  /* Arranque (desde boot, NO bloquea): restaura la sesión si la hay. */
+  function init(){
+    var sess = lsLoad();
+    if(!sess){ setState({ status:'desconectado' }); return Promise.resolve(clone(state)); }
+    setState({ status:'conectando', user: sess.user });
+    var exp = sess.expires_at || jwtExp(sess.access_token);
+    var ready = (exp && (exp - Date.now()) > 60000) ? Promise.resolve(sess) : refreshSession(sess);
+    return ready.then(function(s2){ return loadProfileOf(s2); }).catch(function(e){
+      if(String(e && e.message) === 'refresh_denegado'){ lsClear(); setState({ status:'expirada', user: sess.user }); }
+      else { setState({ status:'offline', user: sess.user }); }  /* sin red: identidad cacheada, núcleo intacto */
+      return clone(state);
+    });
+  }
+
+  /* Login email+password (GoTrue grant_type=password — mismo servicio que
+     el LoginForm del Next.js). Nunca escribe en ninguna tabla. */
+  function signIn(email, pass){
+    if(busy) return Promise.resolve({ ok:false, error:'Ya hay una conexión en curso.' });
+    busy = true;
+    setState({ status:'conectando' });
+    return fetchT(CFG.supabaseUrl + '/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email: String(email || '').trim(), password: String(pass || '') }) })
+      .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+      .then(function(res){
+        busy = false;
+        if(!res.ok || !res.j || !res.j.access_token){
+          var raw = res.j ? ((res.j.msg || res.j.error_description || res.j.error || '') + '') : '';
+          var human = 'No se pudo conectar. Revisa el correo y la contraseña.';
+          if(raw.indexOf('Invalid login credentials') >= 0) human = 'Correo o contraseña incorrectos.';
+          else if(raw.indexOf('Email not confirmed') >= 0) human = 'El correo de esta cuenta aún no está confirmado.';
+          else if(raw.indexOf('signups_not_allowed') >= 0) human = 'El servidor no permite este acceso ahora.';
+          setState({ status:'error', message: human });
+          return { ok:false, error: human };
+        }
+        var u = res.j.user || {};
+        var sess = { v: 1, access_token: res.j.access_token, refresh_token: res.j.refresh_token,
+                     expires_at: Date.now() + ((res.j.expires_in || 3600) * 1000),
+                     user: { id: u.id, email: u.email }, obtainedAt: new Date().toISOString() };
+        lsSave(sess);
+        return loadProfileOf(sess).then(function(){ return { ok: true }; }).catch(function(){
+          /* Perfil no accesible (RLS/fila ausente): la cuenta sigue conectada. */
+          setState({ status:'online', user: sess.user, profile: null, tenant: null, plan: null, expiresAt: sess.expires_at });
+          return { ok: true };
+        });
+      })
+      .catch(function(e){
+        busy = false;
+        var kind = classifyError(e);
+        var msg = (kind === 'red')
+          ? 'Sin conexión con el servidor. Tu trabajo local no se ve afectado; inténtalo de nuevo cuando tengas Internet.'
+          : 'El servicio de cuentas no está disponible ahora. COSTPRO continúa funcionando normalmente.';
+        setState({ status:'error', message: msg });
+        return { ok:false, error: msg };
+      });
+  }
+
+  /* Desconexión local + cierre de sesión en el servidor (mejor esfuerzo). */
+  function signOut(){
+    var sess = lsLoad();
+    lsClear();
+    setState({ status:'desconectado' });
+    if(sess && sess.access_token){
+      fetchT(CFG.supabaseUrl + '/auth/v1/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + sess.access_token }, body: '{}' }).catch(function(){});
+    }
+    return Promise.resolve(clone(state));
+  }
+
+  /* PUNTO DE INTEGRACIÓN (FASE 24.2) del sistema de cuotas EXISTENTE del
+     proyecto (tabla user_usage + RPC increment_user_usage; acciones
+     fc_create/fc_export/fc_import; límite free: 3/día — sin modificar nada
+     en Supabase). En 24.1 NO se consulta ni se incrementa nada: el núcleo
+     no depende de la nube. Firma estable para el wiring futuro. */
+  function checkQuota(action){
+    return { allowed: true, enforced: false, action: String(action || ''),
+             reason: 'cuotas-no-activas (FASE 24.1: solo identidad)',
+             system: 'user_usage (existente del proyecto, sin modificar)' };
+  }
+
+  function planLabel(plan){
+    if(plan === 'pro') return 'PRO';
+    if(plan === 'enterprise') return 'ENTERPRISE';
+    if(plan === 'free') return 'FREE';
+    return '';
+  }
+  function syncUI(){
+    var stEl = document.getElementById('auCloudState');
+    if(stEl){
+      var cls = 'gcc-state', txt = 'Opcional';
+      if(state.status === 'online'){ cls += ' ok'; txt = 'Conectada' + (planLabel(state.plan) ? ' · ' + planLabel(state.plan) : ''); }
+      else if(state.status === 'expirada'){ cls += ' warn'; txt = 'Sesión expirada'; }
+      else if(state.status === 'offline'){ cls += ' warn'; txt = 'Sin conexión'; }
+      stEl.className = cls; stEl.textContent = txt;
+    }
+    var box = document.getElementById('auCloudBox');
+    var tgl = document.querySelector('[data-btn="cloudToggle"]');
+    if(tgl) tgl.setAttribute('aria-expanded', (box && !box.hidden) ? 'true' : 'false');
+    var chip = document.getElementById('umCloudChip');
+    if(chip){
+      if(state.status === 'online'){ chip.hidden = false; chip.textContent = planLabel(state.plan) || 'OK'; }
+      else chip.hidden = true;
+    }
+    if(App.ui && App.ui.view === 'cuenta'){ try{ renderCuenta(); }catch(e){} }
+  }
+  function toggleAuthBox(){
+    var box = document.getElementById('auCloudBox');
+    if(!box) return;
+    box.hidden = !box.hidden;
+    var tgl = document.querySelector('[data-btn="cloudToggle"]');
+    if(tgl) tgl.setAttribute('aria-expanded', box.hidden ? 'false' : 'true');
+    if(!box.hidden){ var e = document.getElementById('auCloudEmail'); if(e) setTimeout(function(){ try{ e.focus(); }catch(err){} }, 30); }
+  }
+  function readCreds(emId, pwId, msgId){
+    var em = document.getElementById(emId), pw = document.getElementById(pwId), msg = document.getElementById(msgId);
+    if(!em || !pw) return null;
+    var email = String(em.value || '').trim(), pass = String(pw.value || '');
+    if(msg) msg.hidden = true;
+    if(!email || !pass || email.indexOf('@') < 1){
+      if(msg){ msg.textContent = 'Introduce el correo y la contraseña de tu cuenta COSTPRO.'; msg.hidden = false; }
+      return null;
+    }
+    return { email: email, pass: pass, pw: pw, msg: msg };
+  }
+  function signInFromAuthScreen(){
+    var c = readCreds('auCloudEmail', 'auCloudPass', 'auCloudMsg');
+    if(!c) return;
+    var go = document.getElementById('auCloudGo');
+    if(go) go.disabled = true;
+    signIn(c.email, c.pass).then(function(r){
+      if(go) go.disabled = false;
+      if(!r.ok){ if(c.msg){ c.msg.textContent = r.error; c.msg.hidden = false; } return; }
+      c.pw.value = '';
+      toast('Cuenta COSTPRO conectada. Tu plan se muestra en Mi cuenta.', 'ok');
+    });
+  }
+  function signInFromCuenta(){
+    var c = readCreds('cuCloudEmail', 'cuCloudPass', 'cuCloudMsg');
+    if(!c) return;
+    signIn(c.email, c.pass).then(function(r){
+      if(!r.ok){ if(c.msg){ c.msg.textContent = r.error; c.msg.hidden = false; } return; }
+      c.pw.value = '';
+      toast('Cuenta COSTPRO conectada.', 'ok');
+    });
+  }
+
+  /* Tarjeta para «Mi cuenta» (renderCuenta la inserta tal cual). */
+  function cuentaCard(){
+    var h = '<div class="cu-card wide" id="cuCloudCard"><h2>' + icon('cloud', 16) + 'Cuenta COSTPRO en la nube<span class="gcc-beta">solo lectura</span></h2>';
+    if(state.status === 'online'){
+      var p = state.profile || {};
+      h += '<dl class="cu-kv">' +
+        '<dt>Estado</dt><dd><span class="gcc-dot ok"></span>Conectada</dd>' +
+        '<dt>Cuenta</dt><dd>' + escapeHtml((state.user && state.user.email) || p.email || '—') + '</dd>' +
+        '<dt>Plan de la cuenta</dt><dd>' + escapeHtml(planLabel(state.plan) || 'no disponible en el servidor') + '</dd>' +
+        (p.full_name ? '<dt>Nombre</dt><dd>' + escapeHtml(String(p.full_name)) + '</dd>' : '') +
+        (p.role ? '<dt>Rol en COSTPRO</dt><dd>' + escapeHtml(String(p.role)) + '</dd>' : '') +
+        (state.tenant ? '<dt>Organización</dt><dd>' + escapeHtml(String(state.tenant.name || state.tenant.id)) +
+          (state.tenant.plan ? ' · plan ' + escapeHtml(String(state.tenant.plan)) : '') +
+          ((state.tenant.subscription_status === 'trial' && state.tenant.trial_ends_at) ? ' · prueba hasta ' + escapeHtml(Lic.fmtDate(state.tenant.trial_ends_at)) : '') + '</dd>' : '') +
+        '</dl>' +
+        '<div class="cu-act"><button class="btn" data-btn="cloudSignOut">' + icon('logout', 15) + 'Desconectar cuenta</button></div>' +
+        '<p class="cu-note">La identidad y el plan vienen de la misma cuenta del panel COSTPRO (misma instancia de Supabase). En esta fase la conexión es solo de lectura: ni fichas ni datos locales se suben a la nube.</p>';
+    } else if(state.status === 'expirada'){
+      h += '<dl class="cu-kv"><dt>Estado</dt><dd><span class="gcc-dot warn"></span>Sesión expirada</dd>' +
+        '<dt>Cuenta</dt><dd>' + escapeHtml((state.user && state.user.email) || '—') + '</dd></dl>' +
+        '<div class="cu-act"><button class="btn primary" data-btn="cloudReconnect">' + icon('cloud', 15) + 'Volver a conectar</button>' +
+        '<button class="btn" data-btn="cloudSignOut">Olvidar cuenta en este navegador</button></div>' +
+        '<p class="cu-note">La sesión caducó y no se pudo renovar. COSTPRO trabaja siempre de forma local: nada se ha perdido.</p>';
+    } else if(state.status === 'offline' || state.status === 'conectando'){
+      h += '<dl class="cu-kv"><dt>Estado</dt><dd><span class="gcc-dot warn"></span>' + (state.status === 'offline' ? 'Sin conexión — último estado conocido' : 'Conectando…') + '</dd>' +
+        (state.user ? '<dt>Cuenta</dt><dd>' + escapeHtml(state.user.email || '—') + '</dd>' : '') + '</dl>' +
+        '<p class="cu-note">No hay Internet ahora. El cálculo, el guardado local y el PDF funcionan exactamente igual; el estado se actualizará al reconectar.</p>';
+    } else if(state.status === 'error'){
+      h += '<dl class="cu-kv"><dt>Estado</dt><dd><span class="gcc-dot warn"></span>No disponible ahora</dd></dl>' +
+        '<p class="cu-note">' + escapeHtml(String(state.message || 'El servicio de cuentas no respondió.')) + '</p>' +
+        '<div class="cu-act"><button class="btn" data-btn="cloudReconnect">' + icon('cloud', 15) + 'Reintentar</button></div>';
+    } else {
+      h += '<p style="margin:0 0 10px;font-size:13px;line-height:1.6">Opcional: conecta la MISMA cuenta que usas en el panel COSTPRO (correo + contraseña) para ver aquí tu perfil y tu plan. Solo lectura en esta fase.</p>' +
+        '<div class="field"><label for="cuCloudEmail">Correo electrónico</label><div class="inwrap"><span class="in-ic" data-icon="user" data-sz="16"></span><input id="cuCloudEmail" type="email" autocomplete="email" autocapitalize="none" spellcheck="false"></div></div>' +
+        '<div class="field"><label for="cuCloudPass">Contraseña</label><div class="inwrap"><span class="in-ic" data-icon="lock" data-sz="16"></span><input id="cuCloudPass" type="password" autocomplete="current-password"></div></div>' +
+        '<p id="cuCloudMsg" class="gate-err" role="alert" hidden></p>' +
+        '<div class="cu-act"><button class="btn primary" data-btn="cloudSignInCuenta">' + icon('cloud', 15) + 'Conectar cuenta</button></div>' +
+        '<p class="cu-note">Esto no sustituye el acceso local a la aplicación: COSTPRO funciona sin Internet y tus datos siguen en este navegador. Sin cuenta en la nube, todo sigue igual que siempre.</p>';
+    }
+    h += '</div>';
+    return h;
+  }
+
+  return {
+    init: init, signIn: signIn, signOut: signOut,
+    toggleAuthBox: toggleAuthBox, signInFromAuthScreen: signInFromAuthScreen, signInFromCuenta: signInFromCuenta,
+    cuentaCard: cuentaCard, checkQuota: checkQuota, onChange: onChange,
+    state: function(){ return clone(state); },
+    plan: function(){ return state.plan || null; },
+    status: function(){ return state.status; }
+  };
+})();
 
 /* === FASE 23 · VERSION MANAGER — INICIO =================================
    Distribución oficial: https://github.com/Nardian90/fichascosto
@@ -4927,6 +5294,8 @@ function renderCuenta(){
       '<p class="cu-note">La activación es opcional: sin licencia puedes seguir usando COSTPRO Free para siempre, con la identificación COSTPRO en los PDF.</p>';
   }
   h += '</div>';
+  /* FASE 24.1 · FcCloud: estado de la cuenta en la nube (opcional, aislada). */
+  h += FcCloud.cuentaCard();
   /* --- Activar licencia (detalle + fichero) --- */
   h += '<div class="cu-card wide"><h2>' + icon('key', 16) + 'Activar licencia</h2>' +
     '<p style="margin:0 0 10px;font-size:13px;line-height:1.6">El flujo es sencillo: solicita tu fichero <b>.fclicense</b> indicando el identificador de instalación, después selecciónalo y listo. No necesitas introducir datos técnicos.</p>' +
@@ -7826,6 +8195,13 @@ function onClick(ev){
   else if(btn === 'verFichas'){ showFichas(); }
   else if(btn === 'verLanding'){ Landing.open(); }
   else if(btn === 'auLanding'){ Landing.open(); } /* FASE 23: la Landing accesible desde el Login */
+  /* FASE 24.1 · FcCloud: identidad en la nube (opcional, aislada del núcleo). */
+  else if(btn === 'cloudToggle'){ FcCloud.toggleAuthBox(); }
+  else if(btn === 'cloudSignIn'){ FcCloud.signInFromAuthScreen(); }
+  else if(btn === 'cloudSignInCuenta'){ FcCloud.signInFromCuenta(); }
+  else if(btn === 'cloudSignOut'){ FcCloud.signOut(); toast('Cuenta COSTPRO desconectada. Todo sigue funcionando en local.', 'info'); }
+  else if(btn === 'cloudReconnect'){ FcCloud.init(); }
+  else if(btn === 'cloudCuenta'){ openCuenta(); }
   else if(btn === 'vmBack' || btn === 'vmContinue'){ Vmgr.close(); } /* FASE 23: en strict vmBack/vmContinue no cierran (§25) */
   else if(btn === 'vmRetry'){ Vmgr.check({ manual:true }); }
   else if(btn === 'verGuia'){ ev.preventDefault(); App.ui.obStep = 0; renderOb(); openOb(); }
@@ -8975,6 +9351,10 @@ function boot(){
   /* FASE 23 · Comprobación de actualizaciones: solo en el release (buildMeta),
      diferida, no bloquea el arranque y jamás interfiere con la puerta de sesión. */
   Vmgr.init();
+  /* FASE 24.1 · FcCloud: restauración de la identidad en la nube. NO
+     bloquea el arranque ni la puerta local; sin red degrada a estado
+     cacheado y el núcleo sigue 100% offline (Internet jamás es requisito). */
+  FcCloud.init();
   /* Ticker comercial: revalida el estado (día 30 → 31, licencia) y mantiene
      el lastSeen monótono de la licencia Premium. */
   setInterval(function(){
