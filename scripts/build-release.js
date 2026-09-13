@@ -25,8 +25,8 @@ const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'FC.html');
 const OUT = path.join(ROOT, 'release', 'FC.release.html');
 const DOCS = path.join(ROOT, 'docs', 'release');
-const VERSION = '12.6.0';
-const PHASE = 'FASE 24.2 · FcCloud — identidad + cuotas reales Free/Pro (sistema comercial existente, sin modificar)';
+const VERSION = '12.6.1';
+const PHASE = 'FASE 24.2-P · hardening buildPrint() — guardia ante almacén vacío/id huérfano; FcCloud 24.2 intacto';
 
 function loadToolchain() {
   const tries = [

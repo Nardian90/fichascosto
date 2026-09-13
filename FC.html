@@ -8591,6 +8591,15 @@ function escapeCsv(s){
 function buildPrintDoc(){
   var o = App.ui.printOpts, f = F(), R = App.res;
   var h = '';
+  /* FASE 24.2-P · guardia documental: sin ficha activa (almacén vacío o id
+     huérfano) no hay documento que emitir — antes: TypeError «reading 'nombre'».
+     Salida CONTROLADA: un aviso claro dentro del propio documento, idéntico para
+     Preview y PDF (misma buildPrintDoc = paridad). No silencia otros errores:
+     sólo actúa cuando F() no resuelve ninguna ficha; con ficha el flujo es intacto. */
+  if(!f){
+    return '<div class="psec pkeep"><h3>Sin ficha activa</h3>' +
+      '<p class="pinfo">No hay ninguna ficha abierta para imprimir. Abra o cree una ficha y vuelva a intentarlo.</p></div>';
+  }
   /* Logo de la empresa (identidad documental): aparece SOLO cuando el estado
      comercial lo permite (Free Trial · Premium) y hay un logo cargado. La
      misma decisión alimenta Preview y PDF (mismo buildPrintDoc = paridad).
@@ -8908,6 +8917,14 @@ function closePdfPreview(){
   if(App.ui.lastFocus && App.ui.lastFocus.focus){ try{ App.ui.lastFocus.focus(); }catch(e){} }
 }
 function pdfExportDoc(){
+  /* FASE 24.2-P · guardia de exportación: sin ficha activa no hay documento que
+     exportar — se informa y NO se consume cuota (el uso se registra UNA sola vez
+     tras el ÉXITO real; exportar nada no es un éxito). */
+  if(!F()){
+    closePdfPreview();
+    toast('No hay ninguna ficha abierta para exportar. Abra o cree una ficha.', 'info');
+    return;
+  }
   buildPrint();
   closePdfPreview();
   toast('Documento preparado: elija "Guardar como PDF" en el diálogo de impresión', 'ok');

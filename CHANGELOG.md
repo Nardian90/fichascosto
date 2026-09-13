@@ -2,6 +2,23 @@
 
 Formato: Keep a Changelog simplificado. Cada versión corresponde a un tag `vX.Y.Z` y a un GitHub Release con `FC.release.html` + `release/release-manifest.json`.
 
+## v12.6.1 — 2026-09-13 · FASE 24.2-P · Hardening quirúrgico de buildPrint()
+
+### Fixed
+- **`TypeError` preexistente al imprimir con almacén vacío o id huérfano** (documentado desde FASE 24.1, reproducible idéntico en v12.4.0–v12.6.0): sin ficha activa, `buildPrintDoc()` leía `f.nombre` sobre `undefined` y el flujo Vista previa / Exportar PDF se rompía con `TypeError: Cannot read properties of undefined (reading 'nombre')`. Fix quirúrgico (2 guardias, +17 líneas, 0 refactor):
+  - **Guardia documental** en `buildPrintDoc()`: sin ficha activa devuelve un documento controlado («Sin ficha activa — abra o cree una ficha») — misma `buildPrintDoc` para Preview y PDF (paridad preservada). Con ficha, el flujo es byte-idéntico (verificado por comparación md5 del documento antes/después).
+  - **Guardia de exportación** en `pdfExportDoc()`: sin ficha activa avisa y NO consume cuota (`fc_export` se registra UNA sola vez tras el ÉXITO real; exportar nada no es un éxito). `window.print()` no se invoca.
+
+### Changed
+- Pipeline de build: etiqueta de fase 24.2-P; versión patch 12.6.0 → 12.6.1 (sin capacidades nuevas).
+
+### Offline (inalterado por diseño)
+- El núcleo local sigue 100% operativo sin Internet; la guardia es puramente local (no depende de red ni de FcCloud).
+
+### Accounting
+- `computeFicha()`: **SIN MODIFICACIONES** — engineHash `c5f4dca8042385c36e49c76992269b25` ANTES == DESPUÉS (fuente); motor minificado del release `aa9a255f…` idéntico al de v12.6.0. Supabase: 0 cambios. COSTPRO Next.js: 0 cambios.
+- Regresión completa en verde (22 suites, 803 verificaciones): f242p_buildprint 46/46 (nueva, casos A–E DEV+REL) · f242_quota 71/71 · f241_cloud 79/79 · f26_equiv 44/44 · audit_motor 39/39 DEV+REL · test-version 18/18 · f23_vmgr 43/43 · landing 68/68 · login_landing 25/25 · smoke 29/29 · release_check 8/8 · audit_seguridad 8/8 · audit_visual 28/28 · f17 51/51 · anexos 46/46 · mipyme 63/63 · apoyo 29/29 · csvfix 34/34 · perf 15/15 · responsive 8/8 · v2_mobile 12/12.
+
 ## v12.6.0 — 2026-09-13 · FASE 24.2 · FcCloud — cuotas reales Free/Pro (sistema comercial existente)
 
 ### Added
