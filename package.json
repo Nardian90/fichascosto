@@ -1,0 +1,13 @@
+{
+  "name": "fichascosto",
+  "private": true,
+  "description": "COSTPRO — Ficha de Costos y Gastos (Resolución 148/2023 MFP). Repositorio oficial de distribución. La versión del producto vive únicamente en FC.html (APP_CONFIG) y se inyecta en el build; no se declara aquí para evitar segundas fuentes.",
+  "scripts": {
+    "build": "node scripts/build-release.js",
+    "test:version": "node scripts/test-version.js"
+  },
+  "devDependencies": {
+    "html-minifier-terser": "7.2.0",
+    "terser": "5.51.2"
+  }
+}

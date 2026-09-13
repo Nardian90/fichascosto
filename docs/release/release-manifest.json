@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "product": "COSTPRO",
+  "productName": "COSTPRO — FC (Ficha de Costos y Gastos) · Resolución 148/2023 MFP",
+  "version": "12.4.0",
+  "channel": "stable",
+  "releaseDate": "2026-09-13",
+  "minimumVersion": "12.4.0",
+  "latestVersion": "12.4.0",
+  "releaseFile": "FC.release.html",
+  "sha256": "b5183718c4413217bcacfdc9303c1d346b2f917886eb564746909f5099053233",
+  "sourceHash": "701cd71a38b99ce8d07c3fa2e9f9954dba395e79014f74e94a5d0a37f2b663c5",
+  "engineHash": "c5f4dca8042385c36e49c76992269b25",
+  "buildPhase": "FASE 23 · DISTRIBUCIÓN OFICIAL (repo + manifest + VersionManager)",
+  "buildDate": "2026-09-13T03:19:34.155Z",
+  "generator": "scripts/build-release.js · html-minifier-terser + terser (mangle interno, sin ofuscación extrema)",
+  "releaseMd5": "4592b7b24591a65b29b697bb738a55d6",
+  "sourceMd5": "8f235a582b145166e880d8662dc8e7f0",
+  "releaseEngineHash": "46c4bf36a0d605eeda641d028c7a845e",
+  "engineNote": "engineHash = md5 del slice __ENGINE_START__/__ENGINE_END__ de la FUENTE. En el release el motor está minificado (mangle interno): su md5 difiere por diseño; la identidad funcional DEV≈RELEASE se demuestra por batería de equivalencia.",
+  "noSecrets": "El release contiene únicamente la clave pública de verificación de licencias; sin claves privadas, tokens ni credenciales.",
+  "distribution": "El archivo para clientes es exclusivamente FC.release.html; FC.html queda para desarrollo y auditoría."
+}

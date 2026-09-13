@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COSTPRO — Convierte tus costos en decisiones</title>
+<meta name="description" content="COSTPRO (Fichas de Costos) — aplicación profesional conforme a la Resolución 148/2023 MFP. Funciona online y offline, tus datos permanecen en tu equipo.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='32' y2='32'%3E%3Cstop offset='0' stop-color='%230d5bb8'/%3E%3Cstop offset='1' stop-color='%23093f66'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='7' fill='url(%23g)'/%3E%3Ctext x='16' y='21.5' font-family='Arial' font-size='13' font-weight='bold' fill='white' text-anchor='middle'%3EFC%3C/text%3E%3C/svg%3E">
+<style>
+/* =====================================================================
+   COSTPRO DESIGN TOKENS — valores extraídos VERBATIM de FC.html v12.4.0.
+   La identidad de COSTPRO define esta página (FASE 22B/§16: la app es la
+   fuente de verdad visual; aquí no se inventa ninguna paleta).
+   ===================================================================== */
+:root{
+  /* Tema CLARO (anclas certificadas de la aplicación) */
+  --bg:#eef1f5;
+  --surface:#ffffff; --surface-elevated:#ffffff;
+  --ink:#16202b;
+  --muted:#54657a; --faint:#7f8fa3;
+  --line:#d5dde6; --line-strong:#b7c4d2;
+  --accent:#0d5bb8; --accent-dark:#0a4894; --accent-soft:#e7f0fb; --accent-line:#c3d9f0;
+  --accent-contrast:#ffffff;
+  --ok:#1e7d43;
+  --hover:#f0f5fa; --thead:#edf2f7;
+  --totalbg:#eef4fa; --totalline:#a9bcd0;
+  --focus:#1d6fd2; --radius:12px; --radius-sm:9px; --radius-lg:16px;
+  --tap:44px;
+  --brand-grad:linear-gradient(135deg,#0d5bb8,#093f66);
+  --shadow:0 1px 2px rgba(22,32,43,.05), 0 2px 10px rgba(22,32,43,.07);
+}
+html[data-theme="dark"]{
+  /* Tema OSCURO (mismos valores que [data-theme=dark] en FC.html) */
+  --bg:#0f141a;
+  --surface:#161d26; --surface-elevated:#1c2530;
+  --ink:#e5edf5;
+  --muted:#9db0c2; --faint:#6e8194;
+  --line:#2a3644; --line-strong:#42556a;
+  --accent:#5aa2e8; --accent-dark:#7db8f0; --accent-soft:#152a41; --accent-line:#2c4a68;
+  --accent-contrast:#0b131c;
+  --ok:#4cc27a;
+  --hover:#1a2432; --thead:#1b2531;
+  --totalbg:#1b2531; --totalline:#3d5065;
+  --focus:#6cb0f5;
+  --brand-grad:linear-gradient(135deg,#2c6cb4,#173a5e);
+  --shadow:0 1px 2px rgba(0,0,0,.25), 0 2px 10px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif;-webkit-text-size-adjust:100%}
+a:focus-visible,button:focus-visible{outline:2.5px solid var(--focus);outline-offset:2px;border-radius:6px}
+.skip{position:absolute;left:12px;top:-48px;z-index:30;background:var(--accent);color:var(--accent-contrast);padding:10px 16px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;transition:top .15s ease}
+.skip:focus{top:12px}
+
+/* --- Botones: mismo lenguaje que .btn/.btn.primary de la aplicación --- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 13px;min-height:44px;font-size:13px;font-weight:650;cursor:pointer;transition:background .15s,border-color .15s,color .15s,box-shadow .15s;text-decoration:none}
+.btn:hover{background:var(--hover);border-color:var(--totalline)}
+.btn:active{transform:translateY(.5px)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-contrast);box-shadow:0 1px 3px rgba(13,91,184,.3)}
+.btn.primary:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+
+/* --- Página --- */
+.top{max-width:1000px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.brandmark{width:34px;height:34px;border-radius:8px;background:var(--brand-grad);box-shadow:var(--shadow);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;letter-spacing:.5px;flex:none}
+.top b{font-size:15px;letter-spacing:.4px}
+.top .spacer{flex:1}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px}
+.hero{padding:54px 0 26px;text-align:center}
+.hero .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:700;min-height:30px}
+.hero h1{font-size:clamp(30px,6vw,52px);line-height:1.08;letter-spacing:-.02em;margin:18px 0 10px;font-weight:800}
+.hero h1 .grad{background:var(--brand-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+html[data-theme="dark"] .hero h1 .grad{background:linear-gradient(135deg,#7db8f0,#5aa2e8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.sub{color:var(--muted);font-size:clamp(15px,2.6vw,18px);max-width:640px;margin:0 auto}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:26px 0 10px}
+.cta .btn{min-height:48px;padding:10px 20px;font-size:14px}
+.ver{color:var(--faint);font-size:12.5px;margin:4px 0 0}
+.ver b{color:var(--muted)}
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin:34px 0 10px}
+.feat .f{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:15px 16px;display:flex;gap:11px;align-items:flex-start;box-shadow:var(--shadow);text-align:left}
+.feat .f .ic{flex:none;width:30px;height:30px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center}
+.feat .f b{display:block;font-size:13.5px}
+.feat .f small{color:var(--muted);font-size:12.5px;line-height:1.45;display:block;margin-top:2px}
+.how{border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface);box-shadow:var(--shadow);padding:22px;margin:26px 0}
+.how h2{margin:0 0 12px;font-size:18px}
+.how ol{margin:0;padding-left:20px;color:var(--muted)}
+.how li{margin:7px 0}
+.how li b{color:var(--ink)}
+.dl-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.dl-row .note{color:var(--faint);font-size:12.5px}
+footer{border-top:1px solid var(--line);margin-top:44px;padding:20px 0 30px}
+footer .fin{max-width:1000px;margin:0 auto;padding:0 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;color:var(--muted);font-size:12.5px}
+footer .fin a{color:var(--accent);text-decoration:none}
+footer .fin a:hover{text-decoration:underline}
+footer .fin b{color:var(--ink)}
+@media (max-width:400px){.top{flex-wrap:wrap}.hero{padding-top:38px}.cta .btn{width:100%}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<header class="top">
+  <span class="brandmark" aria-hidden="true">FC</span>
+  <b>COSTPRO</b>
+  <span class="spacer"></span>
+  <button type="button" class="btn" id="themeBtn" aria-label="Cambiar entre tema oscuro y claro" aria-pressed="true">Tema</button>
+</header>
+
+<main id="main" class="wrap">
+  <section class="hero">
+    <span class="chip">Resolución 148/2023 · MFP · Anexo I</span>
+    <h1>Convierte tus costos <span class="grad">en decisiones.</span></h1>
+    <p class="sub">COSTPRO es la Ficha de Costos y Gastos como aplicación local: calcula, valida y documenta conforme a la metodología oficial. <b>Seducido por la Estrategia.</b></p>
+    <div class="cta">
+      <a class="btn primary" href="./release/FC.release.html" aria-label="Abrir COSTPRO en el navegador">Abrir COSTPRO</a>
+      <a class="btn" href="https://github.com/Nardian90/fichascosto/releases/latest" target="_blank" rel="noopener noreferrer" aria-label="Descargar COSTPRO desde el Release estable">Descargar COSTPRO</a>
+    </div>
+    <p class="ver" id="verLine" hidden>Versión oficial: <b id="verTxt">—</b> · canal estable</p>
+  </section>
+
+  <section class="feat" aria-label="Características principales">
+    <div class="f"><span class="ic" aria-hidden="true">✓</span><span><b>Funciona online y offline</b><small>Una vez abierta o descargada, no necesita Internet para trabajar.</small></span></div>
+    <div class="f"><span class="ic" aria-hidden="true">✓</span><span><b>Datos locales</b><small>Tus fichas y configuración permanecen en este navegador. Sin servidores.</small></span></div>
+    <div class="f"><span class="ic" aria-hidden="true">✓</span><span><b>Actualizaciones oficiales</b><small>La aplicación avisa cuando hay una nueva versión estable publicada.</small></span></div>
+    <div class="f"><span class="ic" aria-hidden="true">✓</span><span><b>Documentos profesionales</b><small>Vista previa y PDF con el formato de la ficha de costos.</small></span></div>
+  </section>
+
+  <section class="how" aria-label="Cómo empezar">
+    <h2>Cómo empezar</h2>
+    <ol>
+      <li><b>Abrir o descargar.</b> Usa «Abrir COSTPRO» para trabajar ahora, o «Descargar» para guardar el archivo oficial <code>FC.release.html</code> en tu equipo.</li>
+      <li><b>Guardar el archivo localmente.</b> El archivo descargado funciona sin conexión: ábrelo con doble clic cuando lo necesites.</li>
+      <li><b>Crear tu primera Ficha.</b> Introduce tus datos; COSTPRO calcula, audita los límites de la Resolución y genera el documento.</li>
+    </ol>
+    <div class="dl-row">
+      <span class="note">Distribución oficial: <b>Nardian90/fichascosto</b> · la descarga apunta siempre al último Release estable.</span>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="fin">
+    <span>© 2026 · Desarrollado por <b>ADRIAN POMPA SANTANA</b></span>
+    <span><a href="https://github.com/Nardian90/fichascosto" target="_blank" rel="noopener noreferrer">Repositorio</a> · <a href="https://github.com/Nardian90/fichascosto/releases" target="_blank" rel="noopener noreferrer">Releases</a></span>
+  </div>
+</footer>
+
+<script>
+/* Tema: mismo comportamiento que la aplicación (preferencia del usuario persistida;
+   por defecto, la preferencia del sistema). Sin estado paralelo: data-theme REAL. */
+(function(){
+  var root = document.documentElement, btn = document.getElementById('themeBtn');
+  function apply(t){ root.setAttribute('data-theme', t); btn.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false'); btn.textContent = t === 'dark' ? 'Tema: oscuro' : 'Tema: claro'; }
+  var saved = null;
+  try{ saved = localStorage.getItem('FC_PAGES_THEME'); }catch(e){}
+  apply(saved === 'light' || saved === 'dark' ? saved : (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'));
+  btn.addEventListener('click', function(){
+    var t = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    apply(t);
+    try{ localStorage.setItem('FC_PAGES_THEME', t); }catch(e){}
+  });
+  /* Versión oficial: SIEMPRE del manifest (fuente única de la versión §8).
+     Si el manifest no está disponible, la línea se oculta — jamás se copia
+     el número de versión a mano en esta página. */
+  fetch('./release/release-manifest.json', { cache:'no-store' })
+    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .then(function(m){
+      if(m && /^\d+\.\d+\.\d+$/.test(String(m.version||''))){
+        document.getElementById('verTxt').textContent = 'v' + m.version;
+        document.getElementById('verLine').hidden = false;
+      }
+    })
+    .catch(function(){ /* sin manifest: línea oculta */ });
+})();
+</script>
+</body>
+</html>

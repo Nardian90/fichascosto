@@ -1,0 +1,34 @@
+# COSTPRO / fichascosto — .gitignore
+# NO excluir jamás: FC.html · release/FC.release.html · release/release-manifest.json · docs/ · scripts/
+
+# Dependencias del build (se restauran con npm install)
+node_modules/
+package-lock.json.bak
+
+# Artefactos y copias locales de desarrollo/auditoría
+*.backup_*.html
+*.bak
+*.tmp
+*.log
+logs/
+tool-results/
+fc_build/
+aud_*.png
+aud_*.pdf
+dbg_*
+
+# Secretos y credenciales (NUNCA deben existir aquí)
+.env
+.env.*
+credentials*.json
+*.pem
+*.key
+id_rsa*
+github_pat_*
+ghp_*.txt
+
+# Metadatos de IDE/SO
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
