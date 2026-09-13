@@ -1,0 +1,56 @@
+name: pages
+
+# FASE 23 · GitHub Pages — Landing oficial de COSTPRO.
+#
+# Publica el contenido de docs/ (Landing oficial + release/FC.release.html +
+# release/release-manifest.json) en:
+#     https://nardian90.github.io/fichascosto/
+#
+# La acción configure-pages con `enablement: true` crea el sitio de Pages
+# automáticamente si aún no existe (fuente: GitHub Actions), de modo que el
+# despliegue no requiere configuración manual en Settings → Pages.
+#
+# Disparadores:
+#   - push a main que toque docs/** o este propio workflow
+#   - ejecución manual (workflow_dispatch)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Pages (habilita el sitio si aún no existe)
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Empaquetar docs/ como artefacto de Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Desplegar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
