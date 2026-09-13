@@ -1,0 +1,54 @@
+name: release
+
+# FASE 23 · Release oficial de COSTPRO.
+# Disparador: push de un tag semántico (v12.4.0, v12.4.1, v12.5.0, …).
+# Construye el release desde FC.html (única fuente), verifica integridad,
+# ejecuta los tests de versionado y publica el GitHub Release con los
+# artefactos oficiales: FC.release.html + release-manifest.json.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Dependencias del build
+        run: npm install
+
+      - name: Build reproducible (FC.html → FC.release.html + manifest)
+        run: node scripts/build-release.js
+
+      - name: Tests de versionado (VERSION-01..14)
+        run: node scripts/test-version.js
+
+      - name: Verificación de hashes contra el manifest
+        run: |
+          ACTUAL=$(sha256sum release/FC.release.html | cut -d' ' -f1)
+          DECLARADO=$(node -e "console.log(require('./release/release-manifest.json').sha256)")
+          echo "actual=$ACTUAL declarado=$DECLARADO"
+          [ "$ACTUAL" = "$DECLARADO" ] || { echo 'ERROR: el hash del release no coincide con el manifest'; exit 1; }
+
+      - name: Publicar GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            release/FC.release.html \
+            release/release-manifest.json \
+            --title "COSTPRO ${GITHUB_REF_NAME}" \
+            --generate-notes \
+            --verify-tag
