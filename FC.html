@@ -4137,6 +4137,11 @@ var APP_CONFIG = {
     supabaseUrl: 'https://wthkddeleylijmonclxg.supabase.co',
     publishableKey: 'sb_publishable__wm5ULYU2FT_Cwq663dP5g_Ycg8AlXr',
     timeoutMs: 8000,
+    /* FASE 24.2 · Límite Free REAL del sistema de cuotas existente: el
+       usage-service.ts del Next.js lo fija en 3/día por acción («hardcoded
+       for now as per requirements») y es el MISMO valor que envía al RPC
+       increment_user_usage (p_limit). NO se inventa otra cifra. */
+    freeLimit: 3,
     /* Acciones del sistema de cuotas YA EXISTENTE en el proyecto
        (tabla user_usage + RPC increment_user_usage; límite free 3/día).
        Punto de integración de la FASE 24.2 — NO activo en 24.1. */
@@ -4275,6 +4280,7 @@ var FcCloud = (function(){
                  tenant: r && r.tenant ? r.tenant : null,
                  plan: (r && r.profile && r.profile.plan) ? r.profile.plan : null,
                  expiresAt: sess.expires_at || jwtExp(sess.access_token) });
+      refreshUsage(sess).catch(function(){});  /* FASE 24.2: uso del día (fire-and-forget, fail-open) */
     });
   }
 
@@ -4344,15 +4350,121 @@ var FcCloud = (function(){
     return Promise.resolve(clone(state));
   }
 
-  /* PUNTO DE INTEGRACIÓN (FASE 24.2) del sistema de cuotas EXISTENTE del
-     proyecto (tabla user_usage + RPC increment_user_usage; acciones
-     fc_create/fc_export/fc_import; límite free: 3/día — sin modificar nada
-     en Supabase). En 24.1 NO se consulta ni se incrementa nada: el núcleo
-     no depende de la nube. Firma estable para el wiring futuro. */
+  /* =====================================================================
+     FASE 24.2 · CUOTAS REALES — sistema EXISTENTE del proyecto Supabase
+     (tabla user_usage + RPC increment_user_usage), ESPEJO del comportamiento
+     REAL de usage-service.ts del Next.js (regla del pliego: reutilizar el
+     comportamiento existente, no inventar uno nuevo):
+       · pro / enterprise / profile.role 'admin' → ilimitado (limit −1),
+         sin llamada al RPC (igual que trackUsage del Next.js).
+       · free → límite 3/día por acción (APP_CONFIG.cloud.freeLimit, la
+         MISMA cifra que el Next.js pasa al RPC como p_limit); periodo =
+         día UTC (usage_date = toISOString().split('T')[0], MISMA expresión);
+         el reinicio es natural al cambiar el día (fila nueva en servidor).
+       · error de red/BD → fail-open (evidencia: usage-service.ts devuelve
+         allowed:true ante error de BD). El núcleo local JAMÁS depende de la
+         nube: sin conexión, el cálculo/guardado/Preview/PDF siguen intactos.
+       · sin sesión (invitado o sesión expirada) → capa comercial inactiva:
+         la infraestructura existente solo puede medir usuarios autenticados
+         (user_usage exige user_id); el invitado usa FC íntegramente.
+       · offline autenticado → caché del día: si el límite ya se alcanzó con
+         dato conocido se informa y se bloquea la acción comercial; si no hay
+         dato del día, fail-open. Trade-off documentado en el informe 24.2.
+     El conteo ocurre UNA sola vez y DESPUÉS del éxito de la acción (igual
+     que el Next.js cuenta fc_export tras el PDF). Editar, recalcular,
+     abrir, guardar local, duplicar e imprimir: GRATIS (§8 del pliego).
+     Cero escrituras fuera del sistema existente: la única escritura es el
+     RPC increment_user_usage del proyecto, invocado exactamente como lo
+     invoca el Next.js. Nada de tablas/planes/cuotas paralelos.
+     ===================================================================== */
+  var USAGE_KEY = 'FC_CLOUD_USAGE_V1';
+  var usage = { date: null, counts: {}, fetchedAt: null };
+  function todayUTC(){ return new Date().toISOString().split('T')[0]; }  /* MISMA expresión que usage-service.ts */
+  function usageLoad(){ try{ var u = JSON.parse(localStorage.getItem(USAGE_KEY) || 'null'); if(u && u.date && u.counts){ usage = u; } }catch(e){} }
+  function usageSave(){ try{ localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); }catch(e){} }
+  usageLoad();
+  function limit(){ return CFG.freeLimit || 3; }
+  /* Espejo exacto de usageService.checkQuota: pro/enterprise/admin ilimitado. */
+  function isUnlimited(){
+    var p = state.profile || {};
+    return state.plan === 'pro' || state.plan === 'enterprise' || p.role === 'admin';
+  }
+  function usageCacheValid(){ return usage.date === todayUTC(); }
+  /* Lectura del PROPIO uso del día (RLS existente: cada usuario ve solo sus filas). */
+  function fetchUsage(sess){
+    var uid = sess.user.id;
+    var url = CFG.supabaseUrl + '/rest/v1/user_usage?user_id=eq.' + encodeURIComponent(uid) +
+              '&usage_date=eq.' + todayUTC() + '&select=action_type,count';
+    return fetchT(url, { headers: { 'Authorization': 'Bearer ' + sess.access_token } }).then(function(r){
+      if(!r.ok) throw new Error('usage_http_' + r.status);
+      return r.json();
+    }).then(function(rows){
+      var counts = {};
+      (rows || []).forEach(function(row){ counts[row.action_type] = row.count || 0; });
+      usage = { date: todayUTC(), counts: counts, fetchedAt: new Date().toISOString() };
+      usageSave();
+      emit();
+      return clone(usage);
+    });
+  }
+  function sessActive(){ return lsLoad(); }
+  function refreshUsage(sess){
+    var s = sess || lsLoad();
+    if(!s) return Promise.reject(new Error('sin-sesion'));
+    return fetchUsage(s);
+  }
+  /* Evaluación sincrónica sobre el estado/caché actual (API estable de 24.1). */
   function checkQuota(action){
-    return { allowed: true, enforced: false, action: String(action || ''),
-             reason: 'cuotas-no-activas (FASE 24.1: solo identidad)',
-             system: 'user_usage (existente del proyecto, sin modificar)' };
+    var a = String(action || '');
+    var SYS = 'user_usage + increment_user_usage (existente del proyecto, sin modificar)';
+    var sess = sessActive();
+    if(!sess || state.status === 'expirada'){
+      return { allowed: true, enforced: false, action: a, mode: 'sin-sesion',
+               reason: 'sin sesión en la nube: la capa comercial queda inactiva (FC local íntegra)', system: SYS };
+    }
+    if(isUnlimited()){
+      return { allowed: true, enforced: true, action: a, mode: 'ilimitado', count: 0, limit: -1,
+               reason: 'plan ' + (state.plan || 'admin') + ': cuota ilimitada (comportamiento real del sistema existente)', system: SYS };
+    }
+    var c = usageCacheValid() ? (usage.counts[a] || 0) : null;
+    if(c !== null && c >= limit()){
+      return { allowed: false, enforced: true, action: a, mode: 'cache', count: c, limit: limit(),
+               reason: 'límite diario alcanzado (uso conocido de hoy)', system: SYS };
+    }
+    return { allowed: true, enforced: true, action: a, mode: (c === null ? 'failopen' : 'cache'), count: (c || 0), limit: limit(),
+             reason: (c === null ? 'sin dato del día: fail-open (mismo comportamiento del Next.js ante error de BD)' : 'bajo el límite del plan Free'), system: SYS };
+  }
+  /* Puerta ASÍNCRONA previa a la acción (autoritativa cuando hay red). */
+  function guard(action){
+    var a = String(action || '');
+    var sess = sessActive();
+    if(!sess || state.status === 'expirada') return Promise.resolve(checkQuota(a));
+    if(state.status === 'online' && !isUnlimited()){
+      return refreshUsage(sess).catch(function(){ return null; }).then(function(){ return checkQuota(a); });
+    }
+    return Promise.resolve(checkQuota(a));
+  }
+  /* Registro UNA sola vez, tras el ÉXITO de la acción (espejo de
+     usageService.trackUsage → RPC increment_user_usage con p_limit). Es
+     fire-and-forget: JAMÁS bloquea ni degrada la acción ya completada
+     (fail-open; el servidor es la fuente de verdad al reconectar). */
+  function recordUsage(action){
+    var a = String(action || '');
+    var sess = sessActive();
+    if(!sess || isUnlimited()) return;
+    if(!usageCacheValid()){ usage = { date: todayUTC(), counts: {}, fetchedAt: null }; }
+    usage.counts[a] = Math.min(limit(), (usage.counts[a] || 0) + 1);  /* actualización optimista local */
+    usageSave();
+    emit();
+    fetchT(CFG.supabaseUrl + '/rest/v1/rpc/increment_user_usage', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + sess.access_token },
+      body: JSON.stringify({ p_user_id: sess.user.id, p_action_type: a, p_limit: limit() })
+    }).then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+      .then(function(res){
+        if(res.ok && res.j === false){ usage.counts[a] = limit(); usageSave(); emit(); }  /* el RPC informa límite alcanzado */
+      })
+      .catch(function(){ /* fail-open: se reconcilia con refreshUsage al reconectar */ });
   }
 
   function planLabel(plan){
@@ -4423,13 +4535,24 @@ var FcCloud = (function(){
 
   /* Tarjeta para «Mi cuenta» (renderCuenta la inserta tal cual). */
   function cuentaCard(){
-    var h = '<div class="cu-card wide" id="cuCloudCard"><h2>' + icon('cloud', 16) + 'Cuenta COSTPRO en la nube<span class="gcc-beta">solo lectura</span></h2>';
+    /* FASE 24.2 · Uso real del día (sistema existente): visible solo con
+       sesión activa. Free: «Crear n/3 · Exportar PDF n/3 · Importar n/3».
+       Pro/Enterprise: «Ilimitado». Sin sesión: nada se muestra. */
+    var quotaRow = '';
+    if(state.status === 'online'){
+      if(isUnlimited()) quotaRow = 'Ilimitado';
+      else if(usage.date === todayUTC()) quotaRow = ['fc_create','fc_export','fc_import'].map(function(a){
+        return ({ fc_create:'Crear', fc_export:'Exportar PDF', fc_import:'Importar' })[a] + ' ' + (usage.counts[a] || 0) + '/' + limit();
+      }).join(' · ');
+    }
+    var h = '<div class="cu-card wide" id="cuCloudCard"><h2>' + icon('cloud', 16) + 'Cuenta COSTPRO en la nube<span class="gcc-beta">cuenta real</span></h2>';
     if(state.status === 'online'){
       var p = state.profile || {};
       h += '<dl class="cu-kv">' +
         '<dt>Estado</dt><dd><span class="gcc-dot ok"></span>Conectada</dd>' +
         '<dt>Cuenta</dt><dd>' + escapeHtml((state.user && state.user.email) || p.email || '—') + '</dd>' +
         '<dt>Plan de la cuenta</dt><dd>' + escapeHtml(planLabel(state.plan) || 'no disponible en el servidor') + '</dd>' +
+        (quotaRow ? '<dt>Uso de hoy</dt><dd>' + escapeHtml(quotaRow) + '</dd>' : '') +
         (p.full_name ? '<dt>Nombre</dt><dd>' + escapeHtml(String(p.full_name)) + '</dd>' : '') +
         (p.role ? '<dt>Rol en COSTPRO</dt><dd>' + escapeHtml(String(p.role)) + '</dd>' : '') +
         (state.tenant ? '<dt>Organización</dt><dd>' + escapeHtml(String(state.tenant.name || state.tenant.id)) +
@@ -4437,7 +4560,7 @@ var FcCloud = (function(){
           ((state.tenant.subscription_status === 'trial' && state.tenant.trial_ends_at) ? ' · prueba hasta ' + escapeHtml(Lic.fmtDate(state.tenant.trial_ends_at)) : '') + '</dd>' : '') +
         '</dl>' +
         '<div class="cu-act"><button class="btn" data-btn="cloudSignOut">' + icon('logout', 15) + 'Desconectar cuenta</button></div>' +
-        '<p class="cu-note">La identidad y el plan vienen de la misma cuenta del panel COSTPRO (misma instancia de Supabase). En esta fase la conexión es solo de lectura: ni fichas ni datos locales se suben a la nube.</p>';
+        '<p class="cu-note">La identidad, el plan y el uso diario vienen de la MISMA cuenta del panel COSTPRO (misma instancia de Supabase, sistema comercial existente sin modificar). Las fichas y los datos locales nunca se suben a la nube.</p>';
     } else if(state.status === 'expirada'){
       h += '<dl class="cu-kv"><dt>Estado</dt><dd><span class="gcc-dot warn"></span>Sesión expirada</dd>' +
         '<dt>Cuenta</dt><dd>' + escapeHtml((state.user && state.user.email) || '—') + '</dd></dl>' +
@@ -4468,6 +4591,7 @@ var FcCloud = (function(){
     init: init, signIn: signIn, signOut: signOut,
     toggleAuthBox: toggleAuthBox, signInFromAuthScreen: signInFromAuthScreen, signInFromCuenta: signInFromCuenta,
     cuentaCard: cuentaCard, checkQuota: checkQuota, onChange: onChange,
+    guard: guard, recordUsage: recordUsage, refreshUsage: refreshUsage, usageSnapshot: function(){ return clone(usage); }, isUnlimited: isUnlimited,
     state: function(){ return clone(state); },
     plan: function(){ return state.plan || null; },
     status: function(){ return state.status; }
@@ -7701,6 +7825,21 @@ function closeConfirm(){
 }
 function confirmIsOpen(){ return document.getElementById('confirmModal').classList.contains('open'); }
 
+/* FASE 24.2 · Bloqueo por cuota del plan Free (sistema user_usage existente).
+   Mensaje claro y profesional, sin paywall invasivo: explica el límite, cuándo
+   se renueva, recuerda que el trabajo local sigue intacto y ofrece conocer Pro
+   sin interrumpir el flujo (§17 del pliego: progressive disclosure). */
+function showQuotaBlocked(action, g){
+  var names = { fc_create:'crear fichas nuevas', fc_export:'exportar el PDF', fc_import:'importar fichas' };
+  var nm = names[action] || action;
+  var msg = 'Has alcanzado el límite de tu plan Free para ' + nm + ' hoy (' + ((g && g.count) || 0) + '/' + ((g && g.limit) || 3) + '). ' +
+    'El contador se renueva mañana. Puedes seguir editando, calculando, guardando, abriendo e imprimiendo tus fichas con normalidad.';
+  askConfirm('Límite del plan Free', msg, 'Conoce COSTPRO Pro', function(){
+    try{ window.open(APP_CONFIG.siteUrl, '_blank', 'noopener'); }catch(e){}
+    toast('COSTPRO Platform: ' + APP_CONFIG.siteUrl, 'info');
+  });
+}
+
 /* ---------- Menú de acciones (⋯) ---------- */
 function moreMenuOpen(){ return !document.getElementById('moreMenu').hidden; }
 function openMoreMenu(){
@@ -8105,7 +8244,9 @@ function onClick(ev){
   else if(btn === 'themeDark'){ setTheme('dark'); }
   else if(btn === 'pdfpreview'){ closeMoreMenu(); openPdfPreview(); }
   else if(btn === 'pdfClose' || btn === 'pdfCancel'){ closePdfPreview(); }
-  else if(btn === 'pdfExport'){ pdfExportDoc(); }
+  else if(btn === 'pdfExport'){ /* FASE 24.2: fc_export con verificación previa de cuota */
+    FcCloud.guard('fc_export').then(function(g){ if(g.allowed){ pdfExportDoc(); } else { showQuotaBlocked('fc_export', g); } });
+  }
   else if(btn === 'pdfPrev'){ gotoPdfPage(updatePdfPageInfo() - 1); }
   else if(btn === 'pdfNext'){ gotoPdfPage(updatePdfPageInfo() + 1); }
   else if(btn === 'pdfZoomIn'){ App.ui.pdfZoom = Math.min(2, App.ui.pdfZoom * 1.15); applyPdfZoom(); }
@@ -8175,7 +8316,9 @@ function onClick(ev){
       refresh(); renderCurrent(); toast('Valores copiados en filas manuales', 'ok');
     });
   }
-  else if(btn === 'nueva'){ crearNuevaFicha(false); }
+  else if(btn === 'nueva'){ /* FASE 24.2: fc_create con verificación previa de cuota (solo aplica con sesión Free) */
+    FcCloud.guard('fc_create').then(function(g){ if(g.allowed){ crearNuevaFicha(false); } else { showQuotaBlocked('fc_create', g); } });
+  }
   else if(btn === 'duplicar'){
     var c = deepClone(f); c.id = uid(); c.nombre = f.nombre + ' (copia)'; c.createdAt = new Date().toISOString(); c.updatedAt = c.createdAt;
     if(c.estado === 'archivada') c.estado = 'borrador';
@@ -8304,6 +8447,15 @@ function importPaste(text, cols, which){
 function onFile(ev){
   var file = ev.target.files && ev.target.files[0];
   if(!file) return;
+  /* FASE 24.2 · fc_import: verificación de cuota ANTES de procesar el
+     archivo (patrón check-before/track-after del sistema existente). Sin
+     sesión o en fail-open, la importación sigue exactamente igual. */
+  FcCloud.guard('fc_import').then(function(g){
+    if(!g.allowed){ showQuotaBlocked('fc_import', g); ev.target.value = ''; return; }
+    proceedImportFile(ev, file);
+  });
+}
+function proceedImportFile(ev, file){
   var reader = new FileReader();
   reader.onload = function(){
     try{
@@ -8317,6 +8469,7 @@ function onFile(ev){
       App.db.fichas.push(ficha);
       App.db.activeId = ficha.id;
       saveDB(); renderAll();
+      FcCloud.recordUsage('fc_import');  /* FASE 24.2: fc_import tras el éxito */
       toast('Ficha importada correctamente', 'ok');
     }catch(e){
       toast('Error al importar: ' + e.message, 'err');
@@ -8758,7 +8911,7 @@ function pdfExportDoc(){
   buildPrint();
   closePdfPreview();
   toast('Documento preparado: elija "Guardar como PDF" en el diálogo de impresión', 'ok');
-  setTimeout(function(){ window.print(); }, 60);
+  setTimeout(function(){ window.print(); FcCloud.recordUsage('fc_export'); }, 60);  /* FASE 24.2: fc_export al confirmar la exportación (equivalente funcional del doc.save() del Next.js; el diálogo del sistema no ofrece confirmación programática) */
 }
 
 /* =====================================================================
@@ -8834,6 +8987,7 @@ function crearNuevaFicha(){
   App.db.fichas.push(nf);
   App.db.activeId = nf.id;
   saveDB();
+  FcCloud.recordUsage('fc_create');  /* FASE 24.2: fc_create tras el éxito (única vía de creación; duplicar/copiar siguen gratis) */
   renderFichaSelector();
   refresh();
   switchTab('datos');

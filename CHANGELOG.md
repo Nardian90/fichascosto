@@ -2,6 +2,32 @@
 
 Formato: Keep a Changelog simplificado. Cada versión corresponde a un tag `vX.Y.Z` y a un GitHub Release con `FC.release.html` + `release/release-manifest.json`.
 
+## v12.6.0 — 2026-09-13 · FASE 24.2 · FcCloud — cuotas reales Free/Pro (sistema comercial existente)
+
+### Added
+- **Cuotas reales en FcCloud**, consumiendo el sistema comercial YA EXISTENTE del proyecto Supabase compartido con COSTPRO Next.js — sin duplicar usuarios, planes, cuotas ni licencias:
+  - **Verificación previa** (`FcCloud.guard(accion)`): para plan Free lee el uso del día en `user_usage` (RLS: solo filas propias; `usage_date` = día UTC, la MISMA expresión del `usage-service.ts` del Next.js) y bloquea la acción comercial si el límite (3/día por acción, la MISMA cifra que el Next.js pasa al RPC) está alcanzado.
+  - **Registro posterior al éxito** (`FcCloud.recordUsage(accion)`): invoca el RPC existente `increment_user_usage(p_user_id, p_action_type, p_limit)` EXACTAMENTE como lo hace el Next.js — una sola vez, DESPUÉS de que la acción se completó, fire-and-forget (fail-open: nunca degrada una acción ya hecha).
+  - **Plan Free**: 3 operaciones/día por acción (`fc_create`, `fc_export`, `fc_import`). **Pro / Enterprise / rol admin**: ilimitado, sin llamadas al RPC (espejo exacto de `usageService` del Next.js). Enterprise queda como plan del backend: NO introduce ninguna funcionalidad enterprise en FC.
+- **Qué consume cuota** (definición FC, coherente con §8 del pliego): crear ficha nueva (la «única vía» de creación) → `fc_create`; exportar PDF (al confirmar la exportación, equivalente funcional del `doc.save()` del Next.js) → `fc_export`; importar JSON (tras el éxito) → `fc_import`. **Gratis**: editar, recalcular, abrir, guardar local, duplicar, «Guardar como nueva ficha», imprimir y los ejemplos incluidos.
+- **Estados comerciales coherentes** (§12): invitado → capa comercial inactiva (FC íntegra); autenticado-online → enforcement real; autenticado-offline → caché del día (si el límite conocido se alcanzó, bloquea con mensaje claro; sin dato del día, fail-open — mismo criterio que `usage-service.ts` ante error de BD); sesión expirada → capa inactiva; error de red → fail-open.
+- **UI comercial mínima** (progressive disclosure, sin banners ni paywalls): fila «Uso de hoy» en la tarjeta «Mi cuenta» (solo con sesión: «Crear n/3 · Exportar PDF n/3 · Importar n/3» o «Ilimitado» para Pro/Enterprise) y, únicamente al alcanzar el límite, un modal claro («Límite del plan Free», renovación mañana, trabajo local intacto) con CTA «Conoce COSTPRO Pro» hacia la plataforma. Cero jerga técnica.
+- Caché de uso propia `FC_CLOUD_USAGE_V1` (metadatos comerciales del propio usuario; jamás datos de fichas).
+
+### Changed
+- La insignia de la tarjeta nube pasa de «solo lectura» a «cuenta real» (las cuotas usan el RPC existente).
+- Pipeline de build: 5 verificaciones nuevas de FASE 24.2 (única escritura REST = RPC del sistema existente; cuotas activas con contrato completo; sin sistemas comerciales paralelos).
+
+### Security
+- Única escritura REST del cliente: el RPC `increment_user_usage` del sistema existente (verificado por pipeline + tripwire E2E). Sin `.insert/.upsert/.delete`, sin service_role, sin secretos; la publishable key sigue siendo la única credencial (1 vez).
+- Nada de contadores locales falsos ni cuotas paralelas: la verdad comercial vive en Supabase; la caché local es solo para el estado offline.
+
+### Offline (inalterado por diseño)
+- Sin Internet el núcleo sigue 100% operativo (crear/editar/calcular/guardar/abrir/Preview/PDF). El invitado no tiene cuota (la infraestructura existente solo mide usuarios autenticados); el autenticado sin red usa la caché del día con política documentada.
+
+### Accounting
+- `computeFicha()`: **SIN MODIFICACIONES** — engineHash `c5f4dca8042385c36e49c76992269b25` INVARIANTE (fuente). Supabase: 0 cambios (solo lecturas RLS + RPC existente invocado como el Next.js). COSTPRO Next.js: 0 cambios.
+
 ## v12.5.0 — 2026-09-13 · FASE 24.1 · FcCloud — identidad en la nube (solo lectura)
 
 ### Added

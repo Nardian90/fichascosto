@@ -25,8 +25,8 @@ const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'FC.html');
 const OUT = path.join(ROOT, 'release', 'FC.release.html');
 const DOCS = path.join(ROOT, 'docs', 'release');
-const VERSION = '12.5.0';
-const PHASE = 'FASE 24.1 · FcCloud — identidad en la nube (Supabase existente, solo lectura)';
+const VERSION = '12.6.0';
+const PHASE = 'FASE 24.2 · FcCloud — identidad + cuotas reales Free/Pro (sistema comercial existente, sin modificar)';
 
 function loadToolchain() {
   const tries = [
@@ -54,7 +54,7 @@ const md5 = s => crypto.createHash('md5').update(s).digest('hex');
   if (a < 0 || b < 0 || b <= a) throw new Error('Marcadores ENGINE no encontrados en la fuente');
   const engineHash = md5(src.slice(a + MK.length, b));
 
-  const buildDate = new Date().toISOString();
+  const buildDate = process.env.FC_BUILD_DATE || new Date().toISOString();
 
   /* identificación de build SOLO en el release (APP_CONFIG sigue siendo la única fuente) */
   const inject = `var APP_CONFIG = { buildMeta:{ product:'COSTPRO', version:'${VERSION}', phase:'${PHASE}', buildDate:'${buildDate}', sourceSha256:'${sourceHash.slice(0, 12)}', pipeline:'build-release v1 (html-minifier-terser + terser, mangle interno)' },`;
@@ -111,17 +111,22 @@ const md5 = s => crypto.createHash('md5').update(s).digest('hex');
   ok('Landing accesible desde el Login (auLanding)', (out.match(/auLanding/g) || []).length >= 2);
   ok('SIN SECRETOS (patrones github_pat_/ghp_/gho_/sk-ant-/clave privada)',
      !/github_pat_|ghp_[A-Za-z0-9]|gho_[A-Za-z0-9]|sk-ant-|-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(out));
-  /* ---- FASE 24.1: capa FcCloud (identidad, solo lectura) ---- */
-  ok('FASE 24.1: FcCloud presente (auth + sesión + perfil + plan + checkQuota)',
+  /* ---- FASE 24.2: capa FcCloud (identidad + cuotas reales) ---- */
+  ok('FASE 24.2: FcCloud presente (auth + sesión + perfil + plan + cuotas reales)',
      /(var|,)\s*FcCloud\s*=\s*(\(function|function)/.test(out));
-  ok('FASE 24.1: publishable key pública exactamente 1 vez (formato sb_publishable_)',
+  ok('FASE 24.2: publishable key pública exactamente 1 vez (formato sb_publishable_)',
      (out.match(/sb_publishable_[A-Za-z0-9_-]{20,}/g) || []).length === 1);
-  ok('FASE 24.1: sin claves de servicio ni secretas (service_role/sb_secret_)',
+  ok('FASE 24.2: sin claves de servicio ni secretas (service_role/sb_secret_)',
      !/service_role|sb_secret_|sb_secret-/.test(out));
-  ok('FASE 24.1: solo lectura — sin escrituras REST desde el cliente',
-     !/rest\/v1\/[a-z_]+[^"]*",\s*\{\s*method:\s*['"]POST/.test(out) && !/\.insert\(|\.upsert\(|\.delete\(\)/.test(out));
-  ok('FASE 24.1: punto de integración de cuotas declarado (checkQuota no activo)',
-     out.includes('checkQuota') && out.includes('fc_create') && out.includes('cuotas-no-activas'));
+  ok('FASE 24.2: única escritura REST = RPC increment_user_usage (sin inserts/upserts SDK, sin otros POST a /rest/v1)',
+     (out.match(/rest\/v1\/rpc\/increment_user_usage/g) || []).length === 1
+     && !/\.insert\(|\.upsert\(|\.delete\(\)/.test(out)
+     && !/rest\/v1\/(?!rpc\/increment_user_usage)[a-z_]+',\s*\{\s*method:\s*'POST/.test(out));
+  ok('FASE 24.2: cuotas reales activas (checkQuota + guard + recordUsage + RPC + freeLimit 3 + caché FC_CLOUD_USAGE_V1)',
+     out.includes('checkQuota') && out.includes('fc_create') && out.includes('.guard(') && out.includes('recordUsage')
+     && out.includes('increment_user_usage') && /freeLimit:\s*3/.test(out) && out.includes('FC_CLOUD_USAGE_V1'));
+  ok('FASE 24.2: sin sistemas comerciales paralelos (no localQuota/fakeQuota/fcPlans/fcUsers/fcLicenses)',
+     !/localQuota|fakeQuota|fcPlans|fcUsers|fcLicenses/.test(out));
 
   const failed = chk.filter(c => !c.ok);
   chk.forEach(c => console.log((c.ok ? 'PASS' : 'FAIL') + ' · ' + c.n + (c.info ? '  [' + c.info + ']' : '')));
