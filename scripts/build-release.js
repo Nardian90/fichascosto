@@ -25,8 +25,8 @@ const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'FC.html');
 const OUT = path.join(ROOT, 'release', 'FC.release.html');
 const DOCS = path.join(ROOT, 'docs', 'release');
-const VERSION = '12.9.0';
-const PHASE = 'FASE 24.5 · G3-D1 + PWA — fix de revalidación online (sesión muerta con estado online tras revocar refresh), PWA progresiva: manifest.webmanifest + sw.js (allowlist, Supabase NETWORK ONLY) + install UX con kill switch APP_CONFIG.pwa.enabled; 0 DDL; motor intocado';
+const VERSION = '12.10.0';
+const PHASE = 'FASE 24.6-1 · Supabase como única fuente de verdad comercial (profiles.plan: pro/enterprise = Premium, whitelist estricta; retirado el sistema de licencias locales y todo material de firma del release) + guard RLS/trigger en profiles contra auto-elección de plan/role + importación universal de fichas JSON (formato costpro-ficha 1.0: drag&drop, validación, vista previa, duplicados, migración 1..4) + exportación Excel Premium (XLSX sin dependencias desde el resultado canónico de computeFicha) + corrección D1: el chip de instalación PWA ya no sale en el PDF impreso';
 
 function loadToolchain() {
   const tries = [
@@ -114,6 +114,22 @@ const md5 = s => crypto.createHash('md5').update(s).digest('hex');
   ok('Landing accesible desde el Login (auLanding)', (out.match(/auLanding/g) || []).length >= 2);
   ok('SIN SECRETOS (patrones github_pat_/ghp_/gho_/sk-ant-/clave privada)',
      !/github_pat_|ghp_[A-Za-z0-9]|gho_[A-Za-z0-9]|sk-ant-|-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(out));
+  /* ---- FASE 24.6-1: retirada total del sistema de licencias locales (autoridad = profiles.plan) ---- */
+  ok('FASE 24.6-1: sin material de licencias locales (sin _sk/makeLicense/FC_LICENSE_PUBKEY/fclicense/ECDSA/P-256)',
+     !/FC_LICENSE_PUBKEY|makeLicense|_skJwk|_skPass|\.fclicense|ECDSA|P-256/.test(out) && !/var Lic\s*=/.test(out));
+  ok('FASE 24.6-1: autoridad comercial = profiles.plan (whitelist isPremiumPlan: solo pro/enterprise)',
+     out.includes('isPremiumPlan') && /"pro"===[A-Za-z_$][A-Za-z0-9_$]*\|\|"enterprise"===[A-Za-z_$][A-Za-z0-9_$]*|plan==='pro'\|\|plan==='enterprise'/.test(out)
+     && out.includes('/rest/v1/profiles'));
+  ok('FASE 24.6-1: guard anti-escalada documentado (el cliente solo LEE el plan; sin escrituras profiles en el producto)',
+     !/\.from\(['"]profiles|method:\s*['"]POST['"],\s*headers[^)]*Authorization[^)]*profiles/.test(out));
+  ok('FASE 24.6-1: importación JSON universal (formato costpro-ficha versionado + drag&drop + vista previa + duplicados)',
+     out.includes('costpro-ficha') && out.includes('handleImportFile') && out.includes('dropZone') && out.includes('impModal')
+     && out.includes('FC_JSON_VERSION'));
+  ok('FASE 24.6-1: exportación Excel Premium (gate en lógica + builder XLSX desde el resultado canónico)',
+     out.includes('excelPremiumGate') && out.includes('Exportar Excel') && out.includes('premModal')
+     && out.includes('buildXlsxBytes') && out.includes('sheet.main+xml'));
+  ok('FASE 24.6-1: caché de plan SOLO dentro de la sesión cloud (sin autoridad local separada)',
+     out.includes('verifiedAt') && !/FC_PLAN_|FC_PREMIUM_|FC_ENTITLEMENT/.test(out));
   /* ---- FASE 24.2: capa FcCloud (identidad + cuotas reales) ---- */
   ok('FASE 24.2: FcCloud presente (auth + sesión + perfil + plan + cuotas reales)',
      /(var|,)\s*FcCloud\s*=\s*(\(function|function)/.test(out));
@@ -159,6 +175,9 @@ const md5 = s => crypto.createHash('md5').update(s).digest('hex');
      !/skipWaiting|clients\.claim/.test(out));
   ok('FASE 24.5: metadata PWA en head (theme-color + manifest + apple-touch-icon)',
      /<meta name="theme-color" content="[^"]+"/.test(out) && /<link rel="manifest" href="manifest.webmanifest"/.test(out) && /<link rel="apple-touch-icon" href="icons\/icon-192.png"/.test(out));
+  /* ---- FASE 24.6-1 · D1: el chip PWA de instalación NO invade el documento impreso ---- */
+  ok('FASE 24.6-1: D1 — #pwaInstallChip + impModal + premModal excluidos del @media print',
+     /#premModal,#pwaInstallChip,[^{]*\{display:none!important\}/.test(out));
 
   const failed = chk.filter(c => !c.ok);
   chk.forEach(c => console.log((c.ok ? 'PASS' : 'FAIL') + ' · ' + c.n + (c.info ? '  [' + c.info + ']' : '')));
@@ -191,7 +210,7 @@ const md5 = s => crypto.createHash('md5').update(s).digest('hex');
     generator: 'scripts/build-release.js · html-minifier-terser + terser (mangle interno, sin ofuscación extrema)',
     releaseMd5, sourceMd5, releaseEngineHash,
     engineNote: 'engineHash = md5 del slice __ENGINE_START__/__ENGINE_END__ de la FUENTE. En el release el motor está minificado (mangle interno): su md5 difiere por diseño; la identidad funcional DEV≈RELEASE se demuestra por batería de equivalencia.',
-    noSecrets: 'El release contiene únicamente la clave pública de verificación de licencias y la publishable key de Supabase (credencial PÚBLICA de cliente por diseño); sin claves de servicio, sin secretos, sin tokens privados.',
+    noSecrets: 'FASE 24.6-1: el sistema de licencias locales fue retirado — el release NO contiene material de firma (sin _sk, sin makeLicense, sin claves ECDSA) ni ficheros .fclicense. Solo incluye la publishable key de Supabase (credencial PÚBLICA de cliente por diseño); sin claves de servicio, sin secretos, sin tokens privados. El plan comercial se verifica contra public.profiles.plan (Supabase).',
     distribution: 'El archivo para clientes es exclusivamente FC.release.html; FC.html queda para desarrollo y auditoría.'
   };
   fs.writeFileSync(path.join(ROOT, 'release', 'release-manifest.json'), JSON.stringify(manifest, null, 2) + '\n', 'utf8');

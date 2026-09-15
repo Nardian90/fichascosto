@@ -578,7 +578,7 @@ table.data{width:100%;border-collapse:collapse;font-size:13px}
 
 [hidden]{display:none!important}
 /* ============================================================
-   FASE 8 — AUTH · LICENCIA · ADMIN · CENTRO DE AYUDA
+   FASE 8 — AUTH · PLAN (24.6-1) · CENTRO DE AYUDA
    Misma familia de tokens, radios y sombras del sistema.
    ============================================================ */
 /* ---------- Puerta de acceso (login / activación) ---------- */
@@ -610,7 +610,7 @@ body.gated #app,body.gated #toasts{visibility:hidden}
 .gate-lic h1{font-size:18.5px;text-align:center;margin:2px 0 8px}
 .gate-note{font-size:12px;color:var(--muted);line-height:1.65;margin:12px 0 0;text-align:center}
 .gate-clockwarn{background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--text);border-radius:9px;padding:9px 11px;font-size:12.5px;margin:0 0 14px;line-height:1.55}
-/* ---------- Indicador de licencia ---------- */
+/* ---------- Indicador del estado comercial (plan) ---------- */
 .st-lic{display:inline-flex;align-items:center;gap:5px;font-weight:650;cursor:pointer;color:var(--ok)}
 .st-lic.warn{color:var(--warn)}
 .licchip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:650;color:var(--ok);background:var(--ok-soft);border:1px solid var(--ok-line);border-radius:999px;padding:4px 11px;min-height:26px;cursor:pointer}
@@ -722,7 +722,7 @@ body[data-view="ayuda"] main{max-width:1180px;margin:0 auto;padding:18px 16px ca
 /* --- FASE 23 · Modal de actualizaciones (mismo lenguaje .cm-* de la app).
      z-index 210 > .gate (200): el aviso de actualización —incluida la
      obligatoria— debe ser visible e interactuable también en la puerta de
-     sesión (login/licencia), no solo dentro de la aplicación. --- */
+     sesión (login/plan), no solo dentro de la aplicación. --- */
 #vmModal{position:fixed;inset:0;z-index:210;display:none;align-items:center;justify-content:center;padding:16px}
 #vmModal.open{display:flex}
 #vmModal .cm-msg{margin:11px 0 16px;line-height:1.7}
@@ -749,7 +749,7 @@ body[data-view="ayuda"] main{max-width:1180px;margin:0 auto;padding:18px 16px ca
   .help-art{padding:16px 14px 18px}
   .adm-kv{grid-template-columns:1fr auto;font-size:12.5px}
 }
-/* ---------- Modo gateadmin: Admin sin licencia activa ---------- */
+/* ---------- Modo gateadmin (histórico FASE 17: ya no se aplica desde 24.6-1) ---------- */
 body.gateadmin .appbar-actions .btn[data-btn="verFichas"],
 body.gateadmin .appbar-actions .btn[data-btn="pdfpreview"],
 body.gateadmin .appbar-actions .btn[data-btn="nueva"],
@@ -920,10 +920,25 @@ body,.appbar,.statusbar,.tabs,.panel,.kpi,.btn,.ibtn,.drawer,.cfgrow,.tblwrap,.d
 @page{size:A4;margin:14mm 12mm 16mm}
 @media print{
   html,body{background:#fff!important}
-  #app,#toasts,#drawerWrap,#pdfModal,#pdfMeasurer,#confirmModal,#ruleModal,#desgModal,#ejModal,#obModal,#authScreen,#licScreen,#helpQuickModal,#vmModal,#sec-admin,#sec-ayuda{display:none!important}
+  #app,#toasts,#drawerWrap,#pdfModal,#pdfMeasurer,#confirmModal,#ruleModal,#desgModal,#ejModal,#obModal,#authScreen,#helpQuickModal,#vmModal,#sec-ayuda,#impModal,#premModal,#pwaInstallChip{display:none!important}
   #printArea{display:block!important;padding:0;margin:0}
   #printArea .pdoc{width:auto;margin:0}
 }
+
+/* ---------- FASE 24.6-1 · Importación JSON (zona de arrastre + modales) ---------- */
+#dropZone{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;
+  background:rgba(9,16,26,.55);backdrop-filter:blur(2px);pointer-events:none}
+#dropZone .dz-card{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;
+  background:var(--surface);color:var(--ink);border:2.5px dashed var(--accent);border-radius:18px;
+  padding:38px 46px;box-shadow:0 10px 34px rgba(9,63,102,.35);max-width:min(92vw,440px)}
+#dropZone .dz-card .ic{color:var(--accent)}
+#dropZone .dz-card b{font-size:17px}
+#dropZone .dz-card p{margin:0;color:var(--muted);font-size:13.5px}
+#impModal .kv-import{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:10px 0;text-align:left}
+#impModal .kv-import dt{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px;align-self:center}
+#impModal .kv-import dd{margin:0;font-weight:700;font-size:13.5px;word-break:break-word}
+#impModal .imp-warn{background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--warn);
+  border-radius:10px;padding:8px 12px;font-size:12.5px;margin-top:10px}
 
 /* ============================================================
    FASE 7 · Centro de Fichas · Editor de regla · Onboarding
@@ -1289,7 +1304,7 @@ body[data-view="cuenta"] main{max-width:980px;margin:0 auto;padding:18px 16px ca
 #landing[hidden]{display:none}
 body.landing-open{overflow:hidden}
 body.landing-open #app, body.landing-open #toasts,
-body.landing-open #authScreen, body.landing-open #licScreen,
+body.landing-open #authScreen,
 body.landing-open .skip{visibility:hidden}
 #landing :focus-visible{outline:2.5px solid var(--focus); outline-offset:2px; border-radius:4px}
 .lp-skip{position:absolute; left:12px; top:-48px; z-index:30; background:var(--accent); color:var(--accent-contrast);
@@ -1613,14 +1628,32 @@ body.landing-open .skip{visibility:hidden}
   </div>
 </div>
 
-<!-- ============ FASE 8 · Activación de la licencia ============ -->
-<div id="licScreen" class="gate" role="dialog" aria-modal="true" aria-labelledby="lcTitle" hidden>
-  <div class="gate-card gate-lic">
-    <div class="gate-brand"><span class="gate-mark sm" aria-hidden="true"><b>FC</b></span></div>
-    <h1 id="lcTitle">Activar licencia Premium</h1>
-    <div id="lcBody"></div>
-    <p class="gate-foot"><span class="gate-support">¿Problemas para activar? <a id="gateWa2" target="_blank" rel="noopener noreferrer" href="#">Contactar soporte</a></span></p>
+<!-- ============ FASE 24.6-1 · Importación universal de Fichas (JSON) ============ -->
+<div id="impModal" role="dialog" aria-modal="true" aria-labelledby="impTitleTxt" hidden>
+  <div class="cm-back" data-btn="impCancel"></div>
+  <div class="cm-win">
+    <h2 class="cm-title" id="impTitle"><span class="ic" data-icon="upload"></span><span id="impTitleTxt">Importar ficha</span></h2>
+    <div class="cm-msg" id="impBody"></div>
+    <div class="cm-actions" id="impActions"></div>
   </div>
+</div>
+
+<!-- ============ FASE 24.6-1 · Exportación Excel (Premium) ============ -->
+<div id="premModal" role="dialog" aria-modal="true" aria-labelledby="premTitleTxt" hidden>
+  <div class="cm-back" data-btn="premClose"></div>
+  <div class="cm-win">
+    <h2 class="cm-title" id="premTitle"><span class="ic" data-icon="badge"></span><span id="premTitleTxt">Exportación Excel</span></h2>
+    <div class="cm-msg" id="premBody"><p>La exportación a Excel está disponible en <b>COSTPRO Premium</b> (planes <b>Pro</b> y <b>Enterprise</b> de la cuenta COSTPRO). Tu plan se verifica con tu cuenta: puedes actualizarlo desde el panel COSTPRO.</p></div>
+    <div class="cm-actions">
+      <button class="btn" data-btn="premClose">Cancelar</button>
+      <button class="btn primary" data-btn="premGo"><span class="ic" data-icon="user" data-sz="15"></span>Ver Premium</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FASE 24.6-1 · Zona de arrastre de JSON ============ -->
+<div id="dropZone" aria-hidden="true" hidden>
+  <div class="dz-card"><span class="ic" data-icon="upload" data-sz="30"></span><b>Importar ficha JSON</b><p>Suelta la ficha aquí</p></div>
 </div>
 
 <!-- ============ FASE 8 · Ayuda contextual (modal rápido) ============ -->
@@ -1795,7 +1828,7 @@ body.landing-open .skip{visibility:hidden}
           <li><span class="ic" data-icon="check" data-sz="15"></span>Tus datos permanecen en tu equipo.</li>
           <li><span class="ic" data-icon="check" data-sz="15"></span>Continúas editando, calculando y consultando.</li>
         </ul>
-        <p class="lp-up">Solo determinadas características comerciales, como retirar la identificación de COSTPRO de los documentos, pueden requerir una <b>licencia Premium</b> — activable cuando tú lo decidas.</p>
+        <p class="lp-up">Las capacidades Premium —exportar a Excel y generar documentos sin la identificación de COSTPRO— vienen con los planes <b>Pro</b> y <b>Enterprise</b> de tu cuenta COSTPRO.</p>
       </div>
     </div>
   </section>
@@ -1866,6 +1899,7 @@ body.landing-open .skip{visibility:hidden}
             <div class="menu-head">Importar / Exportar</div>
             <button class="menu-item" role="menuitem" data-btn="importar" aria-label="Importar ficha desde archivo JSON"><span class="ic" data-icon="upload"></span>Importar JSON…</button>
             <button class="menu-item" role="menuitem" data-btn="expjson" aria-label="Exportar ficha completa en JSON auditable"><span class="ic" data-icon="braces"></span>Exportar JSON</button>
+            <button class="menu-item" role="menuitem" data-btn="expexcel" aria-label="Exportar ficha a Excel (Premium)"><span class="ic" data-icon="table"></span>Exportar Excel</button>
             <button class="menu-item" role="menuitem" data-btn="expcsv" aria-label="Exportar vista comparativa en CSV"><span class="ic" data-icon="table"></span>Exportar CSV</button>
           </div>
         </div>
@@ -1875,12 +1909,11 @@ body.landing-open .skip{visibility:hidden}
           <button class="segbtn" data-btn="themeDark" title="Tema oscuro" aria-label="Usar tema oscuro"><span class="ic" data-icon="moon"></span></button>
         </div>
         <button class="btn" data-btn="ayuda" title="Centro de Ayuda" aria-label="Centro de Ayuda"><span class="ic" data-icon="helpq"></span><span class="bl">Ayuda</span></button>
-        <button class="btn" data-btn="admin" id="btnAdmin" title="Administración" aria-label="Administración" hidden><span class="ic" data-icon="shield"></span><span class="bl">Admin</span></button>
         <div class="menuwrap" id="userWrap" hidden>
           <button class="btn" data-btn="userMenu" aria-haspopup="true" aria-expanded="false" title="Sesión de usuario" aria-label="Sesión de usuario"><span class="ic" data-icon="user"></span><span class="bl" id="userChipName">Usuario</span></button>
           <div class="menu" id="userMenu" hidden role="menu" aria-label="Sesión">
             <button class="menu-item" role="menuitem" data-btn="cuenta" aria-label="Abrir Mi cuenta"><span class="ic" data-icon="user"></span>Mi cuenta</button>
-            <button class="menu-item" role="menuitem" data-btn="cuentaPlan" aria-label="Ver plan y licencia"><span class="ic" data-icon="badge"></span>Plan y licencia</button>
+            <button class="menu-item" role="menuitem" data-btn="cuentaPlan" aria-label="Ver plan y cuenta"><span class="ic" data-icon="badge"></span>Plan y cuenta</button>
             <button class="menu-item" role="menuitem" data-btn="cloudCuenta" aria-label="Cuenta en la nube"><span class="ic" data-icon="cloud"></span>Cuenta en la nube<span class="gcc-chip" id="umCloudChip" hidden></span></button>
             <button class="menu-item" role="menuitem" data-btn="cuentaCafe" aria-label="Apoyar COSTPRO"><span class="ic" data-icon="coffee"></span>Apoya COSTPRO</button>
             <hr class="menu-sep">
@@ -1905,7 +1938,6 @@ body.landing-open .skip{visibility:hidden}
 
   <main id="main">
     <section id="sec-fichas" class="sec" role="tabpanel" aria-label="Centro de Fichas"></section>
-    <section id="sec-admin" class="sec" role="tabpanel" aria-label="Administración"></section>
     <section id="sec-ayuda" class="sec" role="tabpanel" aria-label="Centro de Ayuda"></section>
     <section id="sec-cuenta" class="sec" role="tabpanel" aria-label="Mi cuenta"></section>
     <section id="sec-datos" class="sec" role="tabpanel"></section>
@@ -3965,8 +3997,6 @@ function applySessionUI(){
   var wrap = document.getElementById('userWrap');
   if(chip && s) chip.textContent = s.guest ? 'Invitado' : s.user;
   if(wrap) wrap.hidden = !s;
-  var ab = document.getElementById('btnAdmin');
-  if(ab) ab.hidden = !(s && s.role === 'admin');
 }
 /* --- Pantalla de acceso (FASE 17): sesión, registro o invitado --- */
 var _auMode = 'in';   /* 'in' = iniciar sesión · 'up' = crear cuenta */
@@ -4064,152 +4094,41 @@ function bindAuthUI(){
 }
 
 /* =====================================================================
-   FASE 8 · LICENSE — Activación offline de 100 días.
-   Modelo: licencia firmada (ECDSA P-256 + SHA-256) vinculada a la
-   instalación. La validez SIEMPRE se rederiva al cargar:
-   firma → producto → instalación → fechas → reloj (lastSeen monótono).
-   Nunca se confía en una bandera "licenseValid" almacenada.
+   FASE 24.6-1 · AUTORIDAD COMERCIAL = public.profiles.plan (Supabase)
+   ---------------------------------------------------------------------
+   El sistema de licencias locales (.fclicense / ECDSA / clave de firma /
+   generador) fue RETIRADO del producto en esta fase: ya no existen
+   ficheros de activación, ni material criptográfico de firma, ni
+   verificación local como fuente comercial.
+   Regla canónica para usuarios autenticados (FcCloud lee profiles.plan
+   con el token del usuario; el cliente NO puede escribirlo — RLS +
+   trigger de guard en el servidor):
+       profiles.plan = 'pro'        → PREMIUM
+       profiles.plan = 'enterprise' → PREMIUM
+       'free' / null / valor desconocido → FREE (estado seguro: jamás se
+       interpreta un valor desconocido como Premium — whitelist estricta)
+   Guest sigue siendo Guest y NO consulta profiles.plan.
    ===================================================================== */
-var INSTALL_KEY = 'FC_INSTALL_V1', LIC_KEY = 'FC_LICENSE_V1', LICWARN_KEY = 'FC_LICWARN_V1';
 var DAY_MS = 86400000, CLOCK_TOL = 120000;
-var FC_LICENSE_PUBKEY = {"key_ops":["verify"],"ext":true,"kty":"EC","x":"dE7m_OiifuJwVjL5p55vOJGozSqr7Uwt_mMMP_gM5zI","y":"W9RydsENC_Ui_sKbtgFA1rN12UBun-0SjDKXGIr0YzY","crv":"P-256"};
-/* Clave de firma: cifrada (PBKDF2+XOR) como barrera contra lectura casual.
-   NOTA HONESTA: en un HTML offline nada es secreto frente a un análisis
-   técnico; la vía recomendada para máxima seguridad es el generador
-   externo FC-LicenseGen.html (clave privada fuera del HTML distribuido). */
-var _sk = { s:'KXeltGZLfWbofARfn6Mi/w==', i:20000, d:'36CE6TxuA4SAsDcLpliGIFx/r7e68TwYz6+h63zz+IF+mFotMwQUpd1MB5t/yzhhFsw29Xk0uFGrgdnJ1K6iWwEkBsRsToYrWDUQaLeyVPmQxqxiWD4S6MAGqAHpJe3P6Ni3pE07sBrgsf/NrdPXJzAUY+nbjCIHpN5TrvzA5mp9s0Ks8LDv03tltubMz8gJ928fsy2MLPjnyIxp5eMhX/gVmn+w35s8oRv6M3Pe+RtR0Hq3KxKCUkyZiECLi+V1p7CmLvV6ExN533baHHY=' };
-function _skPass(){ return ['fc','lic','ense','sig','ner','v1'].join('.'); }
-var _skCache = null;
-async function _skJwk(){
-  if(_skCache) return _skCache;
-  var enc = b64ToBytes(_sk.d);
-  var km = await crypto.subtle.importKey('raw', te(_skPass()), 'PBKDF2', false, ['deriveBits']);
-  var ks = new Uint8Array(await crypto.subtle.deriveBits({ name:'PBKDF2', hash:'SHA-256', salt:b64ToBytes(_sk.s), iterations:_sk.i }, km, enc.length * 8));
-  var out = new Uint8Array(enc.length);
-  for(var i = 0; i < enc.length; i++) out[i] = enc[i] ^ ks[i];
-  _skCache = JSON.parse(new TextDecoder().decode(out));
-  return _skCache;
+function isPremiumPlan(plan){
+  return plan === 'pro' || plan === 'enterprise';
 }
-var Lic = {
-  initInstall: function(){
-    try{
-      var raw = JSON.parse(localStorage.getItem(INSTALL_KEY) || 'null');
-      if(raw && raw.installationId) return raw;
-    }catch(e){}
-    var rec = { installationId: fcUuid(), createdAt: new Date().toISOString() };
-    try{ localStorage.setItem(INSTALL_KEY, JSON.stringify(rec)); }catch(e){}
-    return rec;
-  },
-  installId: function(){ return this.initInstall().installationId; },
-  load: function(){
-    try{
-      var raw = JSON.parse(localStorage.getItem(LIC_KEY) || 'null');
-      if(raw && raw.record) return raw;
-    }catch(e){}
-    return null;
-  },
-  save: function(st){ try{ localStorage.setItem(LIC_KEY, JSON.stringify(st)); }catch(e){} },
-  canonical: function(p){
-    return JSON.stringify({ schema:p.schema, licenseId:p.licenseId, installationId:p.installationId, product:p.product, issuedAt:p.issuedAt, expiresAt:p.expiresAt, days:p.days });
-  },
-  verifySig: async function(rec){
-    if(!rec || typeof rec.signature !== 'string' || !rec.signature) return false;
-    var key = await crypto.subtle.importKey('jwk', FC_LICENSE_PUBKEY, { name:'ECDSA', namedCurve:'P-256' }, false, ['verify']);
-    return crypto.subtle.verify({ name:'ECDSA', hash:'SHA-256' }, key, b64ToBytes(rec.signature), te(this.canonical(rec)));
-  },
-  /* Genera y firma una licencia (primitiva del generador Admin / herramienta externa). */
-  makeLicense: async function(installationId, days, issuedMs){
-    var issued = (issuedMs == null) ? Date.now() : issuedMs;
-    var d = Math.max(1, Math.min(3650, Math.round(+days || 100)));
-    var payload = { schema:1, licenseId:fcUuid(), installationId:String(installationId), product:'FC',
-      issuedAt:new Date(issued).toISOString(), expiresAt:new Date(issued + d * DAY_MS).toISOString(), days:d };
-    var jwk = await _skJwk();
-    var key = await crypto.subtle.importKey('jwk', jwk, { name:'ECDSA', namedCurve:'P-256' }, false, ['sign']);
-    var sig = await crypto.subtle.sign({ name:'ECDSA', hash:'SHA-256' }, key, te(this.canonical(payload)));
-    payload.signature = bytesToB64(new Uint8Array(sig));
-    return payload;
-  },
-  /* Validación completa del registro almacenado o importado. */
-  evaluate: async function(){
-    var st = this.load();
-    if(!st || !st.record) return { status:'none' };
-    var sigOk = false;
-    try{ sigOk = await this.verifySig(st.record); }catch(e){ sigOk = false; }
-    if(!sigOk) return { status:'invalid', reason:'firma' };
-    if(st.record.product !== 'FC') return { status:'invalid', reason:'producto' };
-    if(st.record.installationId !== this.installId()) return { status:'invalid', reason:'instalacion' };
-    var exp = Date.parse(st.record.expiresAt);
-    if(!isFinite(exp)) return { status:'invalid', reason:'formato' };
-    var now = Date.now();
-    var last = st.lastSeenAt ? (Date.parse(st.lastSeenAt) || 0) : 0;
-    var rolled = last > 0 && now < last - CLOCK_TOL;
-    var eff = Math.max(now, last);
-    if(eff >= exp) return { status:'expired', clock:rolled };
-    var daysLeft = Math.max(1, Math.ceil((exp - eff) / DAY_MS));
-    return { status:'valid', daysLeft:daysLeft, clock:rolled, expiresAt:st.record.expiresAt, activatedAt:st.activatedAt, licenseId:st.record.licenseId };
-  },
-  /* Reloj monótono: lastSeen nunca retrocede → retroceder el reloj no alarga la licencia. */
-  touch: function(){
-    var st = this.load();
-    if(!st) return;
-    var now = Date.now();
-    var last = st.lastSeenAt ? (Date.parse(st.lastSeenAt) || 0) : 0;
-    if(now > last){
-      st.lastSeenAt = new Date(now).toISOString();
-      this.save(st);
-    }
-  },
-  importRecord: async function(rec){
-    if(!rec || typeof rec !== 'object') return { ok:false, error:'formato' };
-    if(rec.schema !== 1 || typeof rec.licenseId !== 'string' || typeof rec.installationId !== 'string') return { ok:false, error:'formato' };
-    var sigOk = false;
-    try{ sigOk = await this.verifySig(rec); }catch(e){ sigOk = false; }
-    if(!sigOk) return { ok:false, error:'firma' };
-    if(rec.product !== 'FC') return { ok:false, error:'producto' };
-    if(rec.installationId !== this.installId()) return { ok:false, error:'instalacion' };
-    var exp = Date.parse(rec.expiresAt);
-    if(!isFinite(exp)) return { ok:false, error:'formato' };
-    if(exp <= Date.now()) return { ok:false, error:'expirado' };
-    var st = this.load() || { history:[] };
-    st.record = rec;
-    st.activatedAt = new Date().toISOString();
-    st.lastSeenAt = st.activatedAt;
-    st.rollbacks = 0;
-    st.history = (st.history || []);
-    st.history.unshift({ licenseId:rec.licenseId, activatedAt:st.activatedAt, expiresAt:rec.expiresAt });
-    st.history = st.history.slice(0, 8);
-    this.save(st);
-    try{ localStorage.removeItem(LICWARN_KEY); }catch(e){}
-    var v = await this.evaluate();
-    return { ok:true, state:v };
-  },
-  errorHuman: function(code){
-    switch(code){
-      case 'firma': return 'El fichero de activación no es válido o fue modificado. Solicita un nuevo fichero de activación.';
-      case 'producto': return 'Este fichero de activación no corresponde a esta aplicación. Comprueba que el archivo es para FC — Ficha de Costos.';
-      case 'instalacion': return 'Esta activación pertenece a otra instalación. Genera un fichero para el identificador de esta instalación.';
-      case 'expirado': return 'El fichero de activación ha expirado. Solicita un fichero con fecha vigente.';
-      default: return 'No se pudo validar la activación. Comprueba que el archivo corresponde a esta aplicación.';
-    }
-  },
-  stateHuman: function(st){
-    if(st.status === 'expired') return 'El período de activación de esta instalación ha finalizado.';
-    if(st.status === 'invalid') return this.errorHuman(st.reason);
-    return '';
-  },
-  fmtDate: function(iso){
-    var d = Date.parse(iso);
-    if(!isFinite(d)) return '—';
-    return new Date(d).toLocaleDateString('es-CU', { day:'2-digit', month:'2-digit', year:'numeric' });
-  }
-};
+/* Fecha corta es-CU para superficies de cuenta/plan. */
+function fmtDateEs(iso){
+  var d = Date.parse(iso);
+  if(!isFinite(d)) return '—';
+  return new Date(d).toLocaleDateString('es-CU', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+/* (FASE 24.6-1: módulo Lic retirado completo — sin clave pública, sin _sk,
+   sin makeLicense, sin importación de licencias. Su función fmtDate vive
+   como fmtDateEs; el estado comercial vive SOLO en Com + profiles.plan.) */
 /* =====================================================================
-   FASE 17 · MODELO COMERCIAL FREE + PREMIUM
-   Filosofía: COSTPRO continúa siendo útil gratuitamente. La licencia
-   Premium elimina las restricciones comerciales de salida (marca de
-   agua y pie en los PDF) y financia el desarrollo. La aplicación NUNCA
-   se bloquea: el núcleo contable, la edición, el cálculo y los datos
-   permanecen intactos en todos los estados.
+   FASE 17 · MODELO COMERCIAL FREE + PREMIUM (autoridad: profiles.plan)
+   Filosofía: COSTPRO continúa siendo útil gratuitamente. El plan
+   Premium (pro/enterprise) elimina las restricciones comerciales de
+   salida (marca de agua y pie en los PDF) y añade exportación Excel.
+   La aplicación NUNCA se bloquea: el núcleo contable, la edición, el
+   cálculo y los datos permanecen intactos en todos los estados.
 
    Configuración centralizada: la URL oficial del sitio vive SOLO aquí.
    ===================================================================== */
@@ -4400,18 +4319,31 @@ var FcCloud = (function(){
         var ns = { v: 1, access_token: res.j.access_token, refresh_token: res.j.refresh_token || sess.refresh_token,
                    expires_at: Date.now() + ((res.j.expires_in || 3600) * 1000),
                    user: { id: (res.j.user && res.j.user.id) || sess.user.id, email: (res.j.user && res.j.user.email) || sess.user.email },
-                   obtainedAt: new Date().toISOString() };
+                   obtainedAt: new Date().toISOString(),
+                   profile: sess.profile || null };
         lsSave(ns);
         return ns;
       });
   }
   function loadProfileOf(sess){
     return readProfile(sess).then(function(r){
+      var plan = (r && r.profile && r.profile.plan) ? r.profile.plan : null;
       setState({ status:'online', user: sess.user,
                  profile: r && r.profile ? r.profile : null,
                  tenant: r && r.tenant ? r.tenant : null,
-                 plan: (r && r.profile && r.profile.plan) ? r.profile.plan : null,
+                 plan: plan,
                  expiresAt: sess.expires_at || jwtExp(sess.access_token) });
+      /* FASE 24.6-1 · caché del plan DENTRO del registro de sesión cloud
+         (misma clave FC_CLOUD_SESSION_V1, sin autoridad local separada).
+         Se sobrescribe en CADA lectura exitosa de profiles y solo vive
+         mientras exista la sesión: con logout/expiración desaparece. Sirve
+         para continuidad offline (Premium ya verificado sigue viéndose
+         premium); cualquier revalidación en línea lo corrige. */
+      var s = lsLoad();
+      if(s){
+        s.profile = { plan: plan, verifiedAt: new Date().toISOString() };
+        lsSave(s);
+      }
       refreshUsage(sess).catch(function(){});  /* FASE 24.2: uso del día (fire-and-forget, fail-open) */
     });
   }
@@ -4437,7 +4369,7 @@ var FcCloud = (function(){
     var ready = (exp && (exp - Date.now()) > 60000) ? Promise.resolve(sess) : refreshSession(sess);
     return ready.then(function(s2){ return loadProfileOf(s2); }).catch(function(e){
       if(String(e && e.message) === 'refresh_denegado'){ lsClear(); setState({ status:'expirada', user: sess.user }); }
-      else { setState({ status:'offline', user: sess.user }); }  /* sin red: identidad cacheada, núcleo intacto */
+      else { setState({ status:'offline', user: sess.user, plan: (sess.profile && sess.profile.plan) || null }); }  /* sin red: identidad + plan cacheados DE LA SESIÓN, núcleo intacto */
       return clone(state);
     });
   }
@@ -4781,7 +4713,7 @@ var FcCloud = (function(){
         (p.role ? '<dt>Rol en COSTPRO</dt><dd>' + escapeHtml(String(p.role)) + '</dd>' : '') +
         (state.tenant ? '<dt>Organización</dt><dd>' + escapeHtml(String(state.tenant.name || state.tenant.id)) +
           (state.tenant.plan ? ' · plan ' + escapeHtml(String(state.tenant.plan)) : '') +
-          ((state.tenant.subscription_status === 'trial' && state.tenant.trial_ends_at) ? ' · prueba hasta ' + escapeHtml(Lic.fmtDate(state.tenant.trial_ends_at)) : '') + '</dd>' : '') +
+          ((state.tenant.subscription_status === 'trial' && state.tenant.trial_ends_at) ? ' · prueba hasta ' + escapeHtml(fmtDateEs(state.tenant.trial_ends_at)) : '') + '</dd>' : '') +
         '<dt>Cloud Fichas</dt><dd id="cuSheetsState">' + escapeHtml((typeof FcSheets !== 'undefined') ? FcSheets.statusText() : '—') + '</dd>' +
         '</dl>' +
         '<div class="cu-act"><button class="btn" data-btn="cloudSyncNow">' + icon('upload', 15) + 'Sincronizar ahora</button><button class="btn primary" data-btn="cloudSignOut">' + icon('logout', 15) + 'Desconectar cuenta</button></div>' +
@@ -4812,8 +4744,15 @@ var FcCloud = (function(){
     return h;
   }
 
+  /* FASE 24.6-1: revalidación del plan (profiles.plan) con la sesión viva.
+     Sin sesión, sin red o con sesión expirada: no hace nada (caché válida). */
+  function refreshPlan(){
+    return ensureSession().then(function(s2){ return loadProfileOf(s2); })
+      .catch(function(){ /* offline/expirada: el estado queda como está */ });
+  }
+
   return {
-    init: init, signIn: signIn, signUp: signUp, ensureSession: ensureSession, signOut: signOut,
+    init: init, signIn: signIn, signUp: signUp, ensureSession: ensureSession, signOut: signOut, refreshPlan: refreshPlan,
     toggleAuthBox: toggleAuthBox, signInFromAuthScreen: signInFromAuthScreen, signInFromCuenta: signInFromCuenta,
     cuentaCard: cuentaCard, checkQuota: checkQuota, onChange: onChange,
     guard: guard, recordUsage: recordUsage, refreshUsage: refreshUsage, usageSnapshot: function(){ return clone(usage); }, isUnlimited: isUnlimited,
@@ -5239,7 +5178,7 @@ var Vmgr = {
         '<dl class="vm-dl"><div><dt>Versión instalada</dt><dd>' + escapeHtml(local) + '</dd></div>' +
         '<div><dt>Versión disponible</dt><dd>' + escapeHtml(latest) + '</dd></div>' +
         '<div><dt>Versión requerida</dt><dd>' + escapeHtml(this.rec().minimum || '') + '</dd></div></dl>' +
-        '<p>Descarga la versión oficial y abre el archivo actualizado. Tus fichas, configuración, preferencias y licencia permanecen intactas en este navegador.</p>'
+        '<p>Descarga la versión oficial y abre el archivo actualizado. Tus fichas, configuración, preferencias y el plan de tu cuenta permanecen intactos en este navegador.</p>'
       : '<p><b>COSTPRO ' + escapeHtml(latest) + '</b> está disponible.</p>' +
         '<dl class="vm-dl"><div><dt>Versión instalada</dt><dd>' + escapeHtml(local) + '</dd></div>' +
         '<div><dt>Versión disponible</dt><dd>' + escapeHtml(latest) + '</dd></div></dl>' +
@@ -5349,7 +5288,12 @@ var TrustedClock = {
 
 /* ---------------- Com (CommercialState / EntitlementService) ----------------
    ÚNICO servicio que consulta el estado comercial. La UI nunca evalúa
-   "días > 30" por su cuenta: pregunta por Com.state / Com.branding().
+   días ni planes por su cuenta: pregunta por Com.state / Com.branding() /
+   Com.isPremium().
+   FASE 24.6-1 · fuente de verdad: public.profiles.plan (Supabase) para
+   usuarios autenticados. PREMIUM ⇔ plan 'pro' | 'enterprise' (whitelist);
+   'free'/null/desconocido → FREE (reloj de bienvenida local como
+   experiencia Free: nunca concede autoridad, solo la retira).
    Estados: guest · free_trial · free_expired · premium.
    Registro anti-retroceso por cuenta: firstSeenAt, lastTrustedAt,
    lastSeenAt (monótono). El objetivo es impedir la manipulación trivial
@@ -5386,23 +5330,27 @@ var Com = {
       this.save(store);
     }
   },
-  /* Evaluación completa del estado comercial (siempre rederivada). */
+  /* Evaluación completa del estado comercial (siempre rederivada).
+     FASE 24.6-1: PREMIUM ⇔ profiles.plan ∈ {pro, enterprise}; la licencia
+     local ya no participa. El plan se lee del estado FcCloud (fresado en
+     cada carga de perfil; caché dentro de la sesión cloud mientras no haya
+     red — sin autoridad local separada). */
   evaluate: async function(){
     var sess = Auth.current();
     if(!sess) return null;
     /* Invitado: sin reloj de bienvenida (no hay cuenta); puede usar todo,
-       sus PDF salen con la identificación COSTPRO (restricción de salida). */
+       sus PDF salen con la identificación COSTPRO (restricción de salida).
+       Guest NO consulta profiles.plan. */
     if(sess.guest){
       var g = { state:'guest', watermark:true, footerPromotion:true, inAppPromotion:true,
-                source:null, rolled:false, daysLeft:null, day:null, license:null };
+                source:null, rolled:false, daysLeft:null, day:null, plan:null, license:null };
       App.comState = g;
       return g;
     }
-    var lic = await Lic.evaluate();
-    if(lic.status === 'valid'){
+    var plan = FcCloud.plan();
+    if(isPremiumPlan(plan)){
       var p = { state:'premium', watermark:false, footerPromotion:false, inAppPromotion:false,
-                source:null, rolled:!!lic.clock, daysLeft:lic.daysLeft, day:null,
-                license:{ expiresAt:lic.expiresAt, licenseId:lic.licenseId, activatedAt:lic.activatedAt } };
+                source:null, rolled:false, daysLeft:null, day:null, plan:plan, license:null };
       App.comState = p;
       return p;
     }
@@ -5449,7 +5397,8 @@ var Com = {
       day: day,
       daysLeft: expired ? 0 : Math.max(0, APP_CONFIG.welcomeDays - day),
       firstSeenAt: rec.firstSeenAt,
-      license: (lic && lic.status === 'expired') ? { expired:true } : null
+      plan: plan,
+      license: null
     };
     App.comState = st;
     if(rolled && (lastSeen - nowMs) > 7200000 && !_comRollWarned){
@@ -5468,18 +5417,27 @@ var Com = {
     return { watermark:!!(s && s.watermark), footerPromotion:!!(s && s.footerPromotion), inAppPromotion:!!(s && s.inAppPromotion),
              canUseCustomLogo: st === 'free_trial' || st === 'premium' };
   },
+  /* Entitlement Premium sincrónico (derivado del estado evaluado). */
+  isPremium: function(){
+    var s = App.comState;
+    return !!(s && s.state === 'premium');
+  },
   stateLabel: function(s){
     s = s || App.comState;
     if(!s) return '';
-    if(s.state === 'premium') return 'COSTPRO PREMIUM · Licencia activa';
+    if(s.state === 'premium') return 'COSTPRO PREMIUM · Plan ' + String(s.plan || 'premium').toUpperCase();
     if(s.state === 'guest') return 'Invitado';
     if(s.state === 'free_trial') return 'COSTPRO FREE · Bienvenida · ' + s.daysLeft + ' día' + (s.daysLeft === 1 ? '' : 's') + ' restante' + (s.daysLeft === 1 ? '' : 's');
     return 'COSTPRO FREE · Período de bienvenida finalizado';
   },
-  /* Revalidación: detecta cambios de estado en vivo (día 30 → 31, activación
-     de Premium, fin de licencia) y refresca todas las superficies visibles. */
+  /* Revalidación: detecta cambios de estado en vivo (día 30 → 31, cambio
+     de plan en profiles) y refresca todas las superficies visibles. */
   revalidate: async function(){
     var prev = App.comState ? App.comState.state : null;
+    /* FASE 24.6-1: el plan se revalida contra Supabase (no bloqueante).
+       Online: actualiza profiles.plan y dispara onChange → re-evaluación.
+       Offline: falla en silencio y se conserva la caché de la sesión. */
+    try{ if(typeof FcCloud !== 'undefined' && FcCloud.refreshPlan) FcCloud.refreshPlan(); }catch(e){}
     var st = await this.evaluate();
     if(!st) return null;
     if(prev && prev !== st.state){
@@ -5500,10 +5458,10 @@ var Com = {
 };
 
 /* ---------------- Donaciones (Apoya COSTPRO) ----------------
-   Separación explícita: LICENCIA = beneficios Premium · APOYO = donación
-   voluntaria. Una donación JAMÁS activa Premium, ni desbloquea funciones,
-   ni altera el período de bienvenida. Método real: TRANSFERENCIA, cuyos
-   datos viven únicamente en APP_CONFIG.donations.transfer. */
+   Separación explícita: PLAN (profiles.plan) = beneficios Premium ·
+   APOYO = donación voluntaria. Una donación JAMÁS activa Premium, ni
+   desbloquea funciones, ni altera el período de bienvenida. Método real:
+   TRANSFERENCIA, cuyos datos viven únicamente en APP_CONFIG.donations.transfer. */
 var Donation = {
   hasProviders: function(){ return !!(APP_CONFIG.donations.configured && APP_CONFIG.donations.providers.length); },
   providers: function(){ return APP_CONFIG.donations.providers; },
@@ -5645,106 +5603,18 @@ function logoPanelHtml(){
   return h;
 }
 
-/* --- Importación del fichero .fclicense (delegado: sobrevive a re-render) --- */
-function licPickFile(){
-  var inp = document.getElementById('lcFile');
-  if(inp){ inp.value = ''; inp.click(); }
-}
-async function licHandleFileChange(inp){
-  var f = inp.files && inp.files[0];
-  if(!f) return;
-  var box = document.getElementById('lcErr');
-  if(box){ box.hidden = true; }
-  var text = '';
-  try{ text = await f.text(); }
-  catch(e){ licShowImportError('lectura'); return; }
-  var rec = null;
-  try{ rec = JSON.parse(text); }
-  catch(e){ licShowImportError('lectura'); return; }
-  var r = await Lic.importRecord(rec);
-  if(!r.ok){ licShowImportError(r.error); return; }
-  await licAfterActivation(r.state);
-}
-function licShowImportError(code){
-  var box = document.getElementById('lcErr');
-  if(box){ box.textContent = Lic.errorHuman(code === 'formato' ? 'lectura' : code); box.hidden = false; }
-  else { toast(Lic.errorHuman(code === 'formato' ? 'lectura' : code), 'err'); }
-}
-async function licAfterActivation(st){
-  /* FASE 17: la activación es una mejora, no una condición de entrada.
-     Actualiza el estado comercial en vivo: el watermark desaparece del
-     Preview al instante (paridad Preview = PDF). */
-  document.getElementById('licScreen').hidden = true;
-  document.body.classList.remove('gated');
-  document.body.classList.remove('gateadmin');
-  await Com.revalidate();
-  if(Auth.current() && !Auth.current().guest) Com.firstSeenInit(Auth.current());
-  if(App.ui.view === 'cuenta') renderCuenta();
-  toast('COSTPRO Premium activado. Licencia válida hasta el ' + Lic.fmtDate(st.expiresAt) + '.', 'ok');
-}
+/* --- FASE 24.6-1: la pantalla y los ficheros de activación fueron retirados.
+   Premium ahora se obtiene con el plan de la cuenta COSTPRO (profiles.plan
+   = pro | enterprise) gestionado desde el panel; nada se activa con
+   ficheros locales. --- */
 /* --- Pantalla de activación Premium (FASE 17: voluntaria, no bloqueante).
      Se abre desde Mi cuenta → Activar licencia. La aplicación nunca queda
      retenida aquí: hay botón Volver en todo momento. --- */
 var _licLastState = null;
-async function showLicScreen(){
-  _licLastState = null;
-  document.body.classList.remove('gateadmin');
-  document.body.classList.add('gated');
-  document.getElementById('authScreen').hidden = true;
-  var g = document.getElementById('licScreen');
-  g.hidden = false;
-  var t = document.getElementById('lcTitle');
-  t.textContent = 'Activar licencia Premium';
-  var st = await Lic.evaluate();
-  var h = '';
-  h += '<p class="gate-note" style="margin:0 0 14px">La aplicación continúa funcionando con normalidad. Una licencia Premium elimina la identificación COSTPRO (marca de agua y pie) de los documentos PDF.</p>';
-  if(st.status === 'valid'){
-    h += '<div class="gate-clockwarn" role="status" style="background:var(--ok-soft);border-color:var(--ok-line)">' + icon('check', 15) + ' Ya tienes una licencia activa hasta el ' + Lic.fmtDate(st.expiresAt) + '. Puedes reemplazarla cargando otro fichero.</div>';
-  } else if(st.status === 'invalid'){
-    h += '<div class="gate-err" role="alert">' + escapeHtml(Lic.stateHuman(st)) + '</div>';
-  } else if(st.status === 'expired'){
-    h += '<div class="gate-note" style="margin:0 0 14px">La licencia anterior finalizó el ' + Lic.fmtDate(st.expiresAt) + '.</div>';
-  }
-  h += '<p id="lcErr" class="gate-err" role="alert" hidden></p>';
-  h += '<div class="gate-actions">' +
-    '<button class="btn primary gate-btn" data-btn="lcLoad"><span class="ic" data-icon="upload" data-sz="16"></span>Seleccionar fichero .fclicense</button>' +
-    '<input type="file" id="lcFile" accept=".fclicense,application/json" hidden>' +
-    '<button class="btn gate-btn" data-btn="licBack"><span class="ic" data-icon="chevL" data-sz="16"></span>Volver</button>' +
-    '</div>' +
-    '<p class="gate-note" style="margin:10px 0 0;font-size:11px">Instalación: <b>' + escapeHtml(String(Lic.installId()).slice(0, 8)) + '</b> · indica este identificador al solicitar la licencia.</p>';
-  document.getElementById('lcBody').innerHTML = h;
-  hydrateIcons(document.getElementById('lcBody'));
-}
-function closeLicScreen(){
-  document.getElementById('licScreen').hidden = true;
-  document.body.classList.remove('gated');
-  if(!Auth.current()){ showAuth(); }
-}
-async function licHandleAdminAccess(){
-  /* FASE 17: sin gate de activación, la Administración se abre como vista
-     normal para el rol admin (el generador de licencias vive allí). */
-  if(Auth.role() === 'admin'){
-    document.getElementById('licScreen').hidden = true;
-    document.body.classList.remove('gated');
-    openAdminView(false);
-    return;
-  }
-  toast('La Administración requiere credenciales de administrador.', 'err');
-}
-async function licSkipForAdmin(){
-  /* Compatibilidad con arneses antiguos: sin gate, el administrador entra
-     a la aplicación como cualquier usuario. */
-  var st = await Lic.evaluate();
-  document.getElementById('licScreen').hidden = true;
-  document.body.classList.remove('gated');
-  document.body.classList.remove('gateadmin');
-  if(st.status === 'valid'){ await licEnterApp(st); }
-  else { openAdminView(false); }
-}
 /* --- Entrada a la aplicación (FASE 17: nunca bloqueada). El nombre
-     histórico licEnterApp se conserva: los arneses de pruebas lo invocan. --- */
+     histórico licEnterApp se conserva: los arneses de pruebas lo invocan.
+     FASE 24.6-1: sin pantalla de licencia; la entrada es sesión → app. --- */
 async function licEnterApp(st){
-  document.getElementById('licScreen').hidden = true;
   document.getElementById('authScreen').hidden = true;
   document.body.classList.remove('gated');
   document.body.classList.remove('gateadmin');
@@ -5755,7 +5625,6 @@ async function licEnterApp(st){
   renderFichaSelector();
   showFichas();
   if(!loadOnb().done){ App.ui.obStep = 0; openOb(); }
-  Lic.touch();
 }
 function comChipHtml(){
   var s = App.comState;
@@ -5773,19 +5642,13 @@ function licUpdateUI(st){
   if(c) c.innerHTML = comChipHtml();
   if(renderStatus) renderStatus();
 }
-var LIC_THRESHOLDS = [30, 15, 7, 3];
-function licNotifyThresholds(st){
-  /* FASE 17: sin avisos de vencimiento de activación (ya no existe el
-     modelo de 100 días bloqueantes). El estado se comunica desde la
-     barra de estado y Mi cuenta, con lenguaje no agresivo. */
-}
-/* Revalidación periódica y al volver a la pestaña (FASE 17: delega en Com;
-   la validez de la licencia Premium siempre se rederiva). */
+/* Revalidación periódica y al volver a la pestaña (delega en Com; el plan
+   Premium se rederiva desde profiles.plan en cada revalidación). */
 async function licRevalidate(){
   await Com.revalidate();
 }
-/* --- Entrada: SESIÓN (o invitado) → APLICACIÓN. Sin gate de licencia:
-     la activación Premium es voluntaria y está en Mi cuenta. --- */
+/* --- Entrada: SESIÓN (o invitado) → APLICACIÓN (FASE 24.6-1: sin gate de
+     licencia; el plan Premium vive en la cuenta COSTPRO). --- */
 async function gateEnter(){
   if(!Auth.current()){ applySessionUI(); showAuth(); return; }
   applySessionUI();
@@ -5793,18 +5656,17 @@ async function gateEnter(){
 }
 function doLogout(){
   Auth.logout();
+  FcCloud.signOut();      /* FASE 24.6-1: cerrar sesión = cerrar también la sesión cloud (y su caché de plan) */
   App.comState = null;
-  App.licensed = false;
-  document.getElementById('licScreen').hidden = true;
   showAuth(null, 'in');
 }
 
 /* =====================================================================
-   FASE 17 · MI CUENTA — Perfil · Plan y licencia · Activar licencia ·
-   Apoya COSTPRO · Ayuda. Vista app-level (data-view="cuenta") con el
-   mismo patrón de Administración y Ayuda. El estado se muestra SIEMPRE
-   aquí y en la barra de estado: nadie tiene que adivinar por qué un
-   documento lleva la identificación de COSTPRO.
+   FASE 17 · MI CUENTA — Perfil · Plan y cuenta · Apoya COSTPRO · Ayuda.
+   Vista app-level (data-view="cuenta"). El estado comercial se muestra
+   SIEMPRE aquí y en la barra de estado: nadie tiene que adivinar por
+   qué un documento lleva la identificación de COSTPRO (FASE 24.6-1:
+   Premium = profiles.plan pro/enterprise, sin licencias locales).
    ===================================================================== */
 var PROMO_KEY = 'FC_PROMO_V1';
 function promoLoad(){
@@ -5827,7 +5689,7 @@ function openCuenta(){
 function closeCuenta(){ showFichas(); }
 function planCopy(st){
   if(!st) return '';
-  if(st.state === 'premium') return '<b>COSTPRO Premium</b><br>Tu licencia está activa. Tus documentos se generan sin marca de agua ni pie comercial.';
+  if(st.state === 'premium') return '<b>COSTPRO Premium · plan ' + escapeHtml(String(st.plan || '').toUpperCase()) + '</b><br>Tu plan se verifica con tu cuenta COSTPRO (profiles.plan). Tus documentos se generan sin marca de agua ni pie comercial y puedes exportar a Excel.';
   if(st.state === 'guest') return '<b>Modo invitado</b><br>Estás probando COSTPRO sin una cuenta: puedes crear hasta 3 fichas propias. Los PDF incluyen la identificación de COSTPRO. Crea una cuenta gratuita para continuar y disfrutar 30 días de bienvenida con documentos limpios.';
   if(st.state === 'free_trial') return '<b>Período de bienvenida</b><br>Tienes ' + st.daysLeft + ' día' + (st.daysLeft === 1 ? '' : 's') + ' restante' + (st.daysLeft === 1 ? '' : 's') + ' para disfrutar de documentos sin identificación COSTPRO.';
   return '<b>Tu período de bienvenida terminó</b><br>COSTPRO continúa disponible gratuitamente. Tus documentos PDF incluyen identificación de COSTPRO.';
@@ -5866,60 +5728,50 @@ function renderCuenta(){
     '<dl class="cu-kv">' +
     '<dt>Nombre</dt><dd>' + escapeHtml(s ? (s.guest ? 'Invitado' : s.user) : '—') + '</dd>' +
     '<dt>Tipo de acceso</dt><dd>' + escapeHtml(roleTxt) + '</dd>' +
-    '<dt>Instalación</dt><dd title="' + escapeHtml(String(Lic.installId())) + '">' + escapeHtml(String(Lic.installId()).slice(0, 8)) + '…</dd>' +
     '</dl>' +
     (s && s.guest ? '<div class="cu-act"><button class="btn primary" data-btn="guestCreate">' + icon('user', 15) + 'Crear cuenta</button></div>' : '') +
     '<p class="cu-note">Aplicación local: la identidad y los datos viven en este navegador. Esta información no requiere servidor.</p>' +
     '</div>';
-  /* --- Plan y licencia --- */
-  h += '<div class="cu-card"><h2>' + icon('badge', 16) + 'Plan y licencia</h2>' +
+  /* --- Plan y cuenta (FASE 24.6-1: autoridad = profiles.plan) --- */
+  h += '<div class="cu-card"><h2>' + icon('badge', 16) + 'Plan y cuenta</h2>' +
     '<div class="cu-plan"><div>' + planBadge(st) + '</div><p style="margin:0;font-size:13px;line-height:1.55">' + planCopy(st) + '</p></div>';
   if(st && st.state === 'free_trial'){
     h += '<dl class="cu-kv">' +
       '<dt>Período</dt><dd>Bienvenida (día ' + st.day + ' de ' + APP_CONFIG.welcomeDays + ')</dd>' +
       '<dt>Días restantes</dt><dd>' + st.daysLeft + '</dd>' +
-      '<dt>Inicio</dt><dd>' + Lic.fmtDate(st.firstSeenAt) + '</dd>' +
+      '<dt>Inicio</dt><dd>' + fmtDateEs(st.firstSeenAt) + '</dd>' +
       '<dt>Reloj</dt><dd>' + (st.source === 'red' ? 'verificado con hora de Internet' : 'hora local del equipo (último recurso)') + '</dd>' +
       '</dl>';
   } else if(st && st.state === 'free_expired'){
     h += '<dl class="cu-kv">' +
       '<dt>Período</dt><dd>Bienvenida finalizada</dd>' +
-      '<dt>Iniciado</dt><dd>' + Lic.fmtDate(st.firstSeenAt) + '</dd>' +
+      '<dt>Iniciado</dt><dd>' + fmtDateEs(st.firstSeenAt) + '</dd>' +
       '<dt>Funciones</dt><dd>Todas: crear, editar, calcular, exportar</dd>' +
       '</dl>';
-  } else if(st && st.state === 'premium' && st.license){
+  } else if(st && st.state === 'premium'){
     h += '<dl class="cu-kv">' +
-      '<dt>Estado</dt><dd>Licencia activa</dd>' +
-      '<dt>Vencimiento</dt><dd>' + Lic.fmtDate(st.license.expiresAt) + '</dd>' +
-      '<dt>Licencia</dt><dd title="' + escapeHtml(String(st.license.licenseId)) + '">' + escapeHtml(adminShortId(String(st.license.licenseId))) + '</dd>' +
+      '<dt>Plan</dt><dd>' + escapeHtml(String(st.plan || '').toUpperCase()) + '</dd>' +
+      '<dt>Origen</dt><dd>profiles.plan · cuenta COSTPRO (Supabase)</dd>' +
+      '<dt>Beneficios</dt><dd>Exportación Excel · documentos sin identificación comercial · logo de empresa</dd>' +
       '</dl>';
   } else if(st && st.state === 'guest'){
     h += '<dl class="cu-kv">' +
-      '<dt>Licencia</dt><dd>Ninguna asociada (opcional)</dd>' +
+      '<dt>Plan</dt><dd>— (los invitados no consultan plan)</dd>' +
       '</dl>';
   }
   if(!st || st.state !== 'premium'){
-    h += '<div class="cu-act"><button class="btn primary" data-btn="abrirActivacion">' + icon('key', 15) + 'Activar licencia</button>' +
-      (st && st.state === 'free_expired' ? '<button class="btn" data-btn="bannerFree">Seguir usando COSTPRO Free</button>' : '') + '</div>' +
-      '<p class="cu-note">La activación es opcional: sin licencia puedes seguir usando COSTPRO Free para siempre, con la identificación COSTPRO en los PDF.</p>';
+    h += '<p class="cu-note">El plan Premium se gestiona desde tu cuenta COSTPRO (panel de administración o facturación): no se activa con ficheros locales.</p>' +
+      (st && st.state === 'free_expired' ? '<div class="cu-act"><button class="btn" data-btn="bannerFree">Seguir usando COSTPRO Free</button></div>' : '');
   }
   h += '</div>';
   /* FASE 24.1 · FcCloud: estado de la cuenta en la nube (opcional, aislada). */
   h += FcCloud.cuentaCard();
-  /* --- Activar licencia (detalle + fichero) --- */
-  h += '<div class="cu-card wide"><h2>' + icon('key', 16) + 'Activar licencia</h2>' +
-    '<p style="margin:0 0 10px;font-size:13px;line-height:1.6">El flujo es sencillo: solicita tu fichero <b>.fclicense</b> indicando el identificador de instalación, después selecciónalo y listo. No necesitas introducir datos técnicos.</p>' +
-    '<div class="cu-act"><button class="btn primary" data-btn="acPick">' + icon('upload', 15) + 'Seleccionar fichero .fclicense</button>' +
-    '<input type="file" id="acFile" accept=".fclicense,application/json" hidden>' +
-    '<a class="btn" href="' + APP_CONFIG.siteUrl + '" target="_blank" rel="noopener noreferrer">' + icon('arrowR', 15) + 'Sitio oficial</a></div>' +
-    '<p id="acErr" class="gate-err" role="alert" hidden style="margin-top:10px"></p>' +
-    '<p class="cu-note">Instalación: <b>' + escapeHtml(String(Lic.installId()).slice(0, 8)) + '</b> — la licencia se vincula a esta instalación y es verificada criptográficamente (firma ECDSA) cada vez que se usa.</p>' +
-    '</div>';
-  /* --- Apoya COSTPRO (separado de la licencia · método real: transferencia) --- */
+  /* --- FASE 24.6-1: sin tarjeta de activación (Premium = plan de la cuenta) --- */
+  /* --- Apoya COSTPRO (separado del plan · método real: transferencia) --- */
   h += '<div class="cu-card wide" id="cuCafe"><h2>' + icon('coffee', 16) + 'Apoya COSTPRO</h2>' +
     '<div class="cu-cafe"><span class="cup">' + icon('coffee', 22) + '</span>' +
     '<div><p style="margin:0 0 6px;font-size:13.5px;line-height:1.6"><b>¿COSTPRO te resultó útil?</b> Puedes apoyar su desarrollo mediante una transferencia. Cada aporte ayuda a mantener y mejorar la aplicación.</p>' +
-    '<p class="cu-note" style="margin:0 0 10px"><b>Apoyar COSTPRO es voluntario y no es necesario para continuar usando COSTPRO Free.</b> Un aporte es un apoyo al desarrollo: no activa Premium ni modifica tu plan, no desbloquea funcionalidades, no altera el período de bienvenida y no modifica las condiciones de tu licencia.</p>';
+    '<p class="cu-note" style="margin:0 0 10px"><b>Apoyar COSTPRO es voluntario y no es necesario para continuar usando COSTPRO Free.</b> Un aporte es un apoyo al desarrollo: no activa Premium ni modifica tu plan y no desbloquea funcionalidades.</p>';
   if(Donation.hasTransfer()){
     var tr = Donation.transfer();
     h += '<div class="cu-sep">Transferencia</div>' +
@@ -5949,28 +5801,6 @@ function renderCuenta(){
   el.innerHTML = h;
   hydrateIcons(el);
 }
-/* --- Activación desde Mi cuenta (mismo validador Lic.importRecord) --- */
-async function acHandleFileChange(inp){
-  var f = inp.files && inp.files[0];
-  if(!f) return;
-  var box = document.getElementById('acErr');
-  if(box) box.hidden = true;
-  var text = '';
-  try{ text = await f.text(); }
-  catch(e){ acShowImportError('lectura'); return; }
-  var rec = null;
-  try{ rec = JSON.parse(text); }
-  catch(e){ acShowImportError('lectura'); return; }
-  var r = await Lic.importRecord(rec);
-  if(!r.ok){ acShowImportError(r.error); return; }
-  await licAfterActivation(r.state);
-}
-function acShowImportError(code){
-  var box = document.getElementById('acErr');
-  var msg = Lic.errorHuman(code === 'formato' ? 'lectura' : code);
-  if(box){ box.textContent = msg; box.hidden = false; }
-  else { toast(msg, 'err'); }
-}
 /* --- Entrada como invitado --- */
 async function auGuestEnter(){
   Auth.guestIn();
@@ -5979,151 +5809,9 @@ async function auGuestEnter(){
   toast('Entraste como invitado. Todas las funciones están disponibles; tus datos se guardan localmente en este navegador.', 'info');
 }
 
-/* =====================================================================
-   FASE 8 · ADMIN — Vista de Administración (solo rol Admin).
-   Estado de la licencia · generación de ficheros .fclicense · historial.
-   ===================================================================== */
-var ADMINLOG_KEY = 'FC_ADMINLOG_V1';
-function adminLogLoad(){
-  try{ var a = JSON.parse(localStorage.getItem(ADMINLOG_KEY) || 'null'); if(Array.isArray(a)) return a; }catch(e){}
-  return [];
-}
-function adminLogPush(e){
-  var arr = adminLogLoad();
-  arr.unshift(e);
-  try{ localStorage.setItem(ADMINLOG_KEY, JSON.stringify(arr.slice(0, 20))); }catch(err){}
-}
-function openAdminView(fromGate){
-  if(Auth.role() !== 'admin'){
-    toast('La Administración requiere credenciales de administrador.', 'err');
-    return;
-  }
-  document.body.setAttribute('data-view', 'admin');
-  App.ui.view = 'admin';
-  App.ui.adminFromGate = !!fromGate;
-  var tabs = document.querySelectorAll('.tab');
-  for(var i = 0; i < tabs.length; i++){ tabs[i].classList.remove('active'); tabs[i].removeAttribute('aria-current'); }
-  var nav = document.getElementById('btnFichas');
-  if(nav) nav.classList.remove('on');
-  renderAdmin();
-  window.scrollTo(0, 0);
-}
-function adminShortId(s){ s = String(s || ''); return s.length > 13 ? s.slice(0, 8) + '…' + s.slice(-4) : s; }
-async function renderAdmin(){
-  var el = document.getElementById('sec-admin');
-  var st = await Lic.evaluate();
-  var ins = Lic.initInstall();
-  var stateHtml, stateCls = 'mut';
-  if(st.status === 'valid'){
-    stateHtml = icon('check', 14) + ' ACTIVA'; stateCls = 'ok';
-  } else if(st.status === 'expired'){
-    stateHtml = icon('clock', 14) + ' EXPIRADA'; stateCls = 'err';
-  } else if(st.status === 'invalid'){
-    stateHtml = icon('error', 14) + ' NO VÁLIDA'; stateCls = 'err';
-  } else {
-    stateHtml = icon('info', 14) + ' SIN LICENCIA'; stateCls = 'mut';
-  }
-  var kv = '<dl class="adm-kv">' +
-    '<dt>Estado</dt><dd><span class="adm-state ' + stateCls + '">' + stateHtml + '</span></dd>' +
-    '<dt>Días restantes</dt><dd>' + (st.status === 'valid' ? st.daysLeft + ' días' : '—') + '</dd>' +
-    '<dt>Activación</dt><dd>' + (st.activatedAt ? Lic.fmtDate(st.activatedAt) : '—') + '</dd>' +
-    '<dt>Vencimiento</dt><dd>' + (st.expiresAt ? Lic.fmtDate(st.expiresAt) : '—') + '</dd>' +
-    '<dt>Instalación</dt><dd>' + escapeHtml(adminShortId(ins.installationId)) + '</dd>' +
-    '<dt>Licencia</dt><dd>' + (st.licenseId ? escapeHtml(adminShortId(st.licenseId)) : '—') + '</dd>' +
-    '</dl>';
-  if(st.status === 'valid' && st.clock){
-    kv += '<div class="adm-note">' + icon('warning', 14) + ' Cambio de fecha del sistema detectado. La validación usa la última fecha confirmada, por lo que retroceder el reloj no otorga días adicionales.</div>';
-  }
-  var log = adminLogLoad();
-  var logRows = log.map(function(x){
-    return '<tr><td>' + Lic.fmtDate(x.issuedAt) + '</td><td>' + escapeHtml(adminShortId(x.installationId)) + '</td><td>' + Lic.fmtDate(x.expiresAt) + '</td></tr>';
-  }).join('');
-  var stored = Lic.load();
-  var hist = (stored && stored.history) ? stored.history.map(function(x){
-    return '<tr><td>' + Lic.fmtDate(x.activatedAt) + '</td><td>' + escapeHtml(adminShortId(x.licenseId)) + '</td><td>' + Lic.fmtDate(x.expiresAt) + '</td></tr>';
-  }).join('') : '';
-  el.innerHTML =
-    '<div class="adm-head">' +
-      '<h1>' + icon('shield', 20) + ' Administración</h1>' +
-      '<button class="btn" data-btn="adminBack">' + icon('chevL', 15) + (App.ui.adminFromGate ? 'Volver a la activación' : 'Volver a la aplicación') + '</button>' +
-    '</div>' +
-    '<div class="adm-grid">' +
-      '<div class="adm-card"><h2>' + icon('badge', 15) + ' Estado de la licencia</h2>' + kv +
-        '<details class="adm-json"><summary>' + icon('braces', 13) + ' Información técnica de la licencia</summary><pre>' + escapeHtml(JSON.stringify(stored, null, 2)) + '</pre></details>' +
-      '</div>' +
-      '<div class="adm-card"><h2>' + icon('key', 15) + ' Generar fichero de activación</h2>' +
-        '<div class="adm-form">' +
-          '<div><label for="admInstId">Installation ID</label>' +
-          '<input id="admInstId" spellcheck="false" autocomplete="off" value="' + escapeHtml(ins.installationId) + '">' +
-          '<p class="hin">Identificador de la instalación a activar. Para este equipo ya está rellenado; para otro equipo, cópialo desde su pantalla de activación.</p></div>' +
-          '<div><label for="admDays">Duración (días)</label>' +
-          '<input id="admDays" type="number" min="1" max="3650" step="1" value="100">' +
-          '<p class="hin">Período estándar del producto: 100 días.</p></div>' +
-          '<button class="btn primary" data-btn="adminGen" id="admGenBtn"><span class="ic" data-icon="badge" data-sz="16"></span>Generar fichero de activación</button>' +
-          '<p id="admGenMsg" class="hin" role="status"></p>' +
-        '</div>' +
-      '</div>' +
-      '<div class="adm-card"><h2>' + icon('history', 15) + ' Activaciones generadas en este equipo</h2>' +
-        (log.length ? '<table class="adm-tbl"><thead><tr><th>Emisión</th><th>Instalación</th><th>Vence</th></tr></thead><tbody>' + logRows + '</tbody></table>' : '<p class="adm-empty">Todavía no se han generado ficheros de activación en este equipo.</p>') +
-      '</div>' +
-      '<div class="adm-card"><h2>' + icon('clock', 15) + ' Historial de activaciones de esta instalación</h2>' +
-        (hist ? '<table class="adm-tbl"><thead><tr><th>Activada</th><th>Licencia</th><th>Vence</th></tr></thead><tbody>' + hist + '</tbody></table>' : '<p class="adm-empty">Sin activaciones registradas.</p>') +
-      '</div>' +
-      '<div class="adm-card"><h2>' + icon('user', 15) + ' Modelo comercial (información local)</h2>' +
-        '<div class="adm-comm">' +
-          '<h3>' + icon('trend', 14) + ' Estado de esta instalación</h3>' +
-          '<table><tbody>' +
-          '<tr><td>Estado comercial</td><td>' + escapeHtml(Com.stateLabel()) + '</td></tr>' +
-          '<tr><td>Modelo</td><td>Free + Premium · la aplicación nunca se bloquea; la licencia elimina la identificación COSTPRO de los PDF</td></tr>' +
-          '<tr><td>Usuarios registrados</td><td>' + (function(){ var uu = usersLoad().users; var ks = Object.keys(uu); return ks.length ? ks.map(function(k){ return escapeHtml(uu[k].display || k) + ' (' + Lic.fmtDate(uu[k].createdAt) + ')'; }).join(' · ') : '—'; })() + '</td></tr>' +
-          '<tr><td>Alcance</td><td>Datos locales de este navegador (sin servidor). La identidad, las fichas y las licencias no requieren red.</td></tr>' +
-          '</tbody></table>' +
-        '</div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="adm-note">' + icon('shield', 14) + ' <b>Nota de seguridad honesta:</b> el fichero generado lleva firma criptográfica (ECDSA P-256) verificable por la aplicación. La clave de firma incluida en este HTML está protegida contra acceso casual, pero un archivo offline no puede garantizar secreto absoluto frente a un análisis técnico; para máxima seguridad usa el generador externo <b>FC-LicenseGen.html</b> y distribuye una copia de FC.html sin capacidad de firmar. Detalles en el Centro de Ayuda → Administración. <b>Modelo comercial:</b> una licencia = beneficios Premium; una donación = apoyo voluntario (no activa Premium).</div>';
-  hydrateIcons(el);
-}
-async function adminGenerate(){
-  if(Auth.role() !== 'admin'){ toast('Solo el administrador puede generar activaciones.', 'err'); return; }
-  var idEl = document.getElementById('admInstId');
-  var dEl = document.getElementById('admDays');
-  var msg = document.getElementById('admGenMsg');
-  var instId = String(idEl.value || '').trim();
-  if(!/^[A-Za-z0-9-]{6,64}$/.test(instId)){
-    msg.textContent = 'El Installation ID no tiene un formato válido. Cópialo exactamente desde la pantalla de activación.';
-    msg.style.color = 'var(--err)';
-    return;
-  }
-  var days = Math.max(1, Math.min(3650, Math.round(+dEl.value || 100)));
-  var btn = document.getElementById('admGenBtn');
-  btn.disabled = true;
-  try{
-    var rec = await Lic.makeLicense(instId, days);
-    var fname = 'activacion-' + instId.slice(0, 8) + '.fclicense';
-    var blob = new Blob([JSON.stringify(rec, null, 2)], { type:'application/json' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = fname;
-    document.body.appendChild(a); a.click();
-    setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 800);
-    adminLogPush({ licenseId:rec.licenseId, installationId:rec.installationId, issuedAt:rec.issuedAt, expiresAt:rec.expiresAt, at:new Date().toISOString(), file:fname });
-    msg.textContent = 'Fichero generado y firmado: ' + fname + '. Entrégalo al usuario de la instalación ' + instId.slice(0, 8) + '.';
-    msg.style.color = 'var(--ok)';
-    toast('Fichero de activación generado', 'ok');
-    await renderAdmin();
-  }catch(e){
-    msg.textContent = 'No se pudo generar el fichero. Detalle técnico no mostrado por seguridad.';
-    msg.style.color = 'var(--err)';
-  } finally { btn.disabled = false; }
-}
-function adminBack(){
-  if(App.ui.adminFromGate){
-    document.body.classList.remove('gateadmin');
-    gateEnter();
-  }
-  else { showFichas(); }
-}
+/* --- FASE 24.6-1: la vista de Administración (generador de ficheros
+   .fclicense) fue retirada del producto con el sistema de licencias.
+   La gestión de planes vive en el panel COSTPRO (profiles.plan). --- */
 
 /* =====================================================================
    FASE 8 · AYUDA — Contenido del Centro de Ayuda.
@@ -6179,16 +5867,11 @@ var FC_HELP = [
   { id:'pd-pdf', t:'Guardar como PDF', k:'pdf guardar exportar documento digital archivo', b:'<p>En la vista previa, elige <b>Exportar PDF</b> y selecciona «Guardar como PDF» en el diálogo de impresión del sistema. El archivo queda listo para enviarlo por correo, archivarlo o presentarlo a los órganos que correspondan.</p><p>Consejo: si el PDF es para un tercero, usa el perfil <b>Oficial</b>; el perfil <b>Auditoría</b> añade el anexo interno de trazabilidad, pensado para revisión interna.</p>' },
   { id:'pd-formatos', t:'Formatos disponibles', k:'formatos json csv exportar datos machine legible', b:'<p>Además del PDF, la ficha puede exportarse en:</p><ul><li><b>JSON:</b> respaldo íntegro (datos, anexos y reglas). Sirve para trasladar la ficha a otro equipo o conservar versiones.</li><li><b>CSV:</b> tabla comparativa de valores para hojas de cálculo.</li></ul><p>El JSON conserva la configuración de reglas: al importarlo, la ficha se reconstruye idéntica, no solo sus resultados.</p>' }
 ]},
-{ id:'c-activ', name:'Activación', icon:'key', arts:[
-  { id:'ac-periodo', t:'El período de licencia', k:'periodo licencia 100 dias activa vence caduca', b:'<p>La aplicación funciona con una <b>activación temporal</b>: tras cargar un fichero de activación válido, la instalación queda activa durante el período indicado en el fichero, normalmente <b>100 días</b>.</p><p>Mientras está activa, verás discretamente «Licencia activa · N días restantes» en la barra de estado. Quedan avisos progresivos al faltar 30, 15, 7 y 3 días para que la renovación no tome por sorpresa.</p>' },
-  { id:'ac-cargar-fichero', t:'Cargar el fichero de activación', k:'cargar fichero activacion como activar importar archivo fclicense', b:'<p>El administrador te entrega un fichero con extensión <b>.fclicense</b>. Para activar o renovar:</p><ol><li>Abre FC.html e inicia sesión.</li><li>Si la aplicación pide activación, pulsa <b>Cargar fichero de activación</b>.</li><li>Selecciona el fichero .fclicense que recibiste.</li><li>La aplicación verifica que el fichero sea válido, corresponda a esta aplicación y a esta instalación, y que sus fechas estén vigentes.</li><li>Si todo es correcto, la activación queda registrada y puedes continuar trabajando.</li></ol><div class="help-tip">Consejo: el administrador necesita el <b>identificador de instalación</b> que muestra la propia pantalla de activación; cada instalación tiene uno distinto.</div>' },
-  { id:'ac-renovacion', t:'Renovar la activación', k:'renovar reactivar vencimiento nuevo periodo ampliar', b:'<p>Al vencer el período, la aplicación muestra la pantalla <b>Activación requerida</b> y las funciones principales quedan en pausa hasta cargar un nuevo fichero. Tus fichas y configuración <b>no se pierden</b>: esperan intactas a la nueva activación.</p><p>El proceso de renovación es idéntico a la primera activación: se carga el nuevo fichero .fclicense y la aplicación registra el nuevo período. El historial de activaciones queda disponible para el administrador.</p>' },
-  { id:'ac-errores', t:'Errores de activación y qué hacer', k:'errores activacion no valido modificado otra instalacion expirado fecha', b:'<ul><li><b>«El fichero de activación no es válido o fue modificado»:</b> el archivo no supera la verificación de firma. Solicita un fichero nuevo; no intentes editarlo.</li><li><b>«Esta activación pertenece a otra instalación»:</b> el fichero se generó para otro equipo. Entrega al administrador el identificador de instalación de tu pantalla.</li><li><b>«El fichero de activación ha expirado»:</b> el fichero tiene fechas ya vencidas; pide uno con vigencia actual.</li><li><b>«Se detectó un cambio de fecha del sistema»:</b> el reloj del equipo se movió hacia atrás respecto de la última vez que usaste la aplicación. Corrige la fecha del sistema y vuelve a intentar; mientras persista, la validación usa la última fecha confirmada.</li></ul>' }
-]},
-{ id:'c-admin', name:'Administración', icon:'shield', arts:[
-  { id:'ad-acceso', t:'Acceso administrativo', k:'acceso admin administrador credenciales rol', b:'<p>La aplicación distingue dos roles: el <b>Usuario</b>, que crea y gestiona fichas, y el <b>Administrador</b>, que además puede consultar el estado de la licencia y generar ficheros de activación.</p><p>Las credenciales de administrador las entrega quien administra el producto. Con sesión de administrador, el botón <b>Admin</b> aparece en la barra superior; también puede accederse desde la propia pantalla de activación con <b>Acceso administrativo</b>.</p>' },
-  { id:'ad-estado-licencia', t:'Estado de la licencia', k:'estado licencia dias restantes vencimiento instalacion informacion tecnica', b:'<p>El panel de <b>Administración</b> presenta el estado actual: si la licencia está <b>ACTIVA</b>, cuántos días restan, fecha de activación y de vencimiento, identificador abreviado de la instalación y de la licencia, e información técnica completa bajo demanda.</p><p>Si el sistema detectó retrocesos de fecha, se muestra la advertencia correspondiente y cómo la aplicación la resuelve.</p>' },
-  { id:'ad-generacion', t:'Generación de activaciones', k:'generar activacion fichero firma installation id duracion 100 dias', b:'<p>El administrador genera el fichero de activación desde <b>Administración → Generar fichero de activación</b>: introduce el <b>Installation ID</b> del equipo a activar (o deja el precargado para este equipo), define la <b>duración</b> (100 días por defecto) y descarga el fichero <b>.fclicense</b> firmado.</p><p>Ese fichero se entrega al usuario, quien lo carga desde su pantalla de activación. La firma criptográfica garantiza que el fichero no pueda fabricarse ni alterarse por fuera del proceso administrativo.</p><div class="help-warnb">Recomendación de seguridad: para entornos exigentes, genera los ficheros con la herramienta externa FC-LicenseGen (clave de firma fuera del HTML distribuido) y mantén los ficheros .fclicense solo por el canal administrativo.</div>' }
+{ id:'c-cuenta', name:'Cuenta y plan', icon:'badge', arts:[
+  { id:'cp-plan', t:'Tu plan COSTPRO (Free y Premium)', k:'plan free premium pro enterprise cuenta suscripcion costo', b:'<p>El <b>plan</b> de tu cuenta COSTPRO define qué capacidades comerciales tiene la aplicación y se verifica con tu cuenta (nunca con ficheros locales ni ajustes de este navegador):</p><ul><li><b>Free</b>: todo el núcleo — crear, editar, calcular, importar y exportar JSON/CSV, PDF. Los documentos llevan la identificación de COSTPRO cuando el período de bienvenida terminó.</li><li><b>Premium</b> (planes <b>Pro</b> y <b>Enterprise</b>): documentos sin identificación comercial, logo de empresa en el PDF y <b>exportación a Excel</b>.</li></ul><p>El plan se gestiona desde el panel COSTPRO (administración o facturación). Al iniciar sesión, la aplicación lee tu plan y lo muestra en Mi cuenta y en la barra de estado.</p>' },
+  { id:'cp-cambios-plan', t:'Si tu plan cambia', k:'cambiar plan upgrade downgrade pro free facturar', b:'<p>Cuando tu plan cambia (por ejemplo, al contratar Pro o al finalizar una suscripción), la aplicación lo refleja en la próxima revalidación: al iniciar sesión, al volver a la pestaña y periódicamente mientras trabaja.</p><p>No existe ninguna activación local: un plan Premium se obtiene únicamente con la cuenta COSTPRO correcta. Si entras sin conexión con una sesión válida, la aplicación conserva el último plan verificado para que puedas seguir trabajando; al recuperar Internet, el estado se corrige automáticamente con el servidor.</p>' },
+  { id:'cp-excel', t:'Exportación a Excel (Premium)', k:'excel exportar xlsx hoja de cálculo detalle metadatos premium', b:'<p>El botón <b>Exportar Excel</b> (menú «⋯») genera un libro <b>.xlsx</b> con tres hojas: <b>Ficha</b> (identificación y tabla normativa con Costo Base, Costo Nuevo y precio), <b>Detalle</b> (desgloses y anexos con sus totales) y <b>Metadatos</b> (aplicación, versión, ficha y fecha de exportación).</p><p>Los valores del Excel son exactamente los mismos que ves en la ficha, la vista previa y el PDF: todos salen del mismo cálculo canónico. No hay fórmulas reinterpretadas: es una foto fiel del resultado.</p>' },
+  { id:'cp-json', t:'Intercambio de fichas con JSON', k:'json importar exportar intercambio ficha archivo arrastrar soltar version', b:'<p>El JSON es el formato universal de intercambio de fichas: <b>Exportar JSON</b> produce un archivo versionado y autónomo; <b>Importar JSON…</b> (menú «⋯») o <b>arrastrar</b> el archivo sobre la aplicación lo recupera. La aplicación reconoce el formato, muestra una vista previa con los datos de la ficha y pide confirmación antes de importar; si una ficha con el mismo identificador ya existe, tú decides si crear una copia o reemplazarla.</p><p>El archivo contiene la ficha completa (datos, anexos, reglas) y los resultados del cálculo: sirve para respaldar una ficha, pasarla a otro equipo o compartirla con un colega.</p>' }
 ]},
 { id:'c-res148', name:'Resolución 148/2023', icon:'book', arts:[
   { id:'r148-estructura', t:'Estructura de la ficha de costos', k:'estructura ficha anexo i filas 1 5 11 12 13 14 15 16 17 conceptos', b:'<p>La ficha sigue la estructura del <b>Anexo I</b> de la Resolución 148/2023 (Gaceta Oficial GOC-2023-593-O64) con la numeración de resultado 14–17: filas de materias primas (1.1–1.4), gastos de salario (2 y 3), otros gastos directos (4 y 4.1), gastos indirectos (6–10), con sus subfilas salariales, y las filas de resultado: costo directo (5), total de gastos (11), total de costos y gastos (12), utilidad (13), <b>precio o tarifa (14 = 12+13)</b>, <b>impuesto sobre la venta (15)</b>, <b>precio o tarifa final (16 = 14+15)</b>, <b>precio o tarifa unitario ajustado (17 = 16 ÷ cantidad a producir)</b> y la fila explicativa de precios de referencia (18).</p><p>Las columnas <b>Costo Base</b> y <b>Costo Nuevo</b> corresponden al histórico y a la proyección del período, respectivamente. La numeración 14–17 y la fila 15 responden al modelo de precio con impuesto incluido configurado en esta aplicación.</p>' },
@@ -6209,9 +5892,9 @@ var FC_FAQ = [
   { q:'¿Por qué no puedo modificar determinadas filas?', a:'Las filas de totales y las que resultan de reglas o de anexos se calculan solas; escribirlas a mano rompería la coherencia. Para cambiar su resultado, cambia los datos de origen: los valores de base, la regla o el anexo correspondiente.' },
   { q:'¿Cómo guardo una ficha?', a:'Con el botón Guardar de la barra superior. La aplicación también guarda automáticamente en este navegador. Para conservar una versión aparte, usa Guardar como nueva ficha en el menú de la tarjeta del Centro de Fichas.' },
   { q:'¿Dónde encuentro una ficha anterior?', a:'En el Centro de Fichas (botón Fichas de la barra superior). Ahí puedes buscar por nombre, código o producto, filtrar por estado y ordenar por fecha, nombre o costo. Pulsa Abrir en la tarjeta correspondiente.' },
-  { q:'¿Cómo renuevo la aplicación cuando vence?', a:'Solicita al administrador un nuevo fichero de activación (.fclicense), pulsa Cargar fichero de activación en la pantalla de Activación requerida y selecciónalo. Tus fichas no se pierden: quedan intactas.' },
-  { q:'¿Qué hago si el fichero de activación no es válido?', a:'Verifica que el fichero sea el que entregó tu administrador y que corresponda a esta instalación (la pantalla de activación muestra el identificador que el administrador necesita). Si el problema persiste, el fichero pudo dañarse: pide que lo generen de nuevo. Los mensajes exactos y su significado están en la categoría Activación.' },
-  { q:'¿Mis datos salen de este equipo?', a:'No. FC es una aplicación local: las fichas se guardan en este navegador y la activación se valida en este equipo. No hay envío de datos a Internet.' },
+  { q:'¿Cómo obtengo Premium?', a:'Con el plan de tu cuenta COSTPRO: los planes Pro o Enterprise generan documentos sin identificación comercial y activan la exportación a Excel. El plan se gestiona desde el panel COSTPRO; al iniciar sesión, la aplicación lo verifica automáticamente. No hay ficheros de activación locales.' },
+  { q:'¿Por qué no puedo exportar a Excel?', a:'La exportación a Excel es una función Premium (planes Pro y Enterprise). Tu plan se verifica con tu cuenta COSTPRO: si tu cuenta tiene uno de esos planes, el botón del menú «⋯» funciona directamente; si no, la aplicación te lo indica y puedes actualizar tu plan desde el panel.' },
+  { q:'¿Mis datos salen de este equipo?', a:'Tus fichas viven en este navegador. Si conectas tu cuenta COSTPRO, las fichas se sincronizan con la nube (privadas, solo tu cuenta). El plan se consulta contra tu cuenta para verificar tus beneficios; los datos de cálculo no se envían a nadie.' },
   { q:'¿Puedo usar la misma ficha en otro equipo?', a:'Sí: exporta la ficha en JSON desde el equipo actual e impórtala en el otro con Importar JSON…. El archivo conserva datos, anexos y reglas de cálculo.' }
 ];
 /* --- Glosario --- */
@@ -6232,7 +5915,7 @@ var FC_GLOS = [
   { t:'Regla porcentual', d:'Instrucción guardada que calcula una partida como porcentaje de otra fila. Se deriva del Costo Base y se aplica al Costo Nuevo; queda documentada en la auditoría.' },
   { t:'Fila de referencia', d:'Partida de la que depende una regla: la que aporta el valor que se multiplica por el porcentaje.' },
   { t:'Dependencia', d:'Relación de cálculo entre dos filas. Las dependencias se ordenan en cadena; un bucle entre ellas (dependencia circular) queda bloqueado por la aplicación.' },
-  { t:'Licencia', d:'Autorización de uso de la instalación por un período determinado, materializada en un fichero de activación firmado (.fclicense).' },
+  { t:'Plan', d:'Modalidad comercial de la cuenta COSTPRO (free, pro, enterprise) verificada contra el perfil de la cuenta. Premium = planes pro y enterprise.' },
   { t:'Activación', d:'Proceso de cargar un fichero de activación válido para habilitar la aplicación durante el período indicado (normalmente 100 días).' }
 ];
 /* --- Ayuda contextual por zonas --- */
@@ -6244,8 +5927,7 @@ var FC_CTX = {
   centro:{ t:'¿Para qué sirve el Centro de Fichas?', p:'Es el lugar donde viven todas tus fichas: buscar, filtrar, abrir, duplicar, exportar o archivar. Cada tarjeta muestra el estado y los resultados principales de la ficha.', art:'cf-gestionar' },
   datos:{ t:'¿Para qué son los Datos generales?', p:'Identifican la ficha (entidad, producto, código, unidad, nivel de actividad) en pantalla y en el documento impreso. Un buen nombre te permitirá encontrarla después en el Centro de Fichas.', art:'in-datos-generales' },
   preview:{ t:'¿Qué es la Vista previa PDF?', p:'Muestra el documento exacto que se imprimirá o exportará: perfil Oficial o de Auditoría, partes seleccionables, paginación y zoom. Lo que ves es lo que sale.', art:'pd-vista-previa' },
-  activacion:{ t:'¿Cómo funciona la activación?', p:'La instalación queda activa durante el período del fichero .fclicense (normalmente 100 días). Al vencer, se carga un fichero nuevo y las fichas guardadas permanecen intactas.', art:'ac-periodo' },
-  adminlic:{ t:'¿Qué puede hacer un administrador?', p:'Consultar el estado exacto de la licencia, revisar la información técnica y generar ficheros de activación firmados para cualquier instalación del producto.', art:'ad-estado-licencia' }
+  plan:{ t:'¿Qué incluye Premium?', p:'Los planes Pro y Enterprise de la cuenta COSTPRO generan documentos sin identificación comercial, permiten el logo de empresa y activan la exportación a Excel. El plan se verifica con tu cuenta al iniciar sesión.', art:'cp-plan' }
 };
 
 /* =====================================================================
@@ -6810,8 +6492,8 @@ function renderCentro(){
   if(cst && cst.state === 'free_expired' && prd.bannerDismissedState !== 'free_expired'){
     h += '<div class="fc-expbanner" id="fcExpBanner" role="note" aria-label="Estado de tu período de bienvenida">' +
       '<div class="et"><b>' + icon('info', 16) + 'Tu período de bienvenida terminó</b>' +
-      '<p>COSTPRO continúa disponible gratuitamente. Tus documentos PDF incluyen identificación de COSTPRO. Puedes activar una licencia Premium cuando quieras para eliminarla.</p></div>' +
-      '<div class="ea"><button class="btn primary" data-btn="abrirActivacion">' + icon('key', 15) + 'Activar licencia</button>' +
+      '<p>COSTPRO continúa disponible gratuitamente. Tus documentos PDF incluyen identificación de COSTPRO; el plan Pro/Enterprise de tu cuenta COSTPRO los genera limpios y añade la exportación a Excel.</p></div>' +
+      '<div class="ea"><button class="btn primary" data-btn="cuenta">' + icon('badge', 15) + 'Ver mi plan</button>' +
       '<button class="btn" data-btn="bannerFree">Seguir usando COSTPRO Free</button></div></div>';
   }
   if(cst && cst.inAppPromotion && !prd.promoDismissed){
@@ -8355,6 +8037,44 @@ function bindGlobal(){
      reubica — se cierra como lo haría un control nativo. */
   window.addEventListener('resize', function(){ if(FCombo.open) closeFichaCombo(false); });
   document.getElementById('fileJson').addEventListener('change', onFile);
+  /* --- FASE 24.6-1 · Arrastrar y soltar un .json sobre la aplicación ---.
+     La zona de drop es contextual: SOLO aparece mientras se arrastra un
+     archivo (overlay pointer-events:none — el drop lo recibe document). */
+  (function(){
+    var depth = 0;
+    function isFileDrag(ev){
+      try{
+        var dt = ev.dataTransfer;
+        if(!dt) return false;
+        var types = dt.types || [];
+        for(var i = 0; i < types.length; i++){ if(types[i] === 'Files') return true; }
+      }catch(e){}
+      return false;
+    }
+    function show(){ depth++; var z = document.getElementById('dropZone'); if(z) z.hidden = false; }
+    function hide(){
+      depth = Math.max(0, depth - 1);
+      if(!depth){ var z = document.getElementById('dropZone'); if(z) z.hidden = true; }
+    }
+    document.addEventListener('dragenter', function(ev){ if(isFileDrag(ev)){ ev.preventDefault(); show(); } });
+    document.addEventListener('dragover', function(ev){ if(isFileDrag(ev)){ ev.preventDefault(); if(ev.dataTransfer) ev.dataTransfer.dropEffect = 'copy'; } });
+    document.addEventListener('dragleave', function(ev){ if(isFileDrag(ev)) hide(); });
+    document.addEventListener('drop', function(ev){
+      if(!isFileDrag(ev)) return;
+      ev.preventDefault();
+      depth = 0;
+      var z = document.getElementById('dropZone'); if(z) z.hidden = true;
+      var files = (ev.dataTransfer && ev.dataTransfer.files) ? ev.dataTransfer.files : null;
+      if(!files || !files.length) return;
+      var file = files[0];
+      var nm = String(file.name || '').toLowerCase();
+      if(!(nm.indexOf('.json', nm.length - 5) === nm.length - 5) && file.type !== 'application/json'){
+        toast('Arrastra un archivo .json de ficha COSTPRO.', 'info');
+        return;
+      }
+      handleImportFile(file);
+    });
+  })();
   window.addEventListener('beforeunload', function(){ if(App.saveTimer){ clearTimeout(App.saveTimer); saveDB(); } });
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden' && App.saveTimer){ clearTimeout(App.saveTimer); saveDB(); } });
   document.getElementById('pdfPages').addEventListener('scroll', function(){
@@ -8464,8 +8184,6 @@ function onEv(ev){
   }
   if(el.id === 'fcEstado'){ App.ui.fichasFilter.estado = el.value; renderCentro(); return; }
   if(el.id === 'fcOrden'){ App.ui.fichasFilter.orden = el.value; renderCentro(); return; }
-  if(el.id === 'lcFile'){ if(ev.type !== 'change') return; licHandleFileChange(el); return; }
-  if(el.id === 'acFile'){ if(ev.type !== 'change') return; acHandleFileChange(el); return; }
   if(el.id === 'logoFile'){ if(ev.type !== 'change') return; logoHandleFileChange(el); return; }
   if(el.id === 'helpSearch'){
     if(ev.type !== 'input') return;
@@ -8743,11 +8461,6 @@ function onClick(ev){
   else if(btn === 'pdfZoomOut'){ App.ui.pdfZoom = Math.max(0.3, App.ui.pdfZoom / 1.15); applyPdfZoom(); }
   else if(btn === 'pdfFit'){ App.ui.pdfZoom = fitZoom(); applyPdfZoom(); }
   else if(btn === 'ayuda'){ openHelp(); }
-  else if(btn === 'admin'){ openAdminView(false); }
-  else if(btn === 'adminBack'){ adminBack(); }
-  else if(btn === 'adminGen'){ adminGenerate(); }
-  else if(btn === 'lcLoad'){ licPickFile(); }
-  else if(btn === 'lcAdmin'){ licHandleAdminAccess(); }
   else if(btn === 'ctxHelp'){ openCtxHelp(id); }
   else if(btn === 'hqClose'){ closeHelpQuick(); }
   else if(btn === 'hqMore'){ hqMore(); }
@@ -8759,14 +8472,19 @@ function onClick(ev){
   else if(btn === 'helpBack'){ helpBack(); }
   else if(btn === 'ayudaBackApp'){ showFichas(); }
   else if(btn === 'licInfo'){ openCuenta(); }
+  /* --- FASE 24.6-1 · Premium / Excel / Importación JSON --- */
+  else if(btn === 'expexcel'){ closeMoreMenu(); exportExcel(); }
+  else if(btn === 'premClose'){ document.getElementById('premModal').hidden = true; }
+  else if(btn === 'premGo'){ document.getElementById('premModal').hidden = true; openCuenta(); }
+  else if(btn === 'impCancel'){ closeImportModal(); }
+  else if(btn === 'impGo'){ commitImport('copy'); }
+  else if(btn === 'impCopy'){ commitImport('copy'); }
+  else if(btn === 'impReplace'){ commitImport('replace'); }
   /* --- FASE 17 · modelo comercial --- */
   else if(btn === 'cuenta'){ openCuenta(); }
   else if(btn === 'cuentaPlan'){ openCuenta(); }
   else if(btn === 'cuentaCafe'){ openCuenta(); var cf = document.getElementById('cuCafe'); if(cf) cf.scrollIntoView({ behavior:'smooth', block:'start' }); }
   else if(btn === 'cuentaBack'){ closeCuenta(); }
-  else if(btn === 'abrirActivacion'){ showLicScreen(); }
-  else if(btn === 'licBack'){ closeLicScreen(); }
-  else if(btn === 'acPick'){ var aci = document.getElementById('acFile'); if(aci){ aci.value = ''; aci.click(); } }
   else if(btn === 'cafeGo'){ Donation.open(id); }
   else if(btn === 'cafeCopyNum' || btn === 'cafeCopyTel'){
     var trc = Donation.transfer();
@@ -8937,39 +8655,233 @@ function importPaste(text, cols, which){
   });
   return count;
 }
-function onFile(ev){
-  var file = ev.target.files && ev.target.files[0];
+/* =====================================================================
+   FASE 24.6-1 · IMPORTACIÓN UNIVERSAL DE FICHAS (JSON versionado)
+   ---------------------------------------------------------------------
+   Formato de intercambio estable y versionado:
+     { format:'costpro-ficha', version:'1.0', exportedAt, application:{...},
+       sistema (legado), fuenteNormativa, schemaV, ficha, resultados, auditTrail }
+   Compatibilidad hacia atrás: acepta el sobre nuevo, el export histórico
+   de FC ({ficha:...}) y la ficha plana ({rows, meta}). La migración de
+   versiones antiguas ocurre con migrarFicha() (schema 1..4) ANTES del
+   cálculo — el motor JAMÁS ve formatos antiguos (no se toca).
+   Flujo: archivo → parse → validar → VISTA PREVIA → confirmación → import.
+   Seguridad: JSON.parse puro (jamás eval/new Function/HTML injection);
+   validación estructural + tipos + tamaños; coerción de numéricos; los
+   textos se renderizan SIEMPRE vía escapeHtml (existente).
+   Protección de datos (§11): la importación NUNCA reemplaza en silencio —
+   crea una ficha nueva; el único camino de reemplazo (id duplicado, §12)
+   exige elección explícita del usuario en el diálogo.
+   ===================================================================== */
+var FC_JSON_FORMAT = 'costpro-ficha';
+var FC_JSON_VERSION = '1.0';
+var _importDet = null;   /* detalle de la importación en curso (modal) */
+function appVersionLabel(){
+  try{ return (APP_CONFIG.buildMeta && APP_CONFIG.buildMeta.version) ? APP_CONFIG.buildMeta.version : 'dev'; }
+  catch(e){ return 'dev'; }
+}
+function jsonParseSafe(text){
+  try{ return { ok:true, data: JSON.parse(text) }; }
+  catch(e){ return { ok:false, reason:'El archivo no contiene JSON válido: comprueba que no esté dañado o truncado y vuelve a intentarlo.' }; }
+}
+/* Detector de versión/formato: sobre v1, export histórico o ficha plana. */
+function importDetect(d){
+  if(!d || typeof d !== 'object' || Array.isArray(d)) return { ok:false, reason:'El archivo no tiene la estructura de una ficha COSTPRO.' };
+  if(Object.prototype.hasOwnProperty.call(d, '__proto__') || Object.prototype.hasOwnProperty.call(d, 'constructor')) return { ok:false, reason:'El archivo contiene estructuras no permitidas.' };
+  if(d.format !== undefined){
+    if(d.format !== FC_JSON_FORMAT) return { ok:false, reason:'El archivo indica ser «' + _jsonStr(d.format, 60) + '», no una ficha COSTPRO (' + FC_JSON_FORMAT + ').' };
+    var v = String(d.version || '');
+    if(!/^\d+\.\d+$/.test(v) || parseInt(v.split('.')[0], 10) > parseInt(FC_JSON_VERSION.split('.')[0], 10) || v === '') return { ok:false, reason:'La versión del formato («' + (v || 'desconocida') + '») no está soportada por esta aplicación.' };
+    if(!d.ficha || typeof d.ficha !== 'object') return { ok:false, reason:'El sobre ' + FC_JSON_FORMAT + ' no incluye la ficha (campo «ficha»).' };
+    return { ok:true, ficha: d.ficha, format:'costpro-ficha', version: v };
+  }
+  var f2 = d.ficha ? d.ficha : d;
+  if(f2 && typeof f2 === 'object' && !Array.isArray(f2) && f2.rows && typeof f2.rows === 'object' && f2.meta && typeof f2.meta === 'object'){
+    return { ok:true, ficha: f2, format:'export FC (histórico)', version: f2.schemaV ? String(f2.schemaV) : '1' };
+  }
+  return { ok:false, reason:'No se reconoció una ficha COSTPRO compatible en el archivo.' };
+}
+/* Coerciones seguras: números finitos o null; textos acotados. */
+function _jsonNum(v){
+  if(v === null || v === undefined || v === '') return null;
+  if(typeof v === 'number') return isFinite(v) ? v : null;
+  if(typeof v === 'string'){ var s = v.trim(); if(!s) return null; var n = +s.replace(',', '.'); return isFinite(n) ? n : null; }
+  return null;
+}
+function _jsonStr(v, cap){
+  if(v === null || v === undefined) return '';
+  if(typeof v !== 'string' && typeof v !== 'number' && typeof v !== 'boolean') return '';
+  return String(v).slice(0, cap || 200);
+}
+function _jsonBool(v, dflt){
+  if(typeof v === 'boolean') return v;
+  return dflt;
+}
+/* Validación estructural + normalización (en el propio objeto). */
+function importValidate(ficha){
+  if(!ficha || typeof ficha !== 'object' || Array.isArray(ficha)) return { ok:false, reason:'La ficha no tiene una estructura válida.' };
+  if(Object.prototype.hasOwnProperty.call(ficha, '__proto__') || Object.prototype.hasOwnProperty.call(ficha, 'constructor')) return { ok:false, reason:'La ficha contiene estructuras no permitidas.' };
+  if(!ficha.meta || typeof ficha.meta !== 'object' || Array.isArray(ficha.meta)) return { ok:false, reason:'La ficha no tiene «Datos generales» (meta). No se puede reconstruir la ficha.' };
+  if(!ficha.rows || typeof ficha.rows !== 'object' || Array.isArray(ficha.rows)) return { ok:false, reason:'La ficha no tiene filas de costos (rows). No se puede reconstruir la ficha.' };
+  var m = ficha.meta, k;
+  var metaStr = [['entidad',200],['organo',200],['producto',200],['codigo',120],['um',60],['fecha',60],['moneda',8],
+                 ['elaboradoPor',200],['cargoElaborado',200],['aprobadoPor',200],['cargoAprobado',200],['refPrecios',500],['observaciones',2000]];
+  for(var i = 0; i < metaStr.length; i++){ k = metaStr[i][0]; if(m[k] !== undefined) m[k] = _jsonStr(m[k], metaStr[i][1]); }
+  ['nivelProduccion','pctCapacidad','tasaUtilidad','coefIndirectos','tasaTributos','tasaVenta','precioPropuesto','precioBase'].forEach(function(kk){
+    if(m[kk] !== undefined) m[kk] = _jsonNum(m[kk]);
+  });
+  if(m.decimales !== undefined){ var dd = _jsonNum(m.decimales); m.decimales = (dd === null || dd < 0 || dd > 4) ? 2 : Math.round(dd); }
+  if(m.tipoActividad !== undefined && !_jsonStr(m.tipoActividad, 40).match(/^[a-z_]{2,40}$/)) m.tipoActividad = 'bienes';
+  if(m.metodoPrecio !== undefined && m.metodoPrecio !== 'gastos' && m.metodoPrecio !== 'correlacion') m.metodoPrecio = 'gastos';
+  if(m.tributosModo !== undefined && !/^[_a-z]{2,20}$/.test(_jsonStr(m.tributosModo, 20))) m.tributosModo = 'manual';
+  if(m.isvModo !== undefined && m.isvModo !== 'auto' && m.isvModo !== 'manual') m.isvModo = 'auto';
+  if(m.precioUnitModo !== undefined && m.precioUnitModo !== 'auto' && m.precioUnitModo !== 'manual') m.precioUnitModo = 'auto';
+  if(m.isvActivo !== undefined) m.isvActivo = _jsonBool(m.isvActivo, true);
+  if(m.consultaMFP !== undefined) m.consultaMFP = _jsonBool(m.consultaMFP, false);
+  var rIds = Object.keys(ficha.rows);
+  if(rIds.length > 60) return { ok:false, reason:'La ficha tiene demasiadas filas (' + rIds.length + '). El modelo normativo define las filas de la Resolución 148.' };
+  for(var a = 0; a < rIds.length; a++){
+    var rid = rIds[a], r = ficha.rows[rid];
+    if(!r || typeof r !== 'object' || Array.isArray(r)) return { ok:false, reason:'La fila ' + rid + ' no tiene una estructura válida.' };
+    if(r.base !== undefined) r.base = _jsonNum(r.base);
+    if(r.nuevo !== undefined) r.nuevo = _jsonNum(r.nuevo);
+    if(r.desglose !== undefined){
+      if(!Array.isArray(r.desglose)) return { ok:false, reason:'El desglose de la fila ' + rid + ' debe ser una lista de partidas.' };
+      if(r.desglose.length > 500) return { ok:false, reason:'El desglose de la fila ' + rid + ' supera el máximo de 500 partidas.' };
+      for(var b2 = 0; b2 < r.desglose.length; b2++){
+        var it = r.desglose[b2];
+        if(!it || typeof it !== 'object' || Array.isArray(it)) return { ok:false, reason:'Una partida del desglose de la fila ' + rid + ' no es válida.' };
+        it.concepto = _jsonStr(it.concepto, 300);
+        it.codigo = _jsonStr(it.codigo, 60);
+        it.base = _jsonNum(it.base);
+        it.nuevo = _jsonNum(it.nuevo);
+      }
+    }
+  }
+  var anexos = [['anexoInsumos', [['codigo',60],['producto',200],['um',30],['destino',120]], ['costoBase','norma','precio']],
+                ['anexoSalario', [['operacion',300],['categoria',120],['grupo',60]], ['gastoBase','trabajadores','salarioHora','pagosAdic','normaTiempo']]];
+  for(var c2 = 0; c2 < anexos.length; c2++){
+    var an = ficha[anexos[c2][0]];
+    if(an === undefined || an === null) continue;
+    if(typeof an !== 'object' || Array.isArray(an)) return { ok:false, reason:'El anexo «' + anexos[c2][0] + '» no tiene una estructura válida.' };
+    an.activo = _jsonBool(an.activo, true);
+    if(!Array.isArray(an.rows)) an.rows = [];
+    if(an.rows.length > 2000) return { ok:false, reason:'El anexo «' + anexos[c2][0] + '» supera el máximo de 2000 filas.' };
+    for(var e2 = 0; e2 < an.rows.length; e2++){
+      var rr = an.rows[e2];
+      if(!rr || typeof rr !== 'object' || Array.isArray(rr)) return { ok:false, reason:'Una fila del anexo «' + anexos[c2][0] + '» no es válida.' };
+      for(var f3 = 0; f3 < anexos[c2][1].length; f3++){ var sp = anexos[c2][1][f3]; rr[sp[0]] = _jsonStr(rr[sp[0]], sp[1]); }
+      for(var g3 = 0; g3 < anexos[c2][2].length; g3++){ rr[anexos[c2][2][g3]] = _jsonNum(rr[anexos[c2][2][g3]]); }
+    }
+  }
+  if(ficha.config !== undefined && ficha.config !== null && (typeof ficha.config !== 'object' || Array.isArray(ficha.config))) return { ok:false, reason:'La configuración de reglas (config) no tiene una estructura válida.' };
+  return { ok:true };
+}
+/* Entrada común (selector y drag&drop): cuota → leer → detectar → validar → preview */
+function handleImportFile(file){
   if(!file) return;
   /* FASE 24.2 · fc_import: verificación de cuota ANTES de procesar el
      archivo (patrón check-before/track-after del sistema existente). Sin
      sesión o en fail-open, la importación sigue exactamente igual. */
   FcCloud.guard('fc_import').then(function(g){
-    if(!g.allowed){ showQuotaBlocked('fc_import', g); ev.target.value = ''; return; }
-    proceedImportFile(ev, file);
+    if(!g.allowed){ showQuotaBlocked('fc_import', g); return; }
+    var reader = new FileReader();
+    reader.onerror = function(){ toast('No se pudo leer el archivo (puede estar dañado).', 'err'); };
+    reader.onload = function(){
+      var p = jsonParseSafe(reader.result);
+      if(!p.ok){ toast(p.reason, 'err'); return; }
+      var det = importDetect(p.data);
+      if(!det.ok){ toast(det.reason, 'err'); return; }
+      var v = importValidate(det.ficha);
+      if(!v.ok){ toast(v.reason, 'err'); return; }
+      openImportPreview(det);
+    };
+    reader.readAsText(file);
   });
 }
-function proceedImportFile(ev, file){
-  var reader = new FileReader();
-  reader.onload = function(){
-    try{
-      var d = JSON.parse(reader.result);
-      var ficha = d && d.ficha ? d.ficha : d;
-      if(!ficha || !ficha.rows || !ficha.meta) throw new Error('estructura no reconocida');
-      ficha.id = uid();
-      ficha.nombre = (ficha.nombre || 'Ficha importada') + ' (importada)';
-      ficha.schemaV = FC_SCHEMA_VERSION;
-      migrarFicha(ficha);
-      App.db.fichas.push(ficha);
-      App.db.activeId = ficha.id;
-      saveDB(); renderAll();
-      FcCloud.recordUsage('fc_import');  /* FASE 24.2: fc_import tras el éxito */
-      toast('Ficha importada correctamente', 'ok');
-    }catch(e){
-      toast('Error al importar: ' + e.message, 'err');
-    }
-    ev.target.value = '';
-  };
-  reader.readAsText(file);
+function onFile(ev){
+  var file = ev.target.files && ev.target.files[0];
+  if(file) handleImportFile(file);
+  ev.target.value = '';
+}
+/* Vista previa (§24): nunca se muestra JSON crudo. */
+function openImportPreview(det){
+  _importDet = det;
+  var fi = det.ficha;
+  var dup = !!(fi.id && App.db.fichas.some(function(x){ return x.id === fi.id; }));
+  var meta = (fi.meta || {});
+  var updated = fi.updatedAt || fi.createdAt || '';
+  var body =
+    '<p style="margin:0 0 4px"><b>' + icon('check', 15) + ' Ficha reconocida</b> — formato ' + escapeHtml(det.format) + (det.version ? ' · versión ' + escapeHtml(det.version) : '') + '</p>' +
+    '<dl class="kv-import">' +
+    '<dt>Nombre</dt><dd>' + escapeHtml(_jsonStr(fi.nombre, 200) || 'Ficha sin nombre') + '</dd>' +
+    '<dt>Producto</dt><dd>' + escapeHtml(_jsonStr(meta.producto, 200) || '—') + '</dd>' +
+    '<dt>Entidad</dt><dd>' + escapeHtml(_jsonStr(meta.entidad, 200) || '—') + '</dd>' +
+    '<dt>Modificada</dt><dd>' + escapeHtml(updated ? String(updated).slice(0, 10) : '—') + '</dd>' +
+    '</dl>';
+  if(dup) body += '<p class="imp-warn">Ya existe una ficha con este identificador. Elige cómo continuar: no se sobrescribe nada sin tu confirmación explícita.</p>';
+  document.getElementById('impBody').innerHTML = body;
+  var acts = document.getElementById('impActions');
+  acts.innerHTML = dup
+    ? '<button class="btn" data-btn="impCancel">Cancelar</button>' +
+      '<button class="btn danger" data-btn="impReplace">Reemplazar</button>' +
+      '<button class="btn primary" data-btn="impCopy">Crear como copia</button>'
+    : '<button class="btn" data-btn="impCancel">Cancelar</button>' +
+      '<button class="btn primary" data-btn="impGo">Importar ficha</button>';
+  document.getElementById('impModal').hidden = false;
+  var prim = acts.querySelector('.primary');
+  if(prim) prim.focus();
+}
+function closeImportModal(){
+  document.getElementById('impModal').hidden = true;
+  document.getElementById('impBody').innerHTML = '';
+  document.getElementById('impActions').innerHTML = '';
+  _importDet = null;
+}
+/* Confirmación → importación real. */
+function commitImport(mode){
+  if(!_importDet) return;
+  var det = _importDet;
+  if(mode === 'replace'){
+    var ex = App.db.fichas.filter(function(x){ return x.id === det.ficha.id; })[0];
+    askConfirm('Reemplazar ficha',
+      'Se reemplazará el contenido de «' + (ex ? (ex.nombre || 'sin nombre') : '') + '» por el del archivo importado. Los datos actuales de esa ficha se perderán. Esta acción no se puede deshacer.',
+      'Reemplazar', function(){ doImportCommit(det, 'replace'); });
+    return;
+  }
+  doImportCommit(det, 'copy');
+}
+function doImportCommit(det, mode){
+  /* §11: nada pendiente sin persistir antes de tocar la base local. */
+  if(App.saveTimer){ clearTimeout(App.saveTimer); App.saveTimer = null; }
+  var ficha = det.ficha;
+  var today = new Date().toISOString();
+  if(mode === 'replace'){
+    var ex = App.db.fichas.filter(function(x){ return x.id === ficha.id; })[0];
+    if(!ex){ closeImportModal(); return; }
+    var newId = ex.id;                       /* conserva identidad local/cloud */
+    var cloudLink = ex.cloud;                /* el sync detectará el cambio por contenido */
+    delete ficha.cloud;
+    ficha.id = newId;
+    ficha.cloud = cloudLink;
+    var idx = App.db.fichas.indexOf(ex);
+    App.db.fichas[idx] = ficha;
+    toast('Ficha reemplazada por el archivo importado', 'ok');
+  } else {
+    delete ficha.cloud;
+    ficha.id = uid();
+    ficha.nombre = (_jsonStr(ficha.nombre, 180) || 'Ficha importada') + ' (importada)';
+    App.db.fichas.push(ficha);
+    toast('Ficha importada correctamente', 'ok');
+  }
+  ficha.schemaV = FC_SCHEMA_VERSION;
+  migrarFicha(ficha);          /* migración 1..4 ANTES del cálculo */
+  ficha.updatedAt = today;
+  if(ficha.createdAt === undefined || ficha.createdAt === null) ficha.createdAt = today;
+  App.db.activeId = ficha.id;
+  saveDB(); renderAll();
+  FcCloud.recordUsage('fc_import');  /* FASE 24.2: fc_import tras el éxito */
+  closeImportModal();
 }
 
 /* ---------- Exportaciones ---------- */
@@ -8984,14 +8896,21 @@ function downloadBlob(name, content, mime){
 }
 function exportJSON(){
   var f = F(), R = App.res;
+  var now = new Date().toISOString();
+  /* FASE 24.6-1 · sobre versionado y autónomo: sin JWT/tokens/sesión/secretos
+     (§14) — solo la ficha y su cálculo. Los campos históricos se conservan
+     para compatibilidad con importaciones previas. */
   var payload = {
+    format: FC_JSON_FORMAT, version: FC_JSON_VERSION,
+    exportedAt: now, exportado: now,
+    application: { name:'COSTPRO FC', version: appVersionLabel() },
     sistema:'FC — Ficha de Costos y Gastos (archivo único)', fuenteNormativa:RES, schemaV:FC_SCHEMA_VERSION,
-    exportado:new Date().toISOString(), ficha:f,
+    ficha:f,
     resultados:{ base:R.base.values, nuevo:R.nuevo.values, porcentajes:Object.keys(R.pct).reduce(function(o,k){ o[k] = { ratio:R.pct[k].ratio, fuente:R.pct[k].fuente, refFila:R.pct[k].refFila, refCol:R.pct[k].refCol }; return o; }, {}), errores:R.errors, advertencias:R.warnings },
     auditTrail:R.audit
   };
   downloadBlob(safeName(f.nombre) + '.fc.json', JSON.stringify(payload, null, 2), 'application/json;charset=utf-8');
-  toast('JSON exportado: datos + configuración + resultados + trazabilidad', 'ok');
+  toast('JSON exportado: ficha completa + resultados (formato ' + FC_JSON_FORMAT + ' ' + FC_JSON_VERSION + ')', 'ok');
 }
 function safeName(s){ return String(s || 'ficha').replace(/[^\w\u00C0-\u017F -]/g, '').trim().replace(/\s+/g, '_').slice(0, 60) || 'ficha'; }
 function buildCSV(){
@@ -9059,6 +8978,329 @@ function exportCSV(){
   downloadBlob(safeName(F().nombre) + '.csv', buildCSV(), 'text/csv;charset=utf-8');
   toast('CSV exportado (vista comparativa + trazabilidad + validaciones)', 'ok');
 }
+/* =====================================================================
+   FASE 24.6-1 · EXPORTACIÓN EXCEL (PREMIUM: plan pro | enterprise)
+   ---------------------------------------------------------------------
+   §16 · SIN SEGUNDO MOTOR: todo valor sale del resultado canónico
+   App.res (computeFicha), el MISMO que consume Preview, PDF y CSV.
+   Los importes se emiten en unidades (centavos / 100) como números
+   reales con formato de moneda; sin fórmulas reinterpretadas.
+   XLSX mínimo (ZIP sin compresión + SpreadsheetML), 0 dependencias,
+   determinista (fecha DOS fija). Hojas: Ficha · Detalle · Metadatos.
+   §19 · El gate vive en la LÓGICA (excelPremiumGate) además de la UI.
+   ===================================================================== */
+var _CRC32_TABLE = (function(){
+  var t = new Array(256), c, n, k;
+  for(n = 0; n < 256; n++){ c = n; for(k = 0; k < 8; k++){ c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); } t[n] = c >>> 0; }
+  return t;
+})();
+function _crc32(u8){
+  var c = 0xFFFFFFFF;
+  for(var i = 0; i < u8.length; i++) c = _CRC32_TABLE[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function _xlsxCol(n){
+  var s = '';
+  while(n > 0){ var m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); }
+  return s;
+}
+function _xEsc(s){
+  return String(s === null || s === undefined ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+}
+function _xCell(ref, v, st){
+  if(v === null || v === undefined || v === '') return '';
+  if(typeof v === 'number'){
+    if(!isFinite(v)) return '';
+    return '<c r="' + ref + '"' + (st ? ' s="' + st + '"' : '') + '><v>' + (Math.round(v * 1e6) / 1e6) + '</v></c>';
+  }
+  return '<c r="' + ref + '" t="inlineStr"' + (st ? ' s="' + st + '"' : '') + '><is><t xml:space="preserve">' + _xEsc(v) + '</t></is></c>';
+}
+function _xRow(n, cells){ return '<row r="' + n + '">' + cells.join('') + '</row>'; }
+/* Pesos (centavos → unidades) para celdas de moneda. */
+function _xMoney(cents){ return (cents === null || cents === undefined || !isFinite(cents)) ? null : Math.round(cents) / 100; }
+/* ZIP en modo almacenamiento: entradas fijas 1980-01-01 (determinismo). */
+function _zipStore(files){
+  var enc = new TextEncoder();
+  var parts = [], central = [], offset = 0;
+  files.forEach(function(f){
+    var nameU8 = enc.encode(f.name);
+    var data = (f.data instanceof Uint8Array) ? f.data : enc.encode(f.data);
+    var crc = _crc32(data);
+    var lh = new Uint8Array(30 + nameU8.length);
+    var dv = new DataView(lh.buffer);
+    dv.setUint32(0, 0x04034b50, true);
+    dv.setUint16(4, 20, true);
+    dv.setUint16(6, 0x0800, true);
+    dv.setUint16(8, 0, true);                 /* store (sin compresión) */
+    dv.setUint16(10, 0, true); dv.setUint16(12, 0, true);
+    dv.setUint32(14, crc, true);
+    dv.setUint32(18, data.length, true);
+    dv.setUint32(22, data.length, true);
+    dv.setUint16(26, nameU8.length, true);
+    dv.setUint16(28, 0, true);
+    lh.set(nameU8, 30);
+    parts.push(lh, data);
+    var ch = new Uint8Array(46 + nameU8.length);
+    var cv = new DataView(ch.buffer);
+    cv.setUint32(0, 0x02014b50, true);
+    cv.setUint16(4, 20, true); cv.setUint16(6, 20, true);
+    cv.setUint16(8, 0x0800, true);
+    cv.setUint16(10, 0, true);
+    cv.setUint16(12, 0, true); cv.setUint16(14, 0, true);
+    cv.setUint32(16, crc, true);
+    cv.setUint32(20, data.length, true);
+    cv.setUint32(24, data.length, true);
+    cv.setUint16(28, nameU8.length, true);
+    cv.setUint32(42, offset, true);
+    ch.set(nameU8, 46);
+    central.push(ch);
+    offset += lh.length + data.length;
+  });
+  var centralLen = central.reduce(function(a, c){ return a + c.length; }, 0);
+  var eocd = new Uint8Array(22);
+  var ev = new DataView(eocd.buffer);
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(8, files.length, true);
+  ev.setUint16(10, files.length, true);
+  ev.setUint32(12, centralLen, true);
+  ev.setUint32(16, offset, true);
+  var all = parts.concat(central).concat([eocd]);
+  var total = all.reduce(function(a, u){ return a + u.length; }, 0);
+  var out = new Uint8Array(total), pos = 0;
+  all.forEach(function(u){ out.set(u, pos); pos += u.length; });
+  return out;
+}
+var _XMLHEAD = '<' + '?xml version="1.0" encoding="UTF-8" standalone="yes"?' + '>';
+var _XLSX_STYLES = _XMLHEAD +
+  '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+  '<numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0.00"/></numFmts>' +
+  '<fonts count="3"><font><sz val="11"/><name val="Calibri"/></font>' +
+  '<font><b/><sz val="11"/><name val="Calibri"/></font>' +
+  '<font><b/><sz val="14"/><color rgb="FF093F66"/><name val="Calibri"/></font></fonts>' +
+  '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>' +
+  '<fill><patternFill patternType="solid"><fgColor rgb="FFEEF3FA"/><bgColor indexed="64"/></patternFill></fill></fills>' +
+  '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>' +
+  '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+  '<cellXfs count="6">' +
+  '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+  '<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>' +
+  '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+  '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
+  '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
+  '<xf numFmtId="164" fontId="1" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1"/>' +
+  '</cellXfs>' +
+  '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
+  '</styleSheet>';
+function _xSheetXml(rows, cols){
+  var colsXml = (cols || []).map(function(w, i){ return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>'; }).join('');
+  return _XMLHEAD +
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' +
+    (colsXml ? '<cols>' + colsXml + '</cols>' : '') +
+    '<sheetData>' + rows.join('') + '</sheetData>' +
+    '</worksheet>';
+}
+/* Hoja FICHA: identificación + tabla normativa del resultado canónico. */
+function _xlsxSheetFicha(f, R){
+  var rows = [], ln = 0, c0 = 1, cB = 3, cN = 4;
+  function row(vals, styles){
+    ln++;
+    var cells = [];
+    for(var i = 0; i < vals.length; i++){
+      if(vals[i] === null || vals[i] === undefined || vals[i] === '') continue;
+      cells.push(_xCell(_xlsxCol(i + 1) + ln, vals[i], styles ? (styles[i] || 0) : 0));
+    }
+    rows.push(_xRow(ln, cells));
+  }
+  row(['FICHA DE COSTOS Y GASTOS — Res. ' + RES.numero + ' · MFP'], [4]);
+  row([]);
+  row(['Ficha', f.nombre || '', '', 'Fecha', f.meta.fecha || ''], [3, 0, 0, 3, 0]);
+  row(['Entidad', f.meta.entidad || '', '', 'Moneda', f.meta.moneda || 'CUP'], [3, 0, 0, 3, 0]);
+  if(f.meta.organo) row(['Organismo superior', f.meta.organo], [3, 0]);
+  row(['Producto/Servicio', f.meta.producto || '', '', 'Código', f.meta.codigo || ''], [3, 0, 0, 3, 0]);
+  row(['UM', f.meta.um || '', '', 'Cantidad a producir', +f.meta.nivelProduccion || 0], [3, 0, 0, 3, 2]);
+  row(['% utilización de capacidad', +f.meta.pctCapacidad || 0, '', 'Método de precios', f.meta.metodoPrecio === 'gastos' ? 'Gastos (tasa ' + fmtNum(+f.meta.tasaUtilidad || 0, 2) + ' %)' : 'Correlación'], [3, 2, 0, 3, 0]);
+  if(f.meta.observaciones) row(['Observaciones', f.meta.observaciones], [3, 0]);
+  row([]);
+  row(['Partida', 'Concepto', 'Costo Base', 'Costo Nuevo'], [1, 1, 1, 1]);
+  NORM_ROWS.forEach(function(r){
+    var id = r.id;
+    if(r.k === 'info'){ row([id, r.c + ': ' + (f.meta.refPrecios || '—')], [3, 0]); return; }
+    var stB = r.total ? 5 : 2, stN = r.total ? 5 : 2;
+    row([id, r.c, _xMoney(R.base.values[id]), _xMoney(R.nuevo.values[id])], [0, 0, stB, stN]);
+    if(id === '3' && f.rows['3'] && f.rows['3'].desgloseActivo && (f.rows['3'].desglose || []).length){
+      f.rows['3'].desglose.forEach(function(it, ix){
+        var cb = toCents(it.base), cn = toCents(it.nuevo);
+        row(['3.' + (ix + 1), (it.concepto || '(partida sin descripción)') + (it.codigo ? ' [' + it.codigo + ']' : ''), _xMoney(cb), _xMoney(cn)], [0, 0, 2, 2]);
+      });
+    }
+  });
+  row([]);
+  row(['Generado por COSTPRO FC · motor computeFicha (Res. 148/2023) · ' + new Date().toLocaleDateString('es-CU')], [3]);
+  return _xSheetXml(rows, [9, 52, 18, 18]);
+}
+/* Hoja DETALLE: desgloses, anexos y validaciones del mismo resultado. */
+function _xlsxSheetDetalle(f, R){
+  var rows = [], ln = 0;
+  function row(vals, styles){
+    ln++;
+    var cells = [];
+    for(var i = 0; i < vals.length; i++){
+      if(vals[i] === null || vals[i] === undefined || vals[i] === '') continue;
+      cells.push(_xCell(_xlsxCol(i + 1) + ln, vals[i], styles ? (styles[i] || 0) : 0));
+    }
+    rows.push(_xRow(ln, cells));
+  }
+  row(['DETALLE DE COMPONENTES — ' + (f.nombre || '')], [4]);
+  row([]);
+  if(f.rows['3'] && f.rows['3'].desgloseActivo && (f.rows['3'].desglose || []).length){
+    row(['Desglose · Otros Gastos Directos (Fila 3)'], [3]);
+    row(['Partida', 'Concepto', 'Código', 'Costo Base', 'Costo Nuevo'], [1, 1, 1, 1, 1]);
+    f.rows['3'].desglose.forEach(function(it, ix){
+      row(['3.' + (ix + 1), it.concepto || '(partida sin descripción)', it.codigo || '', _xMoney(toCents(it.base)), _xMoney(toCents(it.nuevo))], [0, 0, 0, 2, 2]);
+    });
+    row(['', 'TOTAL FILA 3 (Σ partidas)', '', '', _xMoney(R.nuevo.values['3'])], [0, 3, 0, 0, 5]);
+    row([]);
+  }
+  var A = f.anexoInsumos;
+  if(A.rows.length){
+    row(['Anexo · Desagregación de los Insumos Fundamentales' + (A.activo ? ' (alimenta Filas 1.1–1.4)' : ' (informativo)')], [3]);
+    row(['Código (1)', 'Producto (2)', 'UM (3)', 'Destino (4)', 'Costo Base (5)', 'Norma consumo (6)', 'Precio unit. (7)', 'Costo propuesto (8=6×7)'], [1, 1, 1, 1, 1, 1, 1, 1]);
+    A.rows.forEach(function(r){
+      var prop = roundHalfAway((+r.norma || 0) * (+r.precio || 0) * 100);
+      row([r.codigo || '', r.producto || '', r.um || '', r.destino || '',
+           (r.costoBase === null || r.costoBase === undefined) ? null : +r.costoBase,
+           (r.norma === null || r.norma === undefined) ? null : +r.norma,
+           (r.precio === null || r.precio === undefined) ? null : +r.precio,
+           _xMoney(prop)], [0, 0, 0, 0, 2, 2, 2, 2]);
+    });
+    row(['', 'TOTAL INSUMOS', '', '', _xMoney(R.tIns.totalBase), '', '', _xMoney(R.tIns.totalProp)], [0, 3, 0, 0, 5, 0, 0, 5]);
+    row([]);
+  }
+  var S = f.anexoSalario;
+  if(S.rows.length){
+    row(['Anexo · Desglose del Gasto de Salario de los Obreros' + (S.activo ? ' (alimenta la Fila 2)' : ' (informativo)')], [3]);
+    row(['Operación (1)', 'Gasto salario C.Base (2)', 'Cant. trab. (3)', 'Categoría (4)', 'Grupo (5)', 'Salario/hora (6)', 'Pagos adic./h (7)', 'Norma tiempo h (8)', 'Gasto salario propuesto (9)'], [1, 1, 1, 1, 1, 1, 1, 1, 1]);
+    S.rows.forEach(function(r){
+      var g = roundHalfAway((+r.trabajadores || 0) * ((+r.salarioHora || 0) + (+r.pagosAdic || 0)) * (+r.normaTiempo || 0) * 100);
+      row([r.operacion || '',
+           (r.gastoBase === null || r.gastoBase === undefined) ? null : +r.gastoBase,
+           (r.trabajadores === null || r.trabajadores === undefined) ? null : +r.trabajadores,
+           r.categoria || '', r.grupo || '',
+           (r.salarioHora === null || r.salarioHora === undefined) ? null : +r.salarioHora,
+           (r.pagosAdic === null || r.pagosAdic === undefined) ? null : +r.pagosAdic,
+           (r.normaTiempo === null || r.normaTiempo === undefined) ? null : +r.normaTiempo,
+           _xMoney(g)], [0, 2, 0, 0, 0, 2, 2, 2, 2]);
+    });
+    row(['TOTAL', _xMoney(R.tSal.base), '', '', '', '', '', '', _xMoney(R.tSal.prop)], [3, 5, 0, 0, 0, 0, 0, 0, 5]);
+    row([]);
+  }
+  if(R.errors.length || R.warnings.length){
+    row(['Validaciones del motor'], [3]);
+    row(['Severidad', 'Fila', 'Mensaje'], [1, 1, 1]);
+    R.errors.concat(R.warnings).forEach(function(e2){
+      row([e2.sev.toUpperCase(), e2.fila || '', e2.msg], [0, 0, 0]);
+    });
+  }
+  return _xSheetXml(rows, [16, 34, 16, 22, 18, 18, 16, 18, 22]);
+}
+/* Hoja METADATOS. */
+function _xlsxSheetMeta(f, R){
+  var rows = [], ln = 0;
+  function row(vals, styles){
+    ln++;
+    var cells = [];
+    for(var i = 0; i < vals.length; i++){
+      if(vals[i] === null || vals[i] === undefined || vals[i] === '') continue;
+      cells.push(_xCell(_xlsxCol(i + 1) + ln, vals[i], styles ? (styles[i] || 0) : 0));
+    }
+    rows.push(_xRow(ln, cells));
+  }
+  row(['Metadatos de la exportación'], [4]);
+  row([]);
+  row(['Campo', 'Valor'], [1, 1]);
+  row(['Aplicación', 'COSTPRO FC'], [3, 0]);
+  row(['Versión de la aplicación', appVersionLabel()], [3, 0]);
+  row(['Formato de intercambio', FC_JSON_FORMAT + ' ' + FC_JSON_VERSION], [3, 0]);
+  row(['Motor de cálculo', 'computeFicha() — Metodología Res. ' + RES.numero + ' MFP (Anexo I)'], [3, 0]);
+  row(['Versión del esquema de ficha', FC_SCHEMA_VERSION], [3, 0]);
+  row(['Identificador de ficha', f.id || ''], [3, 0]);
+  row(['Nombre de la ficha', f.nombre || ''], [3, 0]);
+  row(['Estado de la ficha', (ESTADOS_FICHA[f.estado || 'borrador'] || f.estado || 'Borrador')], [3, 0]);
+  row(['Plan comercial (origen)', (App.comState && App.comState.plan) ? (String(App.comState.plan).toUpperCase() + ' — profiles.plan (Supabase)') : '—'], [3, 0]);
+  row(['Estilo documental', documentStyleName()], [3, 0]);
+  row(['Fecha de exportación', new Date().toISOString()], [3, 0]);
+  return _xSheetXml(rows, [34, 62]);
+}
+function buildXlsxBytes(f, R){
+  var heads = _XMLHEAD;
+  var ns = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+  var rn = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  var workbook = heads + '<workbook xmlns="' + ns + '" xmlns:r="' + rn + '">' +
+    '<sheets>' +
+    '<sheet name="Ficha" sheetId="1" r:id="rId1"/>' +
+    '<sheet name="Detalle" sheetId="2" r:id="rId2"/>' +
+    '<sheet name="Metadatos" sheetId="3" r:id="rId3"/>' +
+    '</sheets></workbook>';
+  var wbRels = heads + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="' + rn + '/worksheet" Target="worksheets/sheet1.xml"/>' +
+    '<Relationship Id="rId2" Type="' + rn + '/worksheet" Target="worksheets/sheet2.xml"/>' +
+    '<Relationship Id="rId3" Type="' + rn + '/worksheet" Target="worksheets/sheet3.xml"/>' +
+    '<Relationship Id="rId4" Type="' + rn + '/styles" Target="styles.xml"/>' +
+    '</Relationships>';
+  var rootRels = heads + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+    '</Relationships>';
+  var contentTypes = heads + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+    '<Default Extension="xml" ContentType="application/xml"/>' +
+    '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+    '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+    '<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+    '<Override PartName="/xl/worksheets/sheet3.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+    '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+    '</Types>';
+  return _zipStore([
+    { name:'[Content_Types].xml', data: contentTypes },
+    { name:'_rels/.rels', data: rootRels },
+    { name:'xl/workbook.xml', data: workbook },
+    { name:'xl/_rels/workbook.xml.rels', data: wbRels },
+    { name:'xl/styles.xml', data: _XLSX_STYLES },
+    { name:'xl/worksheets/sheet1.xml', data: _xlsxSheetFicha(f, R) },
+    { name:'xl/worksheets/sheet2.xml', data: _xlsxSheetDetalle(f, R) },
+    { name:'xl/worksheets/sheet3.xml', data: _xlsxSheetMeta(f, R) }
+  ]);
+}
+function downloadBlobBytes(name, bytes, mime){
+  var blob = new Blob([bytes], { type:mime });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+/* §19 · gate real en la lógica: la UI oculta no es seguridad. */
+function excelPremiumGate(){
+  if(typeof Com !== 'undefined' && Com.isPremium && Com.isPremium()) return true;
+  document.getElementById('premModal').hidden = false;
+  return false;
+}
+function exportExcel(){
+  if(!F()){ toast('No hay ninguna ficha abierta para exportar. Abra o cree una ficha.', 'info'); return; }
+  if(!excelPremiumGate()) return;
+  /* §16/§23: el Excel consume el resultado canónico (mismo que Preview/PDF). */
+  if(App.ui.dirty) refresh();
+  var f = F(), R = App.res;
+  if(!R){ toast('La ficha aún no tiene un resultado calculado. Vuelva a intentarlo.', 'err'); return; }
+  var bytes = buildXlsxBytes(f, R);
+  downloadBlobBytes(safeName(f.nombre) + '.xlsx', bytes, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  FcCloud.recordUsage('fc_export');
+  toast('Excel exportado: Ficha + Detalle + Metadatos (resultado canónico de computeFicha)', 'ok');
+}
+
 function escapeCsv(s){
   s = String(s === null || s === undefined ? '' : s);
   /* FASE 22 · P3-1: neutralización de prefijos de fórmula (OWASP CSV injection),
@@ -10115,9 +10357,7 @@ function boot(){
      Onboarding crean claves FC_*). Regla del flag ÚNICO FC_LANDING_V1:
      presente → directo a la app; ausente → presentación una sola vez. */
   Landing.init();
-  App.licensed = false;
   App.comState = null;
-  Lic.initInstall();
   /* Preferencia de estilo documental (presentación, no dato de ficha) */
   try{ var ds = localStorage.getItem('FC_DOCSTYLE'); if(ds && DOC_STYLES.indexOf(ds) >= 0) App.ui.docStyle = ds; }catch(e){}
   var d = loadDB();
@@ -10149,6 +10389,15 @@ function boot(){
      bloquea el arranque ni la puerta local; sin red degrada a estado
      cacheado y el núcleo sigue 100% offline (Internet jamás es requisito). */
   FcCloud.init();
+  /* FASE 24.6-1: si profiles.plan cambia en el servidor (p. ej. el usuario
+     contrata Pro en el panel), el estado comercial se refleja en vivo. */
+  try{
+    FcCloud.onChange(function(st){
+      if(Auth.current() && !Auth.current().guest && st && ('plan' in st)){
+        if(!App.comState || App.comState.plan !== st.plan) Com.revalidate();
+      }
+    });
+  }catch(e){}
   /* FASE 24.4 · Cloud Fichas: sincronización local↔nube (solo con sesión
      cloud; nunca bloquea el arranque ni degrada sin Internet). */
   FcSheets.init();
@@ -10161,13 +10410,11 @@ function boot(){
      el lastSeen monótono de la licencia Premium. */
   setInterval(function(){
     if(Auth.current()){
-      Lic.touch();
       Com.revalidate();
     }
   }, 300000);
   document.addEventListener('visibilitychange', function(){
     if(document.visibilityState === 'visible' && Auth.current()){
-      Lic.touch();
       Com.revalidate();
     }
   });

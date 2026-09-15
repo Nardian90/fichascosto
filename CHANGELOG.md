@@ -2,6 +2,33 @@
 
 Formato: Keep a Changelog simplificado. Cada versión corresponde a un tag `vX.Y.Z` y a un GitHub Release con `FC.release.html` + `release/release-manifest.json`.
 
+## v12.10.0 — 2026-09-15 · FASE 24.6-1 · Supabase como fuente de verdad comercial + JSON universal + Excel Premium + fix PDF/PWA
+
+### Added
+- **Autoridad comercial = `profiles.plan` (Supabase)**: para usuarios autenticados el plan se lee EXCLUSIVAMENTE de `public.profiles.plan` (enum `plan_t`), con whitelist estricta `isPremiumPlan(plan) = (plan === 'pro' || plan === 'enterprise')`. `free`/`null`/valor desconocido → FREE (jamás se interpreta un valor desconocido como Premium). Guest sigue siendo Guest y NO consulta `profiles.plan`. El plan se revalida en vivo (login, visibilidad, tick 5 min, evento `online`); caché de plan SOLO dentro del registro de sesión cloud (`FC_CLOUD_SESSION_V1`), sin autoridad local separada y sin claves nuevas en `localStorage`.
+- **Importación universal de Fichas (JSON)**: formato de intercambio versionado `costpro-ficha 1.0` (`{format, version, exportedAt, application, ficha, resultados, auditTrail}` — sin JWT/tokens/sesión). Importación por **drag & drop** (zona contextual "Suelta la ficha aquí") y por **selector** (`Importar JSON…`). Pipeline: parse → detección de versión (sobre v1, export histórico `{ficha}` y ficha plana legacy) → validación estructural/tipos/tamaños → **vista previa** con datos de la ficha → confirmación → importación con `migrarFicha()` (schema 1..4 antes del cálculo). Protección §11 (nada se reemplaza en silencio; flush de guardado pendiente) y duplicados §12 (mismo id → [Crear como copia][Reemplazar][Cancelar]; Reemplazar exige confirmación explícita y conserva identidad local/cloud). Jamás `eval`/`new Function`; textos siempre por `escapeHtml`.
+- **Exportación Excel (Premium)**: `Exportar Excel` genera un `.xlsx` real (ZIP+SpreadsheetML, 0 dependencias, determinista) con 3 hojas — **Ficha** (identificación + tabla normativa + desglose 3.x), **Detalle** (desglose Fila 3, Anexo Insumos, Anexo Salario, validaciones; totales del resultado canónico) y **Metadatos** (app, versión, formato, ficha, plan, fecha). Encabezados congelados, anchos, formato moneda #,##0.00. **Sin segundo motor**: todo valor sale de `App.res` (`computeFicha()`); gate real en la lógica (`excelPremiumGate()`) además de la UI; modal Premium para Free/Guest con [Ver Premium][Cancelar].
+- **Guard anti-escalada en Supabase** (única DDL de la fase, autorizada por §3): función `profiles_block_privileged_update()` + trigger `BEFORE UPDATE trg_profiles_privileged_cols_guard` en `public.profiles` — un usuario autenticado NO-admin ya no puede modificar sus columnas `plan, role, roles, role_id, is_active, max_stores_limit, max_users_limit, tenant_id, id, created_by` (cerrada la escalada `plan='pro'` y la cadena `role='admin'`→plan vía `role_id`). `service_role`/SQL (`auth.uid() IS NULL`) y admins (`is_admin()`) siguen operando igual; el cambio de plan real vive en el panel (API admin service_role) y facturación.
+
+### Changed
+- **Retirado el sistema `.fclicense` (§4)**: eliminados del producto el módulo `Lic`, la clave pública `FC_LICENSE_PUBKEY`, el material de firma `_sk`+`_skPass`+`_skJwk`, `makeLicense`, la vista de Administración (generador), la pantalla de activación, la importación de licencias y los textos/ayuda asociados. El release publicado ya NO contiene material criptográfico de firma (corrige el hallazgo D2 de la FASE 24.6-0). Documentación histórica (worklog/informes) intacta como auditoría.
+- **D1 corregido**: el chip PWA `#pwaInstallChip` (y los nuevos modales) están excluidos del documento impreso vía `@media print` — 0 apariciones del texto "Instalar COSTPRO como aplicación" en los PDF de los 4 estilos.
+- Mi cuenta: tarjeta "Plan y licencia" → "Plan y cuenta" (plan, origen `profiles.plan`, beneficios); menú de usuario "Plan y cuenta"; Centro: banner de bienvenida finalizada con "Ver mi plan". Ayuda reescrita (categoría "Cuenta y plan"; sin activaciones).
+- Toolchain: `build-release.js` v12.10.0 con checks nuevos (sin material de licencias, whitelist de plan, importación JSON, Excel Premium, caché de plan solo en sesión, D1 print) y `noSecrets` actualizado.
+
+### Unchanged
+- `computeFicha()` — hash `c5f4dca8042385c36e49c76992269b25` (INVARIANTE, markers canónicos; el Excel/JSON consumen su salida, no la duplican).
+- Paginación del PDF, estilos norm/pro/simp/eleg, perfiles Oficial/Auditoría, motor, fórmulas, RLS de `cost_sheets`/`user_usage`, cuotas (`freeEnforce=false`, telemetría), PWA (scope/allowlist/passthrough/kill switch), VersionManager, landing, guest 3 experiencias, sync cloud (FcSheets intacto).
+
+## v12.9.0 — 2026-09-15 · FASE 24.5 · G3-D1 + PWA progresiva
+
+### Changed
+- **G3-D1 corregido**: tras revocación de refresh con estado «online» obsoleto, `FcCloud` ahora revalida SIEMPRE que haya sesión en el evento `online` (guard eliminado); la sesión muerta se limpia y el estado pasa a «expirada» con datos intactos. Causalidad demostrada 3×3.
+- **PWA progresiva**: `manifest.webmanifest` + `sw.js` generados por build (scope `/fichascosto/release/`, allowlist 6 recursos, Supabase/externos passthrough absoluto, shell network-first, cache `costpro-release-<VERSION>`, sin skipWaiting/clients.claim) + UX de instalación real (`beforeinstallprompt`, chip descartable) + kill switch `APP_CONFIG.pwa.enabled` + apple-touch-icon. CI: H-1 (pages.yml branches) verificado y H-2 reescrito como permit de endpoints REST/Auth.
+
+### Unchanged
+- `computeFicha()` `c5f4dca8042385c36e49c76992269b25`; 0 DDL; FcSheets/FcCloud intactos.
+
 ## v12.8.0 — 2026-09-15 · FASE 24.4 · Cloud Fichas (infraestructura Supabase existente, 0 DDL)
 
 ### Added
