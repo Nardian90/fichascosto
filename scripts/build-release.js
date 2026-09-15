@@ -54,7 +54,10 @@ const md5 = s => crypto.createHash('md5').update(s).digest('hex');
   if (a < 0 || b < 0 || b <= a) throw new Error('Marcadores ENGINE no encontrados en la fuente');
   const engineHash = md5(src.slice(a + MK.length, b));
 
-  const buildDate = process.env.FC_BUILD_DATE || new Date().toISOString();
+  /* FASE 24.3 · normalización: GitHub emite head_commit.timestamp sin ms (Z) —
+     new Date(...).toISOString() produce SIEMPRE el formato ISO con ms (.000Z),
+     así el build de CI y el local son byte-idénticos ante la misma fecha. */
+  const buildDate = process.env.FC_BUILD_DATE ? new Date(process.env.FC_BUILD_DATE).toISOString() : new Date().toISOString();
 
   /* identificación de build SOLO en el release (APP_CONFIG sigue siendo la única fuente) */
   const inject = `var APP_CONFIG = { buildMeta:{ product:'COSTPRO', version:'${VERSION}', phase:'${PHASE}', buildDate:'${buildDate}', sourceSha256:'${sourceHash.slice(0, 12)}', pipeline:'build-release v1 (html-minifier-terser + terser, mangle interno)' },`;
