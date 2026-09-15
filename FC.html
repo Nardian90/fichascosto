@@ -1563,6 +1563,12 @@ body.landing-open .skip{visibility:hidden}
           <input id="auUser" name="usuario" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
         </div>
       </div>
+      <div class="field" id="auEmailField" hidden>
+        <label for="auEmail" id="auEmailLabel">Correo electrónico</label>
+        <div class="inwrap"><span class="in-ic" data-icon="mail" data-sz="16"></span>
+          <input id="auEmail" name="correo" type="email" autocomplete="email" autocapitalize="none" spellcheck="false">
+        </div>
+      </div>
       <div class="field">
         <label for="auPass" id="auPassLabel">Contraseña</label>
         <div class="inwrap"><span class="in-ic" data-icon="lock" data-sz="16"></span>
@@ -3667,6 +3673,7 @@ var ICON_PATHS = {
   warning:'<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
   error:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
   check:'<polyline points="20 6 9 17 4 12"/>',
+  mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/>',
   info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
   x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
   table:'<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/>',
@@ -3874,6 +3881,36 @@ var Auth = {
     try{ sessionStorage.setItem(SESSION_KEY, JSON.stringify(sess)); }catch(e){}
     return { session:sess };
   },
+  /* FASE 24.4 · Registro puente local↔nube: crea (o verifica) una cuenta
+     local con el CORREO como identidad y la MISMA contraseña que la cuenta
+     COSTPRO. La clave local es determinista a partir del correo (normText +
+     sanetizado), de modo que el login posterior con ese correo funciona por
+     la vía normal. La contraseña solo se guarda como derivado PBKDF2 (igual
+     que siempre: jamás en texto plano). Idempotente: si ya existe y la
+     contraseña coincide, solo establece la sesión. */
+  bridgeRegister: async function(email, password){
+    var em = String(email || '').trim().toLowerCase();
+    if(!em || em.indexOf('@') < 1) return { error:'Correo no válido.' };
+    var passErr = userValidatePass(password);
+    if(passErr) return { error: passErr };
+    var key = userKey(em);
+    var store = usersLoad();
+    var acc = store.users[key];
+    if(acc){
+      var km0 = await crypto.subtle.importKey('raw', te(password), 'PBKDF2', false, ['deriveBits']);
+      var bits0 = await crypto.subtle.deriveBits({ name:'PBKDF2', hash:'SHA-256', salt:b64ToBytes(acc.salt), iterations:acc.iter }, km0, 256);
+      if(!constEq(new Uint8Array(bits0), b64ToBytes(acc.hash))) return { error:'Ya existe una cuenta local con ese correo y otra contraseña. Usa la contraseña de esa cuenta.' };
+    } else {
+      var salt = crypto.getRandomValues(new Uint8Array(16));
+      var km = await crypto.subtle.importKey('raw', te(password), 'PBKDF2', false, ['deriveBits']);
+      var bits = await crypto.subtle.deriveBits({ name:'PBKDF2', hash:'SHA-256', salt:salt, iterations:150000 }, km, 256);
+      store.users[key] = { salt:bytesToB64(salt), iter:150000, hash:bytesToB64(new Uint8Array(bits)), display:em, createdAt:new Date().toISOString(), cloud:em };
+      usersSave(store);
+    }
+    var sess = { user:em, role:'usuario', at:new Date().toISOString() };
+    try{ sessionStorage.setItem(SESSION_KEY, JSON.stringify(sess)); }catch(e){}
+    return { session:sess };
+  },
   guestIn: function(){
     var sess = { user:'Invitado', role:'guest', guest:true, at:new Date().toISOString() };
     try{ sessionStorage.setItem(SESSION_KEY, JSON.stringify(sess)); }catch(e){}
@@ -3939,10 +3976,12 @@ function auSetMode(mode){
   var ic = go ? go.querySelector('.ic') : null;
   if(go) go.childNodes[go.childNodes.length - 1].textContent = _auMode === 'up' ? 'Crear cuenta' : 'Iniciar sesión';
   if(ic){ ic.setAttribute('data-icon', _auMode === 'up' ? 'user' : 'logout'); hydrateIcons(ic); }
-  if(lbl) lbl.textContent = _auMode === 'up' ? 'Elige un nombre de usuario' : 'Usuario';
+  if(lbl) lbl.textContent = _auMode === 'up' ? 'Tu nombre (opcional)' : 'Usuario';
   if(plbl) plbl.textContent = _auMode === 'up' ? 'Crea una contraseña' : 'Contraseña';
+  var ef = document.getElementById('auEmailField');
+  if(ef) ef.hidden = (_auMode !== 'up');
   if(hint) hint.textContent = _auMode === 'up'
-    ? 'Sin datos personales. Al terminar podrás activar una licencia Premium cuando quieras.'
+    ? 'Crea tu cuenta gratuita con tu correo: recibirás un mensaje para confirmarla y tus fichas se guardarán en tu cuenta.'
     : 'Las fichas guardadas en este navegador estarán disponibles en tu cuenta.';
   var pass = document.getElementById('auPass');
   if(pass) pass.autocomplete = _auMode === 'up' ? 'new-password' : 'current-password';
@@ -3978,11 +4017,37 @@ function bindAuthUI(){
     go.disabled = true;
     try{
       if(_auMode === 'up'){
-        var r = await Auth.register(u, p);
-        if(r.error){ err.textContent = r.error; err.hidden = false; return; }
+        /* FASE 24.4 · Registro cloud (Opción C del pliego): crea la cuenta
+           COSTPRO (Supabase, confirmación de correo OBLIGATORIA) y prepara
+           la sesión local puente para entrar de inmediato. Las fichas ya
+           creadas (invitado incluido) se sincronizarán al conectar. */
+        var em = String((document.getElementById('auEmail') || {}).value || '').trim();
+        var nm = String(u || '').trim();
+        if(!em || em.indexOf('@') < 1){ err.textContent = 'Introduce un correo electrónico válido para crear tu cuenta.'; err.hidden = false; return; }
+        if(!String(p)){ err.textContent = 'Introduce una contraseña para continuar.'; err.hidden = false; return; }
+        var rs = await FcCloud.signUp(em, p, nm);
+        if(rs.error){ err.textContent = rs.error; err.hidden = false; return; }
+        var rb = await Auth.bridgeRegister(em, p);
+        if(rb.error){ err.textContent = rb.error; err.hidden = false; return; }
         err.hidden = true;
-        await auEnterWith(r.session);
-        toast('Cuenta creada: comenzaste tu período de bienvenida de ' + APP_CONFIG.welcomeDays + ' días con PDF sin identificación COSTPRO.', 'ok');
+        await auEnterWith(rb.session);
+        toast('Cuenta creada: ' + APP_CONFIG.welcomeDays + ' días de bienvenida con PDF limpio. Revisa tu correo (' + em + ') y confírmala para guardar tus fichas en la nube.', 'ok');
+      } else if(String(u).indexOf('@') >= 0){
+        /* FASE 24.4 · Login con email: cuenta COSTPRO (nube) + puente local.
+           Si no hay red, la cuenta local puente mantiene el acceso. */
+        var rc = await FcCloud.signIn(u, p);
+        if(rc && rc.ok){
+          var rb2 = await Auth.bridgeRegister(u, p);
+          if(rb2.error){ err.textContent = rb2.error; err.hidden = false; return; }
+          err.hidden = true;
+          await auEnterWith(rb2.session);
+          toast('Cuenta COSTPRO conectada. Sincronizando tus fichas…', 'ok');
+          return;
+        }
+        var sl = await Auth.signIn(u, p);
+        if(sl){ err.hidden = true; await auEnterWith(sl); return; }
+        err.textContent = (rc && rc.error) ? rc.error : 'Correo o contraseña incorrectos.';
+        err.hidden = false;
       } else {
         var s = await Auth.signIn(u, p);
         if(!s){ err.textContent = 'Usuario o contraseña incorrectos. Comprueba las credenciales e inténtalo de nuevo.'; err.hidden = false; return; }
@@ -4192,7 +4257,11 @@ var APP_CONFIG = {
     /* Acciones del sistema de cuotas YA EXISTENTE en el proyecto
        (tabla user_usage + RPC increment_user_usage; límite free 3/día).
        Punto de integración de la FASE 24.2 — NO activo en 24.1. */
-    quotaActions: ['fc_create', 'fc_export', 'fc_import']
+    quotaActions: ['fc_create', 'fc_export', 'fc_import'],
+    /* FASE 24.4 · Cloud Fichas: sincronización con la tabla EXISTENTE
+       cost_sheets (RLS por propietario). Interruptor único del módulo:
+       false = FC vuelve a 100% local (rollback de una línea, §41). */
+    sheetsEnabled: true
   },
   /* DonationProvider + método REAL de aporte (transferencia).
      Los datos del aporte viven SOLO aquí: la UI los consume, jamás los
@@ -4333,6 +4402,12 @@ var FcCloud = (function(){
 
   /* Arranque (desde boot, NO bloquea): restaura la sesión si la hay. */
   function init(){
+    /* FASE 24.4 · ONLINE AGAIN (§17): al volver Internet, re-valida la
+       identidad en la nube si había sesión (el evento online no pasa por boot). */
+    if(!init._onlineBound){
+      init._onlineBound = true;
+      try{ window.addEventListener('online', function(){ if(lsLoad() && state.status !== 'online') init(); }); }catch(e){}
+    }
     var sess = lsLoad();
     if(!sess){ setState({ status:'desconectado' }); return Promise.resolve(clone(state)); }
     setState({ status:'conectando', user: sess.user });
@@ -4343,6 +4418,17 @@ var FcCloud = (function(){
       else { setState({ status:'offline', user: sess.user }); }  /* sin red: identidad cacheada, núcleo intacto */
       return clone(state);
     });
+  }
+
+  /* FASE 24.4 · Sesión lista para usar: devuelve la sesión activa y la
+     refresca si expira en menos de 60 s. La usan las capas cliente
+     (FcSheets) antes de cada operación REST con el JWT del usuario. */
+  function ensureSession(){
+    var sess = lsLoad();
+    if(!sess) return Promise.resolve(null);
+    var exp = sess.expires_at || jwtExp(sess.access_token);
+    if(exp && (exp - Date.now()) > 60000) return Promise.resolve(sess);
+    return refreshSession(sess).catch(function(){ return null; });
   }
 
   /* Login email+password (GoTrue grant_type=password — mismo servicio que
@@ -4395,6 +4481,61 @@ var FcCloud = (function(){
       fetchT(CFG.supabaseUrl + '/auth/v1/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + sess.access_token }, body: '{}' }).catch(function(){});
     }
     return Promise.resolve(clone(state));
+  }
+
+  /* =====================================================================
+     FASE 24.4 · SIGNUP CLOUD — crea la cuenta COSTPRO desde FC.
+     POST /auth/v1/signup (mismo GoTrue del panel): la confirmación de
+     correo es OBLIGATORIA (mailer_autoconfirm=false del proyecto) — NO
+     existe bypass: sin confirmación no hay sesión ni plan. El trigger
+     on_auth_user_created del proyecto crea el profile (plan 'free') SOLO.
+     Metadata: full_name opcional; SIN company_name (un usuario FC no crea
+     tenant — aislamiento del ecosistema retail). Con session (si el
+     proyecto algún día autoconfirmara) se establece igual que en signIn.
+     ===================================================================== */
+  function signUp(email, pass, fullName){
+    if(busy) return Promise.resolve({ ok:false, error:'Ya hay una conexión en curso.' });
+    busy = true;
+    setState({ status:'conectando' });
+    var body = { email: String(email || '').trim(), password: String(pass || ''),
+                 data: { full_name: String(fullName || '').trim() || String(email || '').split('@')[0] } };
+    return fetchT(CFG.supabaseUrl + '/auth/v1/signup', { method: 'POST', body: JSON.stringify(body) })
+      .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+      .then(function(res){
+        busy = false;
+        if(!res.ok || !res.j || (!res.j.id && !res.j.user && !res.j.access_token)){
+          var raw = res.j ? ((res.j.msg || res.j.error_description || res.j.error || (res.j.errors && res.j.errors.join && res.j.errors.join(' ')) || '') + '') : '';
+          var human = 'No se pudo crear la cuenta. Revisa el correo y la contraseña (mínimo 6 caracteres).';
+          if(raw.indexOf('already registered') >= 0 || raw.indexOf('already been registered') >= 0) human = 'Este correo ya tiene una cuenta COSTPRO: usa Iniciar sesión.';
+          else if(raw.indexOf('Password should be at least') >= 0) human = 'La contraseña debe tener al menos 6 caracteres.';
+          else if(raw.indexOf('invalid') >= 0 && raw.toLowerCase().indexOf('email') >= 0) human = 'El correo no parece válido. Revísalo e inténtalo de nuevo.';
+          else if(raw.indexOf('rate limit') >= 0) human = 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
+          setState({ status:'error', message: human });
+          return { ok:false, error: human };
+        }
+        var u = res.j.user || res.j;
+        if(res.j.access_token && res.j.session){
+          var sess = { v:1, access_token: res.j.access_token, refresh_token: res.j.refresh_token || '',
+                       expires_at: Date.now() + ((res.j.expires_in || 3600) * 1000),
+                       user: { id: u.id, email: u.email || String(email).trim() }, obtainedAt: new Date().toISOString() };
+          lsSave(sess);
+          return loadProfileOf(sess).then(function(){ return { ok:true, pendingConfirm:false }; }).catch(function(){
+            setState({ status:'online', user: sess.user, profile:null, tenant:null, plan:null, expiresAt: sess.expires_at });
+            return { ok:true, pendingConfirm:false };
+          });
+        }
+        setState({ status:'pendiente_confirmacion', user: { id: u.id, email: (u.email || String(email).trim()) } });
+        return { ok:true, pendingConfirm:true };
+      })
+      .catch(function(e){
+        busy = false;
+        var kind = classifyError(e);
+        var msg = (kind === 'red')
+          ? 'Sin conexión con el servidor. No se pudo crear la cuenta; tu trabajo local no se ve afectado.'
+          : 'El servicio de cuentas no está disponible ahora. Inténtalo más tarde.';
+        setState({ status:'error', message: msg });
+        return { ok:false, error: msg };
+      });
   }
 
   /* =====================================================================
@@ -4619,9 +4760,10 @@ var FcCloud = (function(){
         (state.tenant ? '<dt>Organización</dt><dd>' + escapeHtml(String(state.tenant.name || state.tenant.id)) +
           (state.tenant.plan ? ' · plan ' + escapeHtml(String(state.tenant.plan)) : '') +
           ((state.tenant.subscription_status === 'trial' && state.tenant.trial_ends_at) ? ' · prueba hasta ' + escapeHtml(Lic.fmtDate(state.tenant.trial_ends_at)) : '') + '</dd>' : '') +
+        '<dt>Cloud Fichas</dt><dd id="cuSheetsState">' + escapeHtml((typeof FcSheets !== 'undefined') ? FcSheets.statusText() : '—') + '</dd>' +
         '</dl>' +
-        '<div class="cu-act"><button class="btn" data-btn="cloudSignOut">' + icon('logout', 15) + 'Desconectar cuenta</button></div>' +
-        '<p class="cu-note">La identidad, el plan y el uso diario vienen de la MISMA cuenta del panel COSTPRO (misma instancia de Supabase, sistema comercial existente sin modificar). Las fichas y los datos locales nunca se suben a la nube.</p>';
+        '<div class="cu-act"><button class="btn" data-btn="cloudSyncNow">' + icon('upload', 15) + 'Sincronizar ahora</button><button class="btn primary" data-btn="cloudSignOut">' + icon('logout', 15) + 'Desconectar cuenta</button></div>' +
+        '<p class="cu-note">La identidad, el plan y el uso diario vienen de la MISMA cuenta del panel COSTPRO (misma instancia de Supabase, sistema comercial existente sin modificar). Con la cuenta conectada, tus fichas se guardan también en la nube (privadas: solo tu cuenta puede verlas) y se sincronizan; sin Internet todo sigue funcionando local.</p>';
     } else if(state.status === 'expirada'){
       h += '<dl class="cu-kv"><dt>Estado</dt><dd><span class="gcc-dot warn"></span>Sesión expirada</dd>' +
         '<dt>Cuenta</dt><dd>' + escapeHtml((state.user && state.user.email) || '—') + '</dd></dl>' +
@@ -4637,7 +4779,7 @@ var FcCloud = (function(){
         '<p class="cu-note">' + escapeHtml(String(state.message || 'El servicio de cuentas no respondió.')) + '</p>' +
         '<div class="cu-act"><button class="btn" data-btn="cloudReconnect">' + icon('cloud', 15) + 'Reintentar</button></div>';
     } else {
-      h += '<p style="margin:0 0 10px;font-size:13px;line-height:1.6">Opcional: conecta la MISMA cuenta que usas en el panel COSTPRO (correo + contraseña) para ver aquí tu perfil y tu plan. Solo lectura en esta fase.</p>' +
+      h += '<p style="margin:0 0 10px;font-size:13px;line-height:1.6">Opcional: conecta la MISMA cuenta del panel COSTPRO (correo + contraseña) para ver aquí tu perfil y tu plan, y para guardar tus fichas en la nube (privadas, solo tu cuenta puede verlas).</p>' +
         '<div class="field"><label for="cuCloudEmail">Correo electrónico</label><div class="inwrap"><span class="in-ic" data-icon="user" data-sz="16"></span><input id="cuCloudEmail" type="email" autocomplete="email" autocapitalize="none" spellcheck="false"></div></div>' +
         '<div class="field"><label for="cuCloudPass">Contraseña</label><div class="inwrap"><span class="in-ic" data-icon="lock" data-sz="16"></span><input id="cuCloudPass" type="password" autocomplete="current-password"></div></div>' +
         '<p id="cuCloudMsg" class="gate-err" role="alert" hidden></p>' +
@@ -4649,13 +4791,274 @@ var FcCloud = (function(){
   }
 
   return {
-    init: init, signIn: signIn, signOut: signOut,
+    init: init, signIn: signIn, signUp: signUp, ensureSession: ensureSession, signOut: signOut,
     toggleAuthBox: toggleAuthBox, signInFromAuthScreen: signInFromAuthScreen, signInFromCuenta: signInFromCuenta,
     cuentaCard: cuentaCard, checkQuota: checkQuota, onChange: onChange,
     guard: guard, recordUsage: recordUsage, refreshUsage: refreshUsage, usageSnapshot: function(){ return clone(usage); }, isUnlimited: isUnlimited,
     state: function(){ return clone(state); },
     plan: function(){ return state.plan || null; },
     status: function(){ return state.status; }
+  };
+})();
+
+/* =====================================================================
+   FASE 24.4 · FcSheets — CLOUD FICHAS (sincronización local ↔ nube)
+   Usa la tabla EXISTENTE cost_sheets del proyecto Supabase compartido:
+   · ownership: RLS existente (created_by = auth.uid()) — sin DDL nuevo
+   · datos: data JSONB { model:'FC_RES148_2023_V1', ficha:{...}, header, meta2 }
+   · versionado: updated_at server (trigger existente) — LWW + copia de conflicto
+   · delete: DELETE server + tumba local; anti-resurrección (0 filas al PATCH)
+   REGLAS del pliego: 0 DDL · 0 políticas nuevas · motor intocado ·
+   local-first (sin red todo funciona; la cola pendiente persiste) ·
+   la copia local NUNCA se borra tras migrar (§39) · migración idempotente
+   (mapa por data.ficha.id; verificar fila devuelta antes de marcar, §38).
+   ===================================================================== */
+var FcSheets = (function(){
+  var CFG = APP_CONFIG.cloud;
+  var ST_KEY = 'FC_CLOUD_SHEETS_V1';
+  var DEV_KEY = 'FC_CLOUD_DEVICE_V1';
+  var st = loadState();
+  var listeners = [];
+  var queueTimer = null;
+
+  function baseState(){ return { v:1, lastPull:null, tombs:{}, busy:false, lastError:null, lastSyncAt:null }; }
+  function loadState(){
+    try{
+      var s = JSON.parse(localStorage.getItem(ST_KEY) || 'null');
+      if(s && s.v === 1 && s.tombs) return Object.assign(baseState(), s, { busy:false });
+    }catch(e){}
+    return baseState();
+  }
+  function saveState(){ try{ localStorage.setItem(ST_KEY, JSON.stringify({ v:1, lastPull:st.lastPull, tombs:st.tombs, lastError:st.lastError, lastSyncAt:st.lastSyncAt })); }catch(e){} }
+  function emit(){ try{ document.dispatchEvent(new CustomEvent('fcsheets:change', {})); }catch(e){} for(var i = 0; i < listeners.length; i++){ try{ listeners[i](); }catch(e){} } }
+  function onChange(fn){ if(typeof fn === 'function') listeners.push(fn); return function(){ listeners = listeners.filter(function(f){ return f !== fn; }); }; }
+  function deviceId(){
+    try{ var d = JSON.parse(localStorage.getItem(DEV_KEY) || 'null'); if(d && d.id) return d.id; }catch(e){}
+    var id = (typeof uid === 'function') ? uid() : ('dev-' + Date.now());
+    try{ localStorage.setItem(DEV_KEY, JSON.stringify({ id:id })); }catch(e){}
+    return id;
+  }
+  function enabled(){ return !!(CFG.sheetsEnabled && typeof FcCloud !== 'undefined'); }
+  function isTomb(id){ return !!(id && st.tombs[id]); }
+  /* Hash de contenido (djb2 sobre el JSON canónico del sobre): «dirty» es un
+     CAMBIO REAL, no un toque de UI (refresh() actualiza updatedAt en cada
+     render/boot; updatedAt se usa para el orden LWW, no para detectar cambios). */
+  function hashOf(f){
+    var copy = JSON.parse(JSON.stringify(f));
+    delete copy.cloud;
+    delete copy.updatedAt;   /* marcador de toque de UI (refresh() lo actualiza sin cambio de contenido) */
+    var str = JSON.stringify(copy);
+    var h = 5381;
+    for(var i = 0; i < str.length; i++){ h = ((h << 5) + h + str.charCodeAt(i)) | 0; }
+    return String(h) + ':' + str.length;
+  }
+  /* Pendiente de subir = sin mapeo cloud, o contenido distinto al confirmado. */
+  function dirty(f){
+    if(!f || !f.id || isTomb(f.id)) return false;
+    if(!f.cloud) return true;
+    if(!f.cloud.syncedAt) return true;
+    return hashOf(f) !== f.cloud.hash;
+  }
+  function pendingCount(){ var n = 0; for(var i = 0; i < App.db.fichas.length; i++){ if(dirty(App.db.fichas[i])) n++; } return n; }
+  function statusText(){
+    if(!CFG.sheetsEnabled) return 'Desactivado';
+    var cs = (typeof FcCloud !== 'undefined') ? FcCloud.status() : '';
+    if(st.busy) return 'Sincronizando…';
+    var p = pendingCount();
+    if(cs !== 'online') return (p ? 'Cambios pendientes (' + p + ') — sin conexión' : 'Sin conexión');
+    if(st.lastError) return 'No se pudo sincronizar — Reintentar';
+    if(p) return 'Cambios pendientes (' + p + ')';
+    return 'Sincronizado';
+  }
+  /* Sobre cloud: la ficha viaja INTACTA (modelo de dominio sin cambios). El
+     header/copy solo mejora la convivencia visual con el panel COSTPRO. */
+  function payloadOf(f){
+    var copy = JSON.parse(JSON.stringify(f));
+    delete copy.cloud;
+    return { model:'FC_RES148_2023_V1', ficha:copy, header:{ name:String(f.nombre || 'Ficha sin nombre') }, meta2:{ app:'FC', deviceId:deviceId() } };
+  }
+  function rest(sess, method, qs, body, prefer){
+    /* apikey SIEMPRE: PostgREST de Supabase lo exige además del Bearer (igual que FcCloud). */
+    var hd = { 'apikey': CFG.publishableKey, 'Authorization': 'Bearer ' + sess.access_token, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' };
+    if(prefer) hd['Prefer'] = prefer;
+    var opts = { method:method, headers:hd, cache:'no-store' };
+    if(body) opts.body = JSON.stringify(body);
+    return fetch(CFG.supabaseUrl + '/rest/v1/cost_sheets' + (qs || ''), opts).then(function(r){
+      return r.text().then(function(t){ var j = null; try{ j = t ? JSON.parse(t) : null; }catch(e){} return { ok:r.ok, status:r.status, j:j }; });
+    });
+  }
+  /* Solo filas FC (data.ficha.id presente): las filas del panel COSTPRO no se tocan. */
+  function rowOf(row){ return (row && row.data && row.data.ficha && row.data.ficha.id) ? row : null; }
+
+  function queueSync(){ if(queueTimer) clearTimeout(queueTimer); queueTimer = setTimeout(function(){ syncAll('cola'); }, 1200); }
+  function syncNow(){ st.lastError = null; saveState(); emit(); queueSync(); }
+
+  function syncAll(reason){
+    if(!enabled()) return Promise.resolve(false);
+    if(st.busy) return Promise.resolve(false);
+    st.busy = true; st.lastError = null; emit();
+    var stats = { migrated:0, imported:0, updated:0, deleted:0, conflicts:0, failed:0 };
+    return FcCloud.ensureSession().then(function(sess){
+      if(!sess || !sess.access_token || !sess.user){ st.busy = false; emit(); return false; }
+      return rest(sess, 'GET', '?select=id,name,data,created_at,updated_at&order=updated_at.desc&limit=500', null).then(function(r){
+        if(!r.ok || !Array.isArray(r.j)){ st.busy = false; st.lastError = 'No se pudo leer la nube (HTTP ' + r.status + ').'; saveState(); emit(); return false; }
+        var rows = r.j;
+        st.lastPull = new Date().toISOString();
+        var map = {}, byCloud = {}, localByCloud = {}, localByFid = {};
+        rows.forEach(function(row){ byCloud[row.id] = row; var rr = rowOf(row); if(rr) map[rr.data.ficha.id] = row; });
+        App.db.fichas.forEach(function(f){ if(f.cloud && f.cloud.cloudId) localByCloud[f.cloud.cloudId] = f; if(f.id) localByFid[f.id] = f; });
+        /* 1 · IMPORTAR: fichas propias que faltan aquí (otro dispositivo/reinstalación) */
+        rows.forEach(function(row){
+          var rr = rowOf(row); if(!rr) return;
+          var fid = rr.data.ficha.id;
+          if(localByCloud[row.id] || localByFid[fid] || isTomb(fid)) return;
+          var nf = JSON.parse(JSON.stringify(rr.data.ficha));
+          delete nf.cloud;
+          nf.cloud = { cloudId:row.id, rev:row.updated_at, syncedAt:new Date().toISOString(), hash:hashOf(nf) };
+          if(localByFid[nf.id]) nf.id = uid();
+          App.db.fichas.push(nf); localByFid[nf.id] = nf; localByCloud[row.id] = nf;
+          stats.imported++;
+        });
+        /* 2 · MIGRAR/ACTUALIZAR fichas locales pendientes */
+        var chain = Promise.resolve();
+        App.db.fichas.slice().forEach(function(f){
+          chain = chain.then(function(){
+            if(!dirty(f)) return null;
+            var pay = payloadOf(f);
+            var nm = String(f.nombre || 'Ficha sin nombre');
+            if(f.cloud && f.cloud.cloudId){
+              /* UPDATE con detección de conflicto: rev conocido vs updated_at real */
+              return rest(sess, 'GET', '?id=eq.' + encodeURIComponent(f.cloud.cloudId) + '&select=id,updated_at', null).then(function(g){
+                var grow = (g.ok && Array.isArray(g.j) && g.j.length) ? g.j[0] : null;
+                if(!grow){
+                  /* eliminada en otro dispositivo: NO resucitar; la copia local se conserva */
+                  st.tombs[f.id] = { cloudId:f.cloud.cloudId, at:new Date().toISOString() };
+                  saveState();
+                  return null;
+                }
+                var conflict = !!(f.cloud.rev && grow.updated_at && grow.updated_at !== f.cloud.rev);
+                if(conflict && f.updatedAt && grow.updated_at > f.updatedAt){
+                  /* la nube es más reciente: conservar local como copia y adoptar la nube */
+                  var cf = byCloud[f.cloud.cloudId];
+                  var cfi = cf && cf.data && cf.data.ficha;
+                  if(cfi){
+                    var dupL = JSON.parse(JSON.stringify(f)); delete dupL.cloud;
+                    dupL.id = uid(); dupL.nombre = (dupL.nombre || 'Ficha') + ' (copia en conflicto)';
+                    App.db.fichas.push(dupL);
+                    var imp = JSON.parse(JSON.stringify(cfi)); delete imp.cloud;
+                    imp.cloud = { cloudId:f.cloud.cloudId, rev:grow.updated_at, syncedAt:new Date().toISOString(), hash:hashOf(imp) };
+                    var ix = App.db.fichas.indexOf(f); if(ix >= 0) App.db.fichas[ix] = imp;
+                    stats.conflicts++;
+                  }
+                  return null;
+                }
+                if(conflict && f.updatedAt && grow.updated_at){
+                  /* local es más reciente: conservar la versión nube como copia antes de sobrescribir */
+                  var cf2 = byCloud[f.cloud.cloudId];
+                  var cf2i = cf2 && cf2.data && cf2.data.ficha;
+                  if(cf2i){
+                    var dup = JSON.parse(JSON.stringify(cf2i)); delete dup.cloud;
+                    dup.id = uid(); dup.nombre = (dup.nombre || 'Ficha') + ' (copia en conflicto)';
+                    App.db.fichas.push(dup);
+                    stats.conflicts++;
+                  }
+                }
+                return rest(sess, 'PATCH', '?id=eq.' + encodeURIComponent(f.cloud.cloudId), { name:nm, data:pay }, 'return=representation').then(function(pr){
+                  if(pr.ok && Array.isArray(pr.j) && pr.j.length){ f.cloud.rev = pr.j[0].updated_at; f.cloud.syncedAt = new Date().toISOString(); f.cloud.hash = hashOf(f); stats.updated++; }
+                  else stats.failed++;
+                  return null;
+                });
+              });
+            }
+            var known = map[f.id];
+            if(known){
+              /* ya estaba en la nube (reinstalación): re-vincular — idempotencia sin duplicar */
+              f.cloud = { cloudId:known.id, rev:known.updated_at, syncedAt:new Date().toISOString(), hash:hashOf(f) };
+              stats.migrated++;
+              if(f.updatedAt && known.updated_at && f.updatedAt > known.updated_at){
+                return rest(sess, 'PATCH', '?id=eq.' + encodeURIComponent(known.id), { name:nm, data:pay }, 'return=representation').then(function(pr){
+                  if(pr.ok && Array.isArray(pr.j) && pr.j.length){ f.cloud.rev = pr.j[0].updated_at; f.cloud.syncedAt = new Date().toISOString(); f.cloud.hash = hashOf(f); }
+                  return null;
+                });
+              }
+              return null;
+            }
+            /* MIGRACIÓN/CREACIÓN: insert y VERIFICAR la fila devuelta antes de marcar (§38) */
+            return rest(sess, 'POST', '', { name:nm, category:'FC Res148', data:pay, created_by:sess.user.id }, 'return=representation').then(function(ir){
+              if(ir.ok && Array.isArray(ir.j) && ir.j.length && ir.j[0].id){
+                f.cloud = { cloudId:ir.j[0].id, rev:ir.j[0].updated_at, syncedAt:new Date().toISOString(), hash:hashOf(f) };
+                stats.migrated++;
+              } else {
+                stats.failed++;
+              }
+              return null;
+            });
+          });
+        });
+        return chain.then(function(){
+          /* 3 · BORRADOS: tumbas con cloudId pendientes de confirmar en server */
+          var dchain = Promise.resolve();
+          Object.keys(st.tombs).forEach(function(tid){
+            var t = st.tombs[tid];
+            if(t && t.cloudId && !t.done){
+              dchain = dchain.then(function(){
+                return rest(sess, 'DELETE', '?id=eq.' + encodeURIComponent(t.cloudId), null).then(function(dr){
+                  if(dr.ok || dr.status === 404){ t.done = true; stats.deleted++; }
+                  return null;
+                });
+              });
+            } else if(t && !t.cloudId && !t.done){ t.done = true; }
+          });
+          return dchain.then(function(){
+            st.busy = false;
+            st.lastSyncAt = new Date().toISOString();
+            st.lastError = stats.failed ? ('No se pudo sincronizar todo: ' + stats.failed + ' ficha(s). Reintenta.') : null;
+            saveState(); emit();
+            if(stats.imported || stats.migrated || stats.updated || stats.deleted || stats.conflicts){
+              var parts = [];
+              if(stats.migrated) parts.push(stats.migrated + ' guardadas en la nube');
+              if(stats.imported) parts.push(stats.imported + ' descargadas');
+              if(stats.updated) parts.push(stats.updated + ' actualizadas');
+              if(stats.deleted) parts.push(stats.deleted + ' eliminadas en la nube');
+              if(stats.conflicts) parts.push(stats.conflicts + ' conflicto(s): se conservó la más reciente y una copia');
+              toast('Sincronización: ' + parts.join(' · ') + '.', 'ok');
+              try{ scheduleSave(); }catch(e){}
+            }
+            return true;
+          });
+        });
+      });
+    }).catch(function(){
+      st.busy = false;
+      st.lastError = 'Sin conexión con la nube. Tus cambios están guardados en este navegador.';
+      saveState(); emit();
+      return false;
+    });
+  }
+
+  function markDeleted(f){
+    if(!f || !f.id) return;
+    st.tombs[f.id] = { cloudId:(f.cloud && f.cloud.cloudId) || null, at:new Date().toISOString() };
+    saveState();
+    if(f.cloud && f.cloud.cloudId) queueSync();
+    emit();
+  }
+
+  function init(){
+    if(!enabled()) return;
+    FcCloud.onChange(function(s2){ if(s2 && s2.status === 'online') queueSync(); emit(); });
+    try{
+      window.addEventListener('online', function(){ queueSync(); });
+      document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible' && FcCloud.status() === 'online') queueSync(); });
+    }catch(e){}
+    setInterval(function(){ if(FcCloud.status() === 'online') queueSync(); }, 300000);
+    queueSync();
+  }
+
+  return {
+    init:init, syncAll:syncAll, syncNow:syncNow, markDeleted:markDeleted,
+    statusText:statusText, pendingCount:pendingCount, onChange:onChange,
+    status:function(){ return { enabled:CFG.sheetsEnabled, busy:st.busy, pending:pendingCount(), lastSyncAt:st.lastSyncAt, error:st.lastError }; }
   };
 })();
 
@@ -8393,6 +8796,7 @@ function onClick(ev){
   else if(btn === 'eliminar'){
     closeMoreMenu();
     askConfirm('Eliminar ficha', '¿Eliminar la ficha "' + f.nombre + '"? Todos sus datos y configuración se perderán. Esta acción no se puede deshacer.', 'Eliminar definitivamente', function(){
+      if(typeof FcSheets !== 'undefined' && f) FcSheets.markDeleted(f);  /* FASE 24.4: tumba + delete nube */
       App.db.fichas = App.db.fichas.filter(function(x){ return x.id !== f.id; });
       if(!App.db.fichas.length) App.db.fichas.push(nuevaFicha('Ficha 1'));
       App.db.activeId = App.db.fichas[0].id;
@@ -8409,6 +8813,7 @@ function onClick(ev){
   else if(btn === 'cloudSignInCuenta'){ FcCloud.signInFromCuenta(); }
   else if(btn === 'cloudSignOut'){ FcCloud.signOut(); toast('Cuenta COSTPRO desconectada. Todo sigue funcionando en local.', 'info'); }
   else if(btn === 'cloudReconnect'){ FcCloud.init(); }
+  else if(btn === 'cloudSyncNow'){ if(typeof FcSheets !== 'undefined') FcSheets.syncNow(); } /* FASE 24.4 */
   else if(btn === 'cloudCuenta'){ openCuenta(); }
   else if(btn === 'vmBack' || btn === 'vmContinue'){ Vmgr.close(); } /* FASE 23: en strict vmBack/vmContinue no cierran (§25) */
   else if(btn === 'vmRetry'){ Vmgr.check({ manual:true }); }
@@ -8464,6 +8869,7 @@ function onClick(ev){
     var del = App.db.fichas.filter(function(x){ return x.id === id; })[0];
     if(!del) return;
     askConfirm('Eliminar ficha', '¿Eliminar la ficha "' + (del.nombre || '') + '"? Todos sus datos y configuración se perderán. Esta acción no se puede deshacer.', 'Eliminar definitivamente', function(){
+      if(typeof FcSheets !== 'undefined' && del) FcSheets.markDeleted(del);  /* FASE 24.4: tumba + delete nube */
       App.db.fichas = App.db.fichas.filter(function(x){ return x.id !== id; });
       if(App.db.activeId === id){
         App.db.activeId = App.db.fichas.length ? App.db.fichas[0].id : null;
@@ -9597,6 +10003,9 @@ function boot(){
      bloquea el arranque ni la puerta local; sin red degrada a estado
      cacheado y el núcleo sigue 100% offline (Internet jamás es requisito). */
   FcCloud.init();
+  /* FASE 24.4 · Cloud Fichas: sincronización local↔nube (solo con sesión
+     cloud; nunca bloquea el arranque ni degrada sin Internet). */
+  FcSheets.init();
   /* Ticker comercial: revalida el estado (día 30 → 31, licencia) y mantiene
      el lastSeen monótono de la licencia Premium. */
   setInterval(function(){

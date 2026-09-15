@@ -27,7 +27,11 @@ jobs:
           node-version: '20'
 
       - name: Dependencias del build
-        run: npm install
+        # FASE 24.4 · determinismo reforzado: lockfile (package-lock.json) + npm ci
+        # fija TAMBIÉN las dependencias transitivas — el toolchain del CI queda
+        # idéntico al local y el build es reproducible byte a byte (deriva del
+        # minificador detectada al reconstruir v12.7.0 sin lockfile).
+        run: npm ci
 
       - name: Build reproducible (FC.html → FC.release.html + manifest)
         run: node scripts/build-release.js

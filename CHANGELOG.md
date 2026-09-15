@@ -2,6 +2,24 @@
 
 Formato: Keep a Changelog simplificado. Cada versión corresponde a un tag `vX.Y.Z` y a un GitHub Release con `FC.release.html` + `release/release-manifest.json`.
 
+## v12.8.0 — 2026-09-15 · FASE 24.4 · Cloud Fichas (infraestructura Supabase existente, 0 DDL)
+
+### Added
+- **Cloud Fichas (FcSheets)**: las fichas se guardan también en la nube usando la tabla **existente** `cost_sheets` del proyecto Supabase compartido con el panel COSTPRO — ownership por RLS (`created_by = auth.uid()`), datos en `data` JSONB (`{model:'FC_RES148_2023_V1', ficha, header}`), versionado por `updated_at` server (trigger existente). **0 DDL: sin tablas, columnas, políticas ni RPC nuevos** (auditoría forense previa: `product_cost_sheets` descartada por acoplamiento retail).
+- **Signup cloud en la puerta** (Opción C del pliego): el registro ahora pide **correo + contraseña** y crea la cuenta COSTPRO real (`/auth/v1/signup`), con **confirmación de email obligatoria** (sin bypass) y sesión local puente para entrar de inmediato. Las cuentas locales existentes (usuario/admin/registradas) y su ciclo comercial siguen funcionando exactamente igual; el login con email conecta la nube y prepara el puente (`Auth.bridgeRegister`, PBKDF2 como siempre, idempotente).
+- **Migración Guest → Free idempotente**: al conectar la cuenta, las fichas locales (incluidas las 3 del invitado) suben a la nube con `verify-then-mark` (nunca se marca antes de confirmar la fila devuelta), mapa por `data.ficha.id` → re-ejecutar NO duplica; la copia local **nunca se borra** (§39).
+- **Sync mínimo local↔nube**: pull (importa fichas propias de otros dispositivos), push (sube cambios reales — detección por hash de contenido, inmune a toques de UI), deletes (DELETE server + tumba local + anti-resurrección si la fila ya no existe). Disparadores: sesión online, evento `online`, visibilidad, botón «Sincronizar ahora», intervalo suave. Sin red, todo sigue funcionando local (cola persistente).
+- **Conflictos LWW con cero pérdida**: `rev` conocida vs `updated_at` real antes de cada PATCH; si difiere, gana la versión más reciente y la perdedora se conserva como ficha local «(copia en conflicto)». Sin merge automático (decisión explícita del pliego).
+- **UI honesta (§36)**: fila «Cloud Fichas» en Mi cuenta (Sincronizado / Cambios pendientes (n) / Sin conexión / Reintentar) + botón «Sincronizar ahora»; textos actualizados (ya no dice «las fichas nunca se suben a la nube»). El usuario nunca ve Supabase/RLS/JWT.
+
+### Changed
+- `APP_CONFIG.cloud.sheetsEnabled` (default true): interruptor único del módulo — rollback de una línea, sin cambios server.
+- CI: `npm ci` + `package-lock.json` (toolchain bloqueado con dependencias transitivas) — determinismo reforzado tras detectar deriva del minificador al reconstruir v12.7.0 sin lockfile.
+
+### Unchanged
+- `computeFicha()` — hash c5f4dca8042385c36e49c76992269b25 (antes == después; round-trip cloud verificado: `computeFicha(ficha)` idéntico tras descargar de la nube).
+- Sin cambios en Supabase (esquema/RLS/Auth/RPC), sin pagos, sin Pro/Enterprise, sin límites Free (freeEnforce=false intacto), sin Internet obligatorio, sin reescritura del monolito. Ecosistema Next.js sin tocar (`cost_sheets` la comparte por diseño; `product_cost_sheets` intacta).
+
 ## v12.7.0 — 2026-09-15 · FASE 24.3 · Modelo de producto Guest → Free → Pro (activación, no paywall)
 
 ### Added

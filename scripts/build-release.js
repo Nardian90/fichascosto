@@ -25,8 +25,8 @@ const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'FC.html');
 const OUT = path.join(ROOT, 'release', 'FC.release.html');
 const DOCS = path.join(ROOT, 'docs', 'release');
-const VERSION = '12.7.0';
-const PHASE = 'FASE 24.3 · modelo de producto Guest→Free→Pro — 3 experiencias de invitado + Free sin límite cuotitativo (telemetría activa); motor intocado';
+const VERSION = '12.8.0';
+const PHASE = 'FASE 24.4 · Cloud Fichas — signup cloud con confirmación, migración Guest→Free idempotente, persistencia local+cloud sobre cost_sheets existente (RLS por propietario), sync mínimo con detección de conflictos; 0 DDL; motor intocado';
 
 function loadToolchain() {
   const tries = [
