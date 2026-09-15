@@ -2,7 +2,7 @@
 
 > **Convierte tus costos en decisiones.** · *Seducido por la Estrategia.*
 
-**COSTPRO** es la aplicación profesional de **Ficha de Costos y Gastos** conforme a la metodología de la **Resolución 148/2023 del Ministerio de Finanzas y Precios (MFP), Anexo I**. Funciona como **aplicación local**: el acceso y los datos permanecen en el equipo del usuario, sin servidores ni cuentas externas.
+**COSTPRO** es la aplicación profesional de **Ficha de Costos y Gastos** conforme a la metodología de la **Resolución 148/2023 del Ministerio de Finanzas y Precios (MFP), Anexo I**. Funciona **local y offline**: el cálculo y los datos permanecen en el equipo del usuario. La nube (Supabase) es **opcional**: con una cuenta autenticada, las fichas se sincronizan y el plan comercial (`free` / `pro` / `enterprise`) se verifica en el servidor.
 
 Desarrollado por **ADRIAN POMPA SANTANA**.
 
@@ -30,6 +30,21 @@ Desarrollado por **ADRIAN POMPA SANTANA**.
 - Cada versión se publica como **GitHub Release** con tag semántico (`v12.4.0`, `v12.4.1`, `v12.5.0`, …) y contiene como mínimo `FC.release.html` + `release/release-manifest.json`.
 - El workflow `.github/workflows/release.yml` construye, verifica y publica automáticamente al empujar un tag `v*`.
 
+### Contrato de release canónico (Gate 24.6-0.6)
+
+| Rol | Valor |
+|---|---|
+| LANDING | `https://nardian90.github.io/fichascosto/` |
+| APLICACIÓN (ejecutable) | `https://nardian90.github.io/fichascosto/release/FC.release.html` |
+| PAGES SOURCE | `docs/` (workflow `pages.yml`, build_type workflow) |
+| EJECUTABLE CANÓNICO | `docs/release/FC.release.html` |
+| ASSETS DEL RELEASE | `release/FC.release.html` + `release/release-manifest.json` (publicados por `release.yml`) |
+| ÚNICA FUENTE DE VERSIÓN | `release-manifest.json` (schema 1) |
+
+- **landing ≠ aplicación**: la landing es la página pública de distribución y no ejecuta la app; siempre enlaza a la aplicación canónica («Abrir COSTPRO» usa ruta relativa al mismo deploy de Pages; «Descargar» usa `releases/latest`). No existen redirecciones automáticas entre ambas por decisión de diseño (SEO/PWA/caché).
+- **Una sola fuente real**: `FC.html` → `build-release.js` → escribe `release/` (input de CI) y `docs/release/` (servido por Pages), verificando su identidad byte a byte (check interno del build). Ninguna de las dos carpetas se edita a mano.
+- **Publicación y versionado**: Pages publica `main`; el artefacto canónico (`FC.release.html` + `release-manifest.json`) **solo cambia en commits etiquetados** (bump + tag en el mismo commit); la landing y la documentación pueden cambiar en commits sin tag sin alterar el release estable. El GitHub Release y el tag se crean exclusivamente por push de tag `v*` (`release.yml`), que verifica el hash del build contra el manifest antes de publicar. Un commit solo-documentación despliega Pages sin nueva versión: la landing sigue mostrando la versión del manifest vigente.
+
 ---
 
 ## Funcionamiento online / offline
@@ -47,7 +62,7 @@ COSTPRO es **offline-first**: Internet sirve para la distribución, la actualiza
 | `CHECK_FAILED` | GitHub sin respuesta / offline / timeout | **jamás bloquea**; nunca se interpreta como actualización obligatoria |
 
 - **Protección anti-downgrade**: un manifest más antiguo que la versión instalada se registra (`REMOTE RELEASE OLDER THAN LOCAL`) y no se instala nada.
-- **Grace period offline**: 0–7 días normal · 7–30 días aviso discreto · >30 días solicitud de conexión (configurable en `APP_CONFIG.offlineGrace`). Nunca borra datos ni licencia.
+- **Grace period offline**: 0–7 días normal · 7–30 días aviso discreto · >30 días solicitud de conexión (configurable en `APP_CONFIG.offlineGrace`). Nunca borra datos locales.
 - **El manifest es solo DATOS**: se valida con severidad y jamás se ejecuta código proveniente de la red.
 
 ---
@@ -89,7 +104,7 @@ El build **falla** si alguna verificación de integridad no pasa (marcadores del
 ## Seguridad y advertencias honestas
 
 - **FC.release.html es un build de distribución**, no un DRM: un HTML ejecutado en el navegador **no puede considerarse protección inviolable**. El hardening del release dificulta la manipulación casual y la ingeniería inversa, distribuye una versión oficial verificable por hash y facilita la detección de versiones obsoletas — no afirma protección imposible de romper.
-- El repositorio se audita antes de publicar: sin API keys, claves privadas, tokens ni credenciales. La clave privada de firma de licencias (si se usa) vive **exclusivamente** en el entorno privado del desarrollador; al cliente solo llega la clave pública.
+- El repositorio se audita antes de publicar: sin API keys, claves privadas, tokens ni credenciales. El plan comercial se verifica en el servidor contra `public.profiles.plan` (`free` → FREE · `pro`/`enterprise` → PREMIUM) con guard contra auto-elección; **no existe ningún sistema de licencias locales** ni material de firma en el release (retirado en FASE 24.6-1; el histórico permanece en CHANGELOG y reportes de auditoría).
 - **Licencia del proyecto**: pendiente de definición por el autor. Este repositorio **no incluye** un archivo `LICENSE` — no se ha elegido aún el régimen de derechos, y no se asume ningún texto legal por defecto.
 
 ---
