@@ -31,6 +31,11 @@ jobs:
 
       - name: Build reproducible (FC.html → FC.release.html + manifest)
         run: node scripts/build-release.js
+        env:
+          # FASE 24.3 · build determinista: la fecha del build es la fecha del
+          # commit etiquetado (no el reloj del runner). Corrige el defecto
+          # detectado al publicar v12.5.0–v12.6.1 (assets ≠ build canónico).
+          FC_BUILD_DATE: ${{ github.event.head_commit.timestamp }}
 
       - name: Tests de versionado (VERSION-01..14)
         run: node scripts/test-version.js

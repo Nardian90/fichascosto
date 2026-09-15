@@ -25,8 +25,8 @@ const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'FC.html');
 const OUT = path.join(ROOT, 'release', 'FC.release.html');
 const DOCS = path.join(ROOT, 'docs', 'release');
-const VERSION = '12.6.1';
-const PHASE = 'FASE 24.2-P · hardening buildPrint() — guardia ante almacén vacío/id huérfano; FcCloud 24.2 intacto';
+const VERSION = '12.7.0';
+const PHASE = 'FASE 24.3 · modelo de producto Guest→Free→Pro — 3 experiencias de invitado + Free sin límite cuotitativo (telemetría activa); motor intocado';
 
 function loadToolchain() {
   const tries = [
@@ -127,6 +127,14 @@ const md5 = s => crypto.createHash('md5').update(s).digest('hex');
      && out.includes('increment_user_usage') && /freeLimit:\s*3/.test(out) && out.includes('FC_CLOUD_USAGE_V1'));
   ok('FASE 24.2: sin sistemas comerciales paralelos (no localQuota/fakeQuota/fcPlans/fcUsers/fcLicenses)',
      !/localQuota|fakeQuota|fcPlans|fcUsers|fcLicenses/.test(out));
+  /* ---- FASE 24.3: modelo de producto Guest→Free→Pro ---- */
+  ok('FASE 24.3: política Free abierta (freeEnforce desactivado + razón política en runtime)',
+     /freeEnforce:\s*(!1|false)/.test(out) && /política 24\.3/.test(out));
+  ok('FASE 24.3: guest 3 experiencias reales (FC_GUEST_EXP_V1 + límite 3 + transición suave)',
+     out.includes('FC_GUEST_EXP_V1') && out.includes('guestTransition') && out.includes('guestExpAtLimit')
+     && /GUEST_EXP_LIMIT\s*=\s*3/.test(out));
+  ok('FASE 24.3: showQuotaBlocked conservado (dormant: solo se dispara con freeEnforce=true)',
+     out.includes('showQuotaBlocked') && /freeEnforce:\s*(!1|false)/.test(out));
 
   const failed = chk.filter(c => !c.ok);
   chk.forEach(c => console.log((c.ok ? 'PASS' : 'FAIL') + ' · ' + c.n + (c.info ? '  [' + c.info + ']' : '')));

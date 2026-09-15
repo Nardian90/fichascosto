@@ -1578,7 +1578,7 @@ body.landing-open .skip{visibility:hidden}
       <button type="button" class="btn" data-btn="auLanding" aria-label="Ver la presentación de COSTPRO"><span class="ic" data-icon="home" data-sz="16"></span>Ver presentación</button>
     </div>
     <p class="gate-hint">«Ver presentación» muestra la página de inicio de COSTPRO: qué es, cómo funciona y sus ejemplos reales, sin necesidad de iniciar sesión.</p>
-    <p class="gate-hint">El invitado puede probar todas las funciones. Los datos se guardan localmente en este navegador, sin cuenta asociada, y los PDF incluyen la identificación de COSTPRO.</p>
+    <p class="gate-hint">El invitado puede probar COSTPRO completo y crear 3 fichas propias: abrir, editar, recalcular, guardar, duplicar y exportar PDF no consumen nada. Los datos se guardan localmente en este navegador, sin cuenta asociada, y los PDF incluyen la identificación de COSTPRO.</p>
     <div class="gate-cloud" id="auCloud">
       <div class="gcc-head">
         <button type="button" class="gcc-tgl" data-btn="cloudToggle" aria-expanded="false" aria-controls="auCloudBox">Cuenta COSTPRO en la nube <em>(opcional)</em></button>
@@ -3881,6 +3881,42 @@ var Auth = {
   },
   logout: function(){ try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){} }
 };
+
+/* =====================================================================
+   FASE 24.3 · GUEST — 3 EXPERIENCIAS REALES DE FICHA (activación, NO cuota)
+   La unidad es la FICHA PROPIA que el invitado crea: una experiencia real
+   de creación y uso. Abrir, editar, recalcular, guardar, duplicar, imprimir
+   y exportar dentro de esas fichas NO consumen experiencias; los ejemplos
+   de la presentación son material de demostración y NO cuentan.
+   NO es una autoridad comercial (el invitado no tiene entitlement que
+   proteger): es una báscula local por dispositivo, deliberadamente simple
+   y manipulable — la autoridad real llegará con Cloud Fichas. Al agotarse
+   la 3.ª experiencia se ofrece UNA transición suave hacia la cuenta
+   gratuita (§8 del pliego): nunca paywall, nunca contador permanente,
+   nunca lenguaje técnico.
+   ===================================================================== */
+var GUEST_EXP_KEY = 'FC_GUEST_EXP_V1';
+var GUEST_EXP_LIMIT = 3;
+function guestExpLoad(){
+  try{
+    var g = JSON.parse(localStorage.getItem(GUEST_EXP_KEY) || 'null');
+    if(g && g.v === 1 && typeof g.n === 'number' && g.n >= 0) return g;
+  }catch(e){}
+  return { v:1, n:0 };
+}
+function guestExpCount(){ return guestExpLoad().n; }
+function guestExpInc(){ var g = guestExpLoad(); g.n += 1; try{ localStorage.setItem(GUEST_EXP_KEY, JSON.stringify(g)); }catch(e){} return g.n; }
+function isGuest(){
+  var s = Auth.current();
+  return !!(s && s.guest === true && s.role === 'guest');
+}
+function guestExpAtLimit(){ return isGuest() && guestExpCount() >= GUEST_EXP_LIMIT; }
+function guestTransition(){
+  askConfirm('Crea tu cuenta gratis',
+    'Ya creaste tus 3 fichas de invitado. Crea tu cuenta gratis para continuar usando COSTPRO y conservar tu trabajo: tu biblioteca sigue aquí y disfrutas 30 días de documentos limpios. Todo lo que hiciste queda guardado en este navegador.',
+    'Crear cuenta gratis',
+    function(){ showAuth(null, 'up'); });
+}
 function applySessionUI(){
   var s = Auth.current();
   var chip = document.getElementById('userChipName');
@@ -4142,6 +4178,17 @@ var APP_CONFIG = {
        for now as per requirements») y es el MISMO valor que envía al RPC
        increment_user_usage (p_limit). NO se inventa otra cifra. */
     freeLimit: 3,
+    /* FASE 24.3 · POLÍTICA COMERCIAL — Free SIN límite cuotitativo por ahora
+       (decisión del modelo de producto: prioridad adquisición→activación→
+       retención→monetización). El coste marginal de las operaciones Free es
+       ~cero en una app local-first (cálculo/edición/PDF son CPU del cliente)
+       y NO existe aún autoridad de datos para límites de stock (llegará con
+       Cloud Fichas). La infraestructura de 24.2 permanece VIVA en modo
+       TELEMETRÍA: recordUsage sigue contando en user_usage (señal «días con
+       tope alcanzado» para la decisión futura sobre el número Free) pero
+       checkQuota/guard NUNCA bloquean mientras freeEnforce sea false.
+       showQuotaBlocked queda dormant. Reversible cambiando SOLO esta flag. */
+    freeEnforce: false,
     /* Acciones del sistema de cuotas YA EXISTENTE en el proyecto
        (tabla user_usage + RPC increment_user_usage; límite free 3/día).
        Punto de integración de la FASE 24.2 — NO activo en 24.1. */
@@ -4426,6 +4473,16 @@ var FcCloud = (function(){
       return { allowed: true, enforced: true, action: a, mode: 'ilimitado', count: 0, limit: -1,
                reason: 'plan ' + (state.plan || 'admin') + ': cuota ilimitada (comportamiento real del sistema existente)', system: SYS };
     }
+    /* FASE 24.3 · POLÍTICA: Free sin límite cuotitativo mientras freeEnforce
+       sea false. NO se convierte la infraestructura de 24.2 en paywall: la
+       telemetría sigue viva (recordUsage cuenta en user_usage) y el dato del
+       día se sigue refrescando (guard ya lo hace) — la decisión futura sobre
+       el número Free será evidencial (§23-§24 del pliego). Reversible. */
+    if(!CFG.freeEnforce){
+      var cOpen = usageCacheValid() ? (usage.counts[a] || 0) : null;
+      return { allowed: true, enforced: false, action: a, mode: 'abierto', count: (cOpen || 0), limit: null,
+               reason: 'política 24.3: Free sin límite cuotitativo (telemetría activa; decisión futura con evidencia)', system: SYS };
+    }
     var c = usageCacheValid() ? (usage.counts[a] || 0) : null;
     if(c !== null && c >= limit()){
       return { allowed: false, enforced: true, action: a, mode: 'cache', count: c, limit: limit(),
@@ -4541,6 +4598,10 @@ var FcCloud = (function(){
     var quotaRow = '';
     if(state.status === 'online'){
       if(isUnlimited()) quotaRow = 'Ilimitado';
+      else if(!CFG.freeEnforce) quotaRow = ['fc_create','fc_export','fc_import'].map(function(a){
+        var v = (usage.date === todayUTC()) ? (usage.counts[a] || 0) : 0;
+        return ({ fc_create:'Crear', fc_export:'Exportar PDF', fc_import:'Importar' })[a] + ' ' + (v >= limit() ? '≥' + limit() : v);
+      }).join(' · ') + ' — sin límite';
       else if(usage.date === todayUTC()) quotaRow = ['fc_create','fc_export','fc_import'].map(function(a){
         return ({ fc_create:'Crear', fc_export:'Exportar PDF', fc_import:'Importar' })[a] + ' ' + (usage.counts[a] || 0) + '/' + limit();
       }).join(' · ');
@@ -5342,7 +5403,7 @@ function closeCuenta(){ showFichas(); }
 function planCopy(st){
   if(!st) return '';
   if(st.state === 'premium') return '<b>COSTPRO Premium</b><br>Tu licencia está activa. Tus documentos se generan sin marca de agua ni pie comercial.';
-  if(st.state === 'guest') return '<b>Modo invitado</b><br>Estás probando COSTPRO sin una cuenta. Los PDF incluyen la identificación de COSTPRO. Crea una cuenta gratuita para disfrutar 30 días de bienvenida con documentos limpios.';
+  if(st.state === 'guest') return '<b>Modo invitado</b><br>Estás probando COSTPRO sin una cuenta: puedes crear hasta 3 fichas propias. Los PDF incluyen la identificación de COSTPRO. Crea una cuenta gratuita para continuar y disfrutar 30 días de bienvenida con documentos limpios.';
   if(st.state === 'free_trial') return '<b>Período de bienvenida</b><br>Tienes ' + st.daysLeft + ' día' + (st.daysLeft === 1 ? '' : 's') + ' restante' + (st.daysLeft === 1 ? '' : 's') + ' para disfrutar de documentos sin identificación COSTPRO.';
   return '<b>Tu período de bienvenida terminó</b><br>COSTPRO continúa disponible gratuitamente. Tus documentos PDF incluyen identificación de COSTPRO.';
 }
@@ -7826,6 +7887,10 @@ function closeConfirm(){
 function confirmIsOpen(){ return document.getElementById('confirmModal').classList.contains('open'); }
 
 /* FASE 24.2 · Bloqueo por cuota del plan Free (sistema user_usage existente).
+   FASE 24.3 · DORMANT: con APP_CONFIG.cloud.freeEnforce=false (política
+   vigente) checkQuota()/guard() nunca devuelven allowed:false para Free, así
+   que esta función NO se dispara. Se conserva íntegra como infraestructura
+   reversible: poner la flag en true la reactiva sin ningún otro cambio.
    Mensaje claro y profesional, sin paywall invasivo: explica el límite, cuándo
    se renueva, recuerda que el trabajo local sigue intacto y ofrece conocer Pro
    sin interrumpir el flujo (§17 del pliego: progressive disclosure). */
@@ -8999,11 +9064,17 @@ function finishOnboarding(){ onbDone(); closeOb(); showFichas(); }
 
 /* ---------- Creación de fichas (única vía; el flujo continúa en Datos generales) ---------- */
 function crearNuevaFicha(){
+  /* FASE 24.3 · GUEST: báscula de activación en la ÚNICA vía de creación
+     (cubre el botón «nueva», el onboarding y la landing; duplicar/copiar
+     siguen gratis y NO cuentan). 1 ficha propia = 1 experiencia real;
+     abrir, editar, recalcular, guardar, duplicar y exportar NO consumen. */
+  if(guestExpAtLimit()){ guestTransition(); return; }
   var nf = nuevaFicha('Ficha ' + (App.db.fichas.length + 1));
   nf.estado = 'borrador';
   App.db.fichas.push(nf);
   App.db.activeId = nf.id;
   saveDB();
+  if(isGuest()) guestExpInc();  /* FASE 24.3: post-éxito, UNA sola vez por ficha creada */
   FcCloud.recordUsage('fc_create');  /* FASE 24.2: fc_create tras el éxito (única vía de creación; duplicar/copiar siguen gratis) */
   renderFichaSelector();
   refresh();

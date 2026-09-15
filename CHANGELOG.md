@@ -2,6 +2,22 @@
 
 Formato: Keep a Changelog simplificado. Cada versión corresponde a un tag `vX.Y.Z` y a un GitHub Release con `FC.release.html` + `release/release-manifest.json`.
 
+## v12.7.0 — 2026-09-15 · FASE 24.3 · Modelo de producto Guest → Free → Pro (activación, no paywall)
+
+### Added
+- **Guest: 3 experiencias reales de ficha** (activación, NO cuota): el invitado prueba COSTPRO completo; la unidad es la FICHA PROPIA que crea — abrir, editar, recalcular, guardar, duplicar e imprimir dentro de esas fichas NO consumen, y los ejemplos de la presentación tampoco. Báscula local por dispositivo (FC_GUEST_EXP_V1), honesta y sin valor comercial: la autoridad real de datos llegará con Cloud Fichas.
+- **Transición Guest → Free suave y única**: al agotar la 3.ª experiencia se ofrece «Crea tu cuenta gratis para continuar usando COSTPRO y conservar tu trabajo» → puerta en la pestaña «Crear cuenta». Sin contadores permanentes, sin paywall, sin lenguaje técnico (§8/§25 del pliego).
+
+### Changed
+- **POLÍTICA COMERCIAL 24.3 — Free sin límite cuantitativo (por ahora)**: `APP_CONFIG.cloud.freeEnforce = false`. La infraestructura de cuotas de 24.2 (user_usage + RPC increment_user_usage, espejo exacto del Next.js) permanece viva en MODO TELEMETRÍA: `recordUsage` sigue contando tras cada éxito (señal «días con tope alcanzado» para la decisión futura sobre el número Free) pero `checkQuota`/`guard` NUNCA bloquean al plan Free. `showQuotaBlocked` queda dormant. Motivo: coste marginal ~cero de las operaciones Free en una app local-first, prioridad adquisición→activación→retención→monetización, y ausencia de autoridad de datos para límites de stock (llegará con Cloud Fichas). Reversible con una sola flag.
+- «Uso de hoy» en Mi cuenta: Free se muestra sin denominador («Crear 2 · Exportar PDF 1 · Importar 0 — sin límite»), con «≥3» cuando la telemetría local alcanzó el tope del sistema.
+- Textos de la puerta y de Mi cuenta actualizados para describir el modelo de invitado con honestidad.
+- CI (release.yml): el build del release fija `FC_BUILD_DATE` con la fecha del commit etiquetado → builds deterministas (corrige el defecto detectado al publicar v12.5.0–v12.6.1, cuyos assets ya fueron sincronizados manualmente a los bytes canónicos).
+
+### Unchanged
+- `computeFicha()` — hash c5f4dca8042385c36e49c76992269b25 (antes == después).
+- Sin cambios en Supabase (esquema/RLS/Auth), sin pagos, sin Enterprise/Multi-Tienda, sin cloud sync, sin reescritura del monolito.
+
 ## v12.6.1 — 2026-09-13 · FASE 24.2-P · Hardening quirúrgico de buildPrint()
 
 ### Fixed
