@@ -187,20 +187,10 @@ main{max-width:1280px;margin:0 auto;padding:16px 16px 60px}
 .sb-nuevo .sb-ic{background:var(--accent-soft);color:var(--accent)}
 .sb .sb-side{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 
-/* ---------- Banda de resultado (Ficha): Base → Nuevo → Variación ---------- */
-.resultband{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin-bottom:14px}
-.resultband .kpi{flex:1 1 150px;margin:0}
-.resultband .rb-arrow{display:grid;place-items:center;color:var(--faint);padding:0 2px}
-.kpi{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:11px 13px;box-shadow:var(--shadow);min-width:0}
-.kpi small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:750;line-height:1.35}
-.kpi b{font-size:16.5px;display:block;margin-top:4px;font-variant-numeric:tabular-nums;letter-spacing:.2px}
-.kpi .d{font-size:11px;font-weight:600;display:block;margin-top:2px}
-.kpi .d.pos{color:var(--ok)} .kpi .d.neg{color:var(--err)}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin-bottom:16px}
-.kpi.hl{border-color:var(--accent-line);background:linear-gradient(180deg,var(--accent-soft),var(--panel) 130%)}
-.kpi.hl b{color:var(--accent);font-size:22px}
-.kpi-base b{color:var(--muted)}
-.kpi-var b{font-size:19px}
+/* FASE 24.6-0.8 · LA FICHA ES LA FICHA: la banda de resultado (Base→Nuevo→Variación)
+   y la tira de KPIs se eliminaron como capa redundante. Los totales, el precio
+   final y el unitario se leen ÚNICAMENTE en la tabla normativa (bloque
+   res/res-fin, filas 14-17). No se crearon tarjetas equivalentes. */
 .pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:800;letter-spacing:.2px}
 .pill.pos{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line)}
 .pill.neg{background:var(--err-soft);color:var(--err);border:1px solid var(--err-line)}
@@ -216,11 +206,9 @@ main{max-width:1280px;margin:0 auto;padding:16px 16px 60px}
 .prodband .pb-in input{width:120px;border:1.5px solid var(--border-strong);border-radius:9px;background:var(--inputbg);color:var(--ink);font-size:14px;font-weight:650;padding:7px 10px;font-variant-numeric:tabular-nums;min-height:38px}
 .prodband .pb-in input:focus{border-color:var(--focus)}
 .prodband .pb-suf{font-size:11.5px;font-weight:750;color:var(--muted);white-space:nowrap}
-.prodband .pb-arrow{color:var(--faint);display:inline-flex;flex:none}
-.prodband .pb-res b{font-size:19px;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:.2px}
-.prodband .pb-res .d{font-size:11px;font-weight:600;margin-top:2px}
-.prodband .pb-warn{color:var(--warn);display:inline-flex;align-items:center;gap:4px}
-@media (max-width:760px){ .prodband{align-items:stretch} .prodband .pb-arrow{display:none} .prodband .pb-item{flex:1 1 140px} .prodband .pb-in input{width:100%} }
+/* FASE 24.6-0.8: la prodband queda como banda de PARÁMETROS de producción
+   (sin resultado); el unitario ajustado se lee en la fila 17 de la tabla. */
+@media (max-width:760px){ .prodband{align-items:stretch} .prodband .pb-item{flex:1 1 140px} .prodband .pb-in input{width:100%;min-height:44px} }
 
 /* ---------- Regla de base compuesta: rejilla de selección de filas ---------- */
 .bfgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:5px;max-height:264px;overflow:auto;border:1px solid var(--border);border-radius:10px;padding:8px;background:var(--surface-2)}
@@ -276,7 +264,13 @@ table.data{width:100%;border-collapse:collapse;font-size:13px}
 .staticval{display:inline-block;min-width:88px;text-align:right;padding:4px 7px;font-variant-numeric:tabular-nums}
 .pctcell{color:var(--accent);font-weight:700}
 .refcell{color:var(--muted);font-size:12px;white-space:nowrap;font-family:ui-monospace,Menlo,monospace}
-.varpos{color:var(--ok)} .varneg{color:var(--err)}
+/* FASE 24.6-0.8 · Bloque de resultado EN la tabla (filas 14-17): jerarquía por
+   peso/tamaño/separación, no por tarjetas. El acento señala las cifras finales
+   (16/17) acompañado siempre de peso y tamaño — nunca solo color (WCAG). */
+table.data tr.res td{font-weight:700}
+table.data tr.res td .staticval{font-weight:800;font-size:1.12em}
+table.data tr.res-fin td .staticval{color:var(--accent);font-size:1.22em}
+table.data tr.res-fin td.concepto{font-weight:800}
 .minibtn{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:30px;min-height:30px;border:1px solid var(--line-strong);background:var(--surface);border-radius:8px;cursor:pointer;padding:3px 9px;font-size:11.5px;color:var(--accent);font-weight:700;transition:background .15s,border-color .15s}
 .minibtn:hover{background:var(--accent-soft);border-color:var(--accent-line)}
 .minibtn.del{color:var(--err)}
@@ -815,7 +809,7 @@ th[aria-sort] .thsort .srt{opacity:1}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition:none!important;animation:none!important}
 }
-body,.appbar,.statusbar,.tabs,.panel,.kpi,.btn,.ibtn,.drawer,.cfgrow,.tblwrap,.dochead,.pm-win,.sb,.audit-summary,.menu,.cm-win{transition:background-color .18s ease,border-color .18s ease,color .18s ease}
+body,.appbar,.statusbar,.tabs,.panel,.btn,.ibtn,.drawer,.cfgrow,.tblwrap,.dochead,.pm-win,.sb,.audit-summary,.menu,.cm-win{transition:background-color .18s ease,border-color .18s ease,color .18s ease}
 
 /* Tabla desplazable con encabezado fijo (≥761px): el thead se pinnea
    dentro de su propio contenedor de scroll — sin artefactos de sticky. */
@@ -841,9 +835,6 @@ body,.appbar,.statusbar,.tabs,.panel,.kpi,.btn,.ibtn,.drawer,.cfgrow,.tblwrap,.d
   main{padding:13px 10px calc(84px + env(safe-area-inset-bottom,0px))}
   .statusbar{top:0;padding:6px 10px}
   .savestate{display:none}
-  .resultband .rb-arrow{display:none}
-  .resultband{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .resultband .kpi.hl{grid-column:1/-1}
   .sig{grid-template-columns:1fr}
   #pdfModal{padding:0}
   .pm-win{width:100%;height:100%;border-radius:0;border:none}
@@ -871,15 +862,20 @@ body,.appbar,.statusbar,.tabs,.panel,.kpi,.btn,.ibtn,.drawer,.cfgrow,.tblwrap,.d
   table.data td.num{justify-content:flex-end}
   .cellinput{max-width:170px}
   .tblwrap{border:none;background:transparent;box-shadow:none;overflow:visible;max-height:none}
-  .kpi b{font-size:15px}
-  .kpi.hl b{font-size:19px}
   .minibtn{min-height:34px;min-width:34px}
+  /* FASE 24.6-0.8: tarjetas-fila del bloque de resultado + objetivos táctiles ≥44 px en Ficha */
+  table.data tr.res{border:1.5px solid var(--totalline);background:var(--totalbg)}
+  table.data tr.res td .staticval{font-weight:800}
+  table.data tr.res-fin td .staticval{color:var(--accent);font-size:16.5px}
+  #sec-ficha .minibtn{min-height:44px;min-width:44px}
+  #sec-ficha .cellinput{min-height:44px}
+  #sec-ficha .dochead .btn{min-height:44px;min-width:44px}
+  #sec-ficha .dochead .ibtn{min-height:44px;min-width:44px}
   .brand .bt b{font-size:13px}
 }
 @media (max-width:400px){
   .brand .bt{display:none}
   .appbar select{max-width:118px}
-  .resultband{grid-template-columns:1fr 1fr}
   .panel{padding:13px}
   .cm-win{padding:15px}
 }
@@ -5856,10 +5852,10 @@ var FC_HELP = [
   { id:'rg-dependencias', t:'Dependencias y errores de dependencia circular', k:'dependencia circular bucle errores bloqueo cadena filas', b:'<p>Las reglas encadenan filas: 4.1 depende de 1.1, y otra partida puede depender de 4.1. El motor construye ese mapa de <b>dependencias</b> para calcular en el orden correcto.</p><p>Hay dos situaciones que la aplicación impide:</p><ul><li><b>Autorreferencia:</b> que una fila se use como referencia de sí misma.</li><li><b>Dependencia circular:</b> que dos o más filas se dependan mutuamente formando un bucle (A → B → A).</li></ul><p>Cuando ocurra, el editor muestra un mensaje claro —«esta selección generaría una dependencia circular»— y las opciones problemáticas aparecen deshabilitadas. No se pierde ningún dato: basta elegir otra fila de referencia.</p>' }
 ]},
 { id:'c-result', name:'Resultados', icon:'trend', arts:[
-  { id:'re-costo-total', t:'El costo total', k:'costo total fila 12 total general suma', b:'<p>El <b>costo total</b> (fila 12 de la ficha) es la suma de los gastos directos e indirectos: 5 + 11 según la estructura del Anexo I. La aplicación lo calcula siempre; no se escribe a mano.</p><p>Aparece en la banda de resultados de la ficha, en el Centro de Fichas, en la Vista previa PDF y en las exportaciones, siempre con el mismo valor porque proviene del mismo motor.</p>' },
+  { id:'re-costo-total', t:'El costo total', k:'costo total fila 12 total general suma', b:'<p>El <b>costo total</b> (fila 12 de la ficha) es la suma de los gastos directos e indirectos: 5 + 11 según la estructura del Anexo I. La aplicación lo calcula siempre; no se escribe a mano.</p><p>Aparece como fila de total en la tabla de la ficha, en el Centro de Fichas, en la Vista previa PDF y en las exportaciones, siempre con el mismo valor porque proviene del mismo motor.</p>' },
   { id:'re-precio', t:'El precio, el impuesto y la utilidad', k:'precio utilidad tarifa formar precio margen tasa impuesto venta isv activar desactivar aplicar', b:'<p>Sobre el costo total se forma el <b>precio</b>: la ficha incorpora la utilidad según la tasa aplicable al tipo de actividad (Fila 13), obtiene la <b>Fila 14 · Precio o Tarifa</b> (12+13, base previa al impuesto), añade la <b>Fila 15 · Impuesto sobre la venta</b> (tasa configurable, predeterminada 10 %: Fila 14 × 10 ⁄ 90), la <b>Fila 16 · Precio o Tarifa FINAL</b> (14+15) y la <b>Fila 17 · Precio o Tarifa Unitario Ajustado</b> (Fila 16 ÷ cantidad a producir).</p><p>El impuesto sobre la venta es <b>opcional</b>: la casilla «Aplicar impuesto sobre la venta» en Configuración lo activa o desactiva por ficha. Desactivado, la Fila 15 se muestra en 0,00 y la Fila 16 coincide con la Fila 14 (la fila no desaparece: conserva la estructura y la trazabilidad del documento). La tasa máxima de utilidad depende del método y del tipo de actividad conforme al Anexo II de la Resolución; la aplicación la valida y avisa si se supera. La fila 15 es una extensión configurable: la Res. 148/2023 no la define y su tasa debe ajustarse a la legislación vigente.</p>' },
-  { id:'re-indicadores', t:'Indicadores de la ficha', k:'indicadores variacion diferencia aumento por unidad nivel de actividad', b:'<p>La banda de resultados muestra, junto al Costo Base y al Costo Nuevo, la <b>variación</b> entre ambos (en moneda y en porcentaje) y los indicadores por unidad de medida según el nivel de actividad declarado en los datos generales.</p><p>Estos indicadores permiten responder rápido la pregunta de fondo: ¿cuánto y por qué cambia el costo respecto del período base?</p>' },
-  { id:'re-interpretacion', t:'Cómo interpretar los resultados', k:'interpretar resultados leer banda comparacion delta', b:'<p>Lectura recomendada de la banda de resultados:</p><ol><li><b>Costo Base (histórico):</b> el punto de partida documentado.</li><li><b>Costo Nuevo (proyectado):</b> el resultado de tus valores y reglas.</li><li><b>Variación:</b> cuánto se mueve el costo y en qué proporción; una variación grande amerita revisar las reglas que la producen.</li><li><b>Unitario ajustado (17):</b> el precio final con impuesto, expresado por unidad producida (Fila 16 ÷ cantidad a producir).</li></ol><p>La banda de producción debajo muestra el % de utilización de capacidad, la <b>cantidad a producir</b> y el precio unitario ajustado juntos: al cambiar la cantidad y pulsar <b>Calcular</b>, la fila 17 se recalcula. Si una fila del Nuevo te sorprende, pulsa su acción <b>Regla</b>: el editor muestra la regla que la produce y el cálculo paso a paso.</p>' }
+  { id:'re-indicadores', t:'Indicadores de la ficha', k:'indicadores comparacion columnas base nuevo aumento por unidad nivel de actividad', b:'<p>La tabla de la ficha presenta dos columnas comparables: el <b>Costo Base</b> (histórico del período de referencia) y el <b>Costo Nuevo</b> (proyección calculada). Comparar ambas columnas fila a fila responde la pregunta de fondo: ¿cuánto y por qué cambia el costo respecto del período base? El bloque final (filas 14 a 17) concentra el resultado: precio o tarifa, impuesto sobre la venta, precio final y expresión unitaria ajustada.</p>' },
+  { id:'re-interpretacion', t:'Cómo interpretar los resultados', k:'interpretar resultados leer tabla comparacion columnas', b:'<p>Lectura recomendada de la tabla de la ficha:</p><ol><li><b>Costo Base (histórico):</b> el punto de partida documentado, columna por columna.</li><li><b>Costo Nuevo (proyectado):</b> el resultado de tus valores y reglas.</li><li><b>Filas 12 y 14:</b> el total de costos y gastos y el precio o tarifa antes del impuesto.</li><li><b>Filas 16 y 17:</b> el precio final con impuesto y su expresión unitaria ajustada (Fila 16 ÷ cantidad a producir), destacados como cierre del documento.</li></ol><p>Encima de la tabla, la banda de producción reúne el % de utilización de capacidad y la <b>cantidad a producir</b>: al cambiar la cantidad y pulsar <b>Calcular</b>, la fila 17 se recalcula. Si una fila del Nuevo te sorprende, pulsa su acción <b>Regla</b>: el editor muestra la regla que la produce y el cálculo paso a paso.</p>' }
 ]},
 { id:'c-pdf', name:'PDF y exportaciones', icon:'printer', arts:[
   { id:'pd-vista-previa', t:'La vista previa del documento', k:'vista previa pdf documento imprimir perfiles zoom paginas', b:'<p>El botón <b>Vista previa PDF</b> abre el documento tal como saldrá impreso: encabezado oficial, ficha completa, anexos y, si se desea, el anexo de auditoría con la trazabilidad de las reglas.</p><p>En el modal puedes cambiar el <b>perfil</b> (Oficial, Auditoría o Personalizado), elegir qué partes incluir, navegar páginas y ajustar el zoom. Lo que ves ahí es exactamente lo que se imprime o exporta.</p>' },
@@ -5923,7 +5919,7 @@ var FC_CTX = {
   nuevo:{ t:'¿Cómo se calcula una partida?', p:'Una partida puede configurarse para calcularse como un porcentaje de otra fila. La aplicación obtiene el porcentaje a partir del Costo Base y lo aplica al valor correspondiente del Costo Nuevo.', art:'cn-que-significa' },
   base:{ t:'¿Qué es el Costo Base?', p:'El Costo Base recoge los gastos históricos del período de referencia. Es la columna que da contexto a la ficha y la referencia de la que se derivan las reglas porcentuales del Costo Nuevo.', art:'cb-que-significa' },
   regla:{ t:'¿Qué es una regla de cálculo?', p:'Una regla dice cómo se calcula una partida del Costo Nuevo, por ejemplo «4.1 = 100 % de 1.1». Se guarda la regla, no un número fijo: así el valor evoluciona con su referencia y queda trazable.', art:'rg-que-es' },
-  resultados:{ t:'¿Cómo leer los resultados?', p:'La banda muestra el Costo Base (histórico), el Costo Nuevo (proyectado), la variación entre ambos y el precio o tarifa unitario ajustado (fila 17). Debajo, la banda de producción reúne el % de utilización de capacidad, la cantidad a producir y el propio unitario ajustado. Si una cifra te sorprende, abre la regla de esa fila para ver su cálculo.', art:'re-interpretacion' },
+  resultados:{ t:'¿Cómo leer los resultados?', p:'La tabla de la ficha compara el Costo Base (histórico) con el Costo Nuevo (proyectado) fila a fila; el bloque final (filas 14 a 17) concentra el precio o tarifa, el impuesto, el precio final y la expresión unitaria ajustada. Encima de la tabla, la banda de producción reúne el % de utilización de capacidad y la cantidad a producir. Si una cifra te sorprende, abre la regla de esa fila para ver su cálculo.', art:'re-interpretacion' },
   centro:{ t:'¿Para qué sirve el Centro de Fichas?', p:'Es el lugar donde viven todas tus fichas: buscar, filtrar, abrir, duplicar, exportar o archivar. Cada tarjeta muestra el estado y los resultados principales de la ficha.', art:'cf-gestionar' },
   datos:{ t:'¿Para qué son los Datos generales?', p:'Identifican la ficha (entidad, producto, código, unidad, nivel de actividad) en pantalla y en el documento impreso. Un buen nombre te permitirá encontrarla después en el Centro de Fichas.', art:'in-datos-generales' },
   preview:{ t:'¿Qué es la Vista previa PDF?', p:'Muestra el documento exacto que se imprimirá o exportará: perfil Oficial o de Auditoría, partes seleccionables, paginación y zoom. Lo que ves es lo que sale.', art:'pd-vista-previa' },
@@ -6329,14 +6325,6 @@ function badge(src, err){
   if(src === 'bloqueado') return '<span class="badge b-err">bloqueado</span>';
   return '';
 }
-function varCell(P, id){
-  var b = P.base.values[id], n = P.nuevo.values[id];
-  if(b === null || n === null) return '<td class="num" data-l="Δ">—</td><td class="num" data-l="Δ %">—</td>';
-  var d = n - b, dp = (b !== 0) ? d / Math.abs(b) : null;
-  var cls = d > 0 ? 'varpos' : (d < 0 ? 'varneg' : '');
-  return '<td class="num ' + cls + '" data-l="Δ">' + fmtMoney(d, dec()) + '</td><td class="num ' + cls + '" data-l="Δ %">' + (dp === null ? '—' : fmtPctFromRatio(dp)) + '</td>';
-}
-
 /* ---------- Indicador de salud de la Ficha (batería SVG profesional) ----------
    NO es un sistema de validación nuevo: visualiza EXACTAMENTE las severidades
    que ya produce el motor (R.errors · R.warnings, sev 'error' | 'advertencia').
@@ -6618,17 +6606,18 @@ function renderDatos(){
        '<textarea data-act="meta" data-id="observaciones" data-fk="meta:observaciones">' + escapeHtml(m.observaciones || '') + '</textarea></div>';
   h += '</div>';
   h += logoPanelHtml();
-  h += '<p class="hint">Campos con * son recomendados por la Metodología. La cantidad a producir se usa para la Fila 17 (precio o tarifa unitario ajustado) y también se edita en la banda de producción de la Ficha, junto al resultado. ' +
+  h += '<p class="hint">Campos con * son recomendados por la Metodología. La cantidad a producir se usa para la Fila 17 (precio o tarifa unitario ajustado) y también se edita en la banda de producción de la Ficha, encima de la tabla. ' +
        'Los parámetros metodológicos (método de precios, utilidad del Anexo II, coeficiente de gastos indirectos, impuesto sobre la venta y decimales) se configuran en la sección <b>Configuración</b>.</p></div>';
   document.getElementById('sec-datos').innerHTML = h;
 }
 
 /* ---------- Pestaña: Ficha de Costo (centro del producto) ----------
-   Jerarquía: 1) identidad y estado · 2) banda Base→Nuevo→Variación
-   · 3) indicadores secundarios · 4) composición comparativa · 5) firmas */
+   LA FICHA ES LA FICHA (FASE 24.6-0.8): jerarquía única 1) identidad y
+   estado · 2) parámetros de producción · 3) LA TABLA NORMATIVA (protagonista;
+   bloque de resultado 14-17 dentro de la tabla, clases res/res-fin) ·
+   4) leyenda y firmas. Sin tarjetas KPI ni paneles duplicados. */
 function renderFicha(){
   var f = F(), R = App.res;
-  var ind = R.indicators;
   /* Encabezado de documento: identidad + salud (batería SVG basada en las
      severidades reales del motor — sin emojis, sin glifos unicode). */
   var hlth = fichaHealth(R);
@@ -6655,50 +6644,20 @@ function renderFicha(){
     return;
   }
 
-  /* Banda de resultado: la historia en un golpe de vista */
-  var B12 = R.base.values['12'], N12 = R.nuevo.values['12'];
-  var d12 = (B12 !== null && N12 !== null) ? N12 - B12 : null;
-  var dp12 = (d12 !== null && B12 !== null && B12 !== 0) ? d12 / Math.abs(B12) : null;
-  var varPill = d12 === null ? '<span class="pill neu">—</span>'
-    : (d12 > 0 ? '<span class="pill pos">' + icon('trend', 11) + '+' + fmtMoney(d12, dec()).replace('$ ', '').replace('-', '') + '</span>'
-    : (d12 < 0 ? '<span class="pill neg">' + fmtMoney(d12, dec()).replace('$ ', '') + '</span>' : '<span class="pill neu">sin cambio</span>'));
-  h += '<div class="resultband">';
-  h += '<div class="kpi kpi-base"><small>Costo Base · histórico</small><b>' + fmtMoney(B12, dec()) + '</b><span class="d muted">Fila 12 · datos registrados</span></div>';
-  h += '<div class="rb-arrow">' + icon('arrowR', 20) + '</div>';
-  h += '<div class="kpi kpi-nuevo hl"><small>Costo Nuevo · proyectado</small><b>' + fmtMoney(N12, dec()) + '</b><span class="d muted">Recalculado por el motor</span></div>';
-  h += '<div class="kpi kpi-var"><small>Variación</small><b>' + (d12 === null ? '—' : (d12 > 0 ? '+' : '') + fmtMoney(d12, dec())) + '</b>' + varPill + (dp12 !== null ? '<span class="d muted">' + fmtPctFromRatio(dp12) + ' vs. base</span>' : '') + '</div>';
-  h += '<div class="kpi kpi-precio"><small>Unitario ajustado (17)</small><b>' + fmtMoney(R.nuevo.values['17'], dec()) + '</b><span class="d muted">Base: ' + fmtMoney(R.base.values['17'], dec()) + '</span></div>';
-  h += '</div>';
-
-  /* Banda de producción: la cantidad junto a lo que calcula (pliego §9).
+  /* Banda de producción: SOLO parámetros editables (pliego §9). El unitario
+     ajustado (Fila 17) se lee en la tabla — el resultado no se duplica aquí.
      Captura desacoplada: escribir aquí solo marca pendencia; el motor
      corre con Calcular (único punto de cálculo). */
-  var cantValida = isFinite(+f.meta.nivelProduccion) && +f.meta.nivelProduccion > 0;
-  h += '<div class="prodband" role="group" aria-label="Producción y precio unitario">';
+  h += '<div class="prodband" role="group" aria-label="Parámetros de producción">';
   h += '<div class="pb-item"><label for="pbCap">% utilización capacidad</label>' +
     '<div class="pb-in"><input id="pbCap" inputmode="decimal" data-act="meta" data-id="pctCapacidad" data-fk="meta:pctCapacidad" value="' + (f.meta.pctCapacidad === null || f.meta.pctCapacidad === undefined ? '' : escapeHtml(String(f.meta.pctCapacidad).replace('.', ','))) + '" placeholder="0,00" aria-label="% utilización capacidad"><span class="pb-suf">%</span></div></div>';
-  h += '<div class="pb-arrow">' + icon('arrowR', 14) + '</div>';
   h += '<div class="pb-item"><label for="pbCant">Cantidad a producir</label>' +
     '<div class="pb-in"><input id="pbCant" inputmode="decimal" data-act="meta" data-id="nivelProduccion" data-fk="meta:nivelProduccion" value="' + (f.meta.nivelProduccion === null || f.meta.nivelProduccion === undefined ? '' : escapeHtml(String(f.meta.nivelProduccion).replace('.', ','))) + '" placeholder="0,00" aria-label="Cantidad a producir"><span class="pb-suf">' + escapeHtml(f.meta.um || 'UM') + '</span></div></div>';
-  h += '<div class="pb-arrow">' + icon('arrowR', 14) + '</div>';
-  h += '<div class="pb-item pb-res"><label>Precio o Tarifa Unitario Ajustado</label>' +
-    '<b>' + fmtMoney(R.nuevo.values['17'], dec()) + '</b>' +
-    (cantValida
-      ? '<span class="d muted">Fila 16 ÷ cantidad · Base: ' + fmtMoney(R.base.values['17'], dec()) + '</span>'
-      : '<span class="d pb-warn">' + icon('warning', 12) + ' Defina la cantidad a producir (Fila 17 = 0)</span>') + '</div>';
   h += '</div>';
 
-  /* Indicadores secundarios */
-  h += '<div class="kpis">';
-  h += '<div class="kpi"><small>Costo Total (5)</small><b>' + fmtMoney(R.nuevo.values['5'], dec()) + '</b><span class="d muted">Base: ' + fmtMoney(R.base.values['5'], dec()) + '</span></div>';
-  h += '<div class="kpi"><small>Total Gastos (11)</small><b>' + fmtMoney(R.nuevo.values['11'], dec()) + '</b><span class="d muted">Base: ' + fmtMoney(R.base.values['11'], dec()) + '</span></div>';
-  h += '<div class="kpi"><small>Utilidad (13)</small><b>' + fmtMoney(R.nuevo.values['13'], dec()) + '</b><span class="d muted">Base: ' + fmtMoney(R.base.values['13'], dec()) + '</span></div>';
-  h += '<div class="kpi"><small>Precio o Tarifa (14)</small><b>' + fmtMoney(R.nuevo.values['14'], dec()) + '</b><span class="d muted">Base: ' + fmtMoney(R.base.values['14'], dec()) + '</span></div>';
-  h += '<div class="kpi"><small>Impuesto s/venta (15)</small><b>' + fmtMoney(R.nuevo.values['15'], dec()) + '</b><span class="d muted">' + (f.meta.isvActivo === false ? 'Desactivado · Fila 16 = Fila 14' : 'Tasa ' + fmtNum(+f.meta.tasaVenta || 0) + ' % · Base: ' + fmtMoney(R.base.values['15'], dec())) + '</span></div>';
-  h += '<div class="kpi"><small>Precio o Tarifa FINAL (16)</small><b>' + fmtMoney(R.nuevo.values['16'], dec()) + '</b><span class="d muted">Base: ' + fmtMoney(R.base.values['16'], dec()) + '</span></div>';
-  h += '<div class="kpi"><small>Coef. gastos indirectos</small><b>' + fmtMoney(ind.coef.usado, dec()) + '</b><span class="d muted">límite ' + fmtMoney(ind.coef.limite, dec()) + '</span></div>';
-  h += '<div class="kpi"><small>Tasa efectiva de utilidad</small><b>' + fmtPctFromRatio(ind.util.tasa) + '</b><span class="d muted">' + escapeHtml(ind.util.formula) + '</span></div>';
-  h += '</div>';
+  /* FASE 24.6-0.8: la tira de indicadores secundarios se eliminó. Filas 5,
+     11, 13, 14, 15 y 16 se leen en la tabla; coeficiente y tasa de utilidad
+     quedan vigilados por las advertencias del motor (Auditoría). */
 
   if(R.errors.length || R.warnings.length){
     var aviso = [];
@@ -6708,19 +6667,23 @@ function renderFicha(){
   }
 
   h += '<div class="tblwrap"><table class="data"><thead><tr>' +
-    '<th>Conceptos</th><th>Fila</th><th class="num th-base">Costo Base · histórico</th><th class="num">%</th><th>Ref.</th><th class="num th-nuevo">Costo Nuevo · proyectado</th><th class="num">Δ</th><th class="num">Δ %</th><th></th></tr></thead><tbody>';
+    '<th>Conceptos</th><th>Fila</th><th class="num th-base">Costo Base · histórico</th><th class="num">%</th><th>Ref.</th><th class="num th-nuevo">Costo Nuevo · proyectado</th><th></th></tr></thead><tbody>';
 
   NORM_ROWS.forEach(function(r){
     var id = r.id;
     if(r.k === 'info'){
-      h += '<tr class="info"><td class="concepto" colspan="9">' + escapeHtml(r.c) + ': <span class="muted">' + escapeHtml(f.meta.refPrecios || '—') + '</span> <button class="minibtn" data-btn="explain" data-id="' + id + '">explicar</button></td></tr>';
+      h += '<tr class="info"><td class="concepto" colspan="7">' + escapeHtml(r.c) + ': <span class="muted">' + escapeHtml(f.meta.refPrecios || '—') + '</span> <button class="minibtn" data-btn="explain" data-id="' + id + '">explicar</button></td></tr>';
       return;
     }
     var bMode = R.base.mode[id], nMode = R.nuevo.mode[id];
     var bEditable = (bMode === 'manual'), nEditable = (nMode === 'manual');
     var bV = R.base.values[id], nV = R.nuevo.values[id];
     var pc = R.pct[id];
-    var trCls = r.total ? 'total' : '';
+    var clsArr = [];
+    if(r.total) clsArr.push('total');
+    if(id === '14' || id === '15' || id === '16' || id === '17') clsArr.push('res');
+    if(id === '16' || id === '17') clsArr.push('res-fin');
+    var trCls = clsArr.join(' ');
     var pad = 'padding-left:' + (9 + (r.niv || 0) * 18) + 'px';
     var bCell = bEditable
       ? '<input class="cellinput" inputmode="decimal" data-act="row" data-id="' + id + '" data-col="base" data-fk="row:' + id + ':base" value="' + (f.rows[id] && f.rows[id].base !== null && f.rows[id].base !== undefined ? escapeHtml(String(f.rows[id].base).replace('.', ',')) : '') + '" placeholder="0,00">'
@@ -6738,7 +6701,6 @@ function renderFicha(){
       '<td class="num" data-l="%">' + pctCell + '</td>' +
       '<td class="refcell" data-l="Ref.">' + refCell + '</td>' +
       '<td class="num" data-l="Costo Nuevo">' + nCell + '</td>' +
-      varCell(R, id) +
       '<td class="no-l"><button class="minibtn" data-btn="explain" data-id="' + id + '" title="Explicar cálculo de la Fila ' + id + '" aria-label="Explicar cálculo de la Fila ' + id + '">' + icon('info', 13) + '</button></td>' +
       '</tr>';
   });

@@ -25,8 +25,8 @@ const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'FC.html');
 const OUT = path.join(ROOT, 'release', 'FC.release.html');
 const DOCS = path.join(ROOT, 'docs', 'release');
-const VERSION = '12.10.0';
-const PHASE = 'FASE 24.6-1 · Supabase como única fuente de verdad comercial (profiles.plan: pro/enterprise = Premium, whitelist estricta; retirado el sistema de licencias locales y todo material de firma del release) + guard RLS/trigger en profiles contra auto-elección de plan/role + importación universal de fichas JSON (formato costpro-ficha 1.0: drag&drop, validación, vista previa, duplicados, migración 1..4) + exportación Excel Premium (XLSX sin dependencias desde el resultado canónico de computeFicha) + corrección D1: el chip de instalación PWA ya no sale en el PDF impreso';
+const VERSION = '12.11.0';
+const PHASE = 'FASE 24.6-0.8 · LA FICHA ES LA FICHA: rediseño UX/UI de la sección Ficha — eliminada la capa de dashboard (banda de resultado Base→Nuevo→Variación, tira de 8 indicadores y el resultado duplicado de la banda de producción) y las columnas comparativas Δ/Δ %; la tabla normativa pasa a ser el único protagonista con bloque de resultado 14-17 jerarquizado dentro de la propia tabla (res/res-fin), banda de producción reducida a sus 2 parámetros editables, objetivos táctiles ≥44 px en móvil y la ayuda reescrita a la lectura tabla-céntrica; computeFicha() intacto (c5f4dca8 ANTES==DESPUÉS)';
 
 function loadToolchain() {
   const tries = [

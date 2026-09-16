@@ -1,11 +1,11 @@
 /* COSTPRO FC — Service Worker (FASE 24.5) · capa de RECURSOS DE APLICACIÓN, NO de datos.
-   Generado por scripts/build-release.js (VERSION 12.10.0) — no editar a mano.
+   Generado por scripts/build-release.js (VERSION 12.11.0) — no editar a mano.
    · Allowlist explícita: shell + manifest + iconos. Todo lo demás = passthrough.
    · Supabase y todo origen cruzado: NUNCA entran en Cache Storage (ni 2xx ni errores).
    · Sin skipWaiting/clients.claim: la actualización la gobierna VersionManager.
-   · Cache: costpro-release-12.10.0 · al activarse borra SOLO caches costpro-release-*. */
+   · Cache: costpro-release-12.11.0 · al activarse borra SOLO caches costpro-release-*. */
 'use strict';
-var VERSION = "12.10.0";
+var VERSION = "12.11.0";
 var CACHE = 'costpro-release-' + VERSION;
 var SCOPE_PATH = new URL(self.registration.scope).pathname;
 var ALLOWLIST = [

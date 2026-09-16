@@ -2,6 +2,21 @@
 
 Formato: Keep a Changelog simplificado. Cada versión corresponde a un tag `vX.Y.Z` y a un GitHub Release con `FC.release.html` + `release/release-manifest.json`.
 
+## v12.11.0 — 2026-09-16 · FASE 24.6-0.8 · LA FICHA ES LA FICHA — la tabla normativa como único protagonista
+
+### Removed
+- **Capa de dashboard de la Ficha eliminada** (12 elementos): la banda de resultado «Costo Base · histórico → Costo Nuevo · proyectado → Variación → Unitario ajustado (17)» y la tira de 8 indicadores secundarios (Costo Total (5), Total Gastos (11), Utilidad (13), Precio o Tarifa (14), Impuesto s/venta (15), Precio FINAL (16), Coef. gastos indirectos, Tasa efectiva de utilidad). Ninguna tarjeta fue sustituida por equivalente: los totales y el precio se leen únicamente donde se producen, en la tabla normativa (la variación de Fila 12, cálculo UI sin consumidores tras la eliminación, desaparece con su capa).
+- **Columnas comparativas Δ y Δ %** de la tabla de la Ficha (thead, celdas por fila y sus etiquetas móviles `data-l`): la comparación Base↔Nuevo es la propia estructura de columnas. La función generadora `varCell()` quedó sin consumidores y se retiró. El paso «Δ = …» del drawer «Explicar cálculo» pertenece al motor (bloque protegido por hash) y se conserva íntegro.
+- **Resultado duplicado de la banda de producción**: el panel «Precio o Tarifa Unitario Ajustado» (pb-res) y las flechas se retiran; la banda queda como lo que es — 2 parámetros editables de producción (% utilización capacidad, cantidad a producir). La Fila 17 se lee en la tabla; sin cantidad válida, la advertencia del motor (Auditoría) y el 0,00 en la fila 17 conservan la señal.
+
+### Changed
+- **Bloque de resultado 14–17 DENTRO de la tabla**: nueva jerarquía tipográfica por clases `res` (14–17: peso 700/800) y `res-fin` (16–17: acento + tamaño mayor), con separación de grupo en la fila 14 — sin tarjetas ni paneles nuevos, nunca solo color (WCAG 2.2 AA: peso + tamaño + texto de columna «histórico/proyectado»).
+- **Móvil ≤760 px**: las tarjetas-fila del bloque 14–17 heredan borde/fondo de total; objetivos táctiles de la sección Ficha a ≥44 px (botones explicar, celdas editables, inputs de producción, Calcular y ayuda contextual del dochead). Sin scroll horizontal en 320/360/375/390/400 px.
+- **Ayuda y textos coherentes con la lectura tabla-céntrica**: artículos «El costo total», «Indicadores de la ficha», «Cómo interpretar los resultados», ayuda contextual «¿Cómo leer los resultados?» y la pista de Datos generales reescritos; no queda documentación que describa la banda eliminada.
+
+### Nota de integridad
+- `computeFicha()` **intacto**: md5 del bloque `__ENGINE_START__/__ENGINE_END__` = `c5f4dca8042385c36e49c76992269b25` ANTES == DESPUÉS; `R.indicators` sigue computándose en el motor (sus tarjetas eran solo consumidores de lectura). Persistencia, PDF, Excel, CSV, importación/exportación, PWA, Supabase y lógica comercial sin cambios funcionales. Regresión: motor 58/58 · baseline 28/28 · fase6 57/57 · v2 46/46 · fase7 52/52 · rulemodal 64/64 · perf 15/15 · numeración 46/46 · ISV 36/36 · suite nueva 24.6-8 32/32 · release 18/18.
+
 ## v12.10.0 — 2026-09-15 · FASE 24.6-1 · Supabase como fuente de verdad comercial + JSON universal + Excel Premium + fix PDF/PWA
 
 ### Added
